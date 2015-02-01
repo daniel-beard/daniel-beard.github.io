@@ -1,0 +1,1380 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Daniel Beard</title>
+  <meta name="author" content="Daniel Beard">
+
+  
+  <meta name="description" content="This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects. The first &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://danielbeard.io">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Daniel Beard" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin" rel="stylesheet" type="text/css" />
+<link href='http://fonts.googleapis.com/css?family=Noto+Serif:400,700' rel='stylesheet' type='text/css'>
+
+
+
+  
+
+</head>
+
+<body    class="collapse-sidebar sidebar-footer" >
+  <nav id="main-nav" role="navigation">
+<ul class="main-navigation">
+  <li><a href="/" class="nav-link">Blog</a></li>
+  <li><a href="/blog/archives" class="nav-link">Archives</a></li>
+	<li><a href="https://github.com/daniel-beard">GitHub</a></li>
+	<li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <header role="banner"><hgroup>
+	
+  <h1><a href="/">Daniel Beard</a></h1>
+  
+    <h2>iOS and other stuff</h2>
+  
+</hgroup>
+
+</header> 
+  
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github/">Setting Up Travis-ci for Automated Unit Testing of iOS Projects on GitHub</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-06T17:16:04-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects.</p>
+
+<p>The first step is to create a new project in Xcode. I am going to select a single view application and enable storyboards, Automatic Reference Counting and Unit Tests.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png?w=300" alt="Screen Shot 2013-05-06 at 11.42.27 PM" /></a></p>
+
+<p>All I&rsquo;m going to change is the <code>testExample</code> method in the unit testing bundle to something that will pass. For now I have just gone with this:</p>
+
+<pre><code>- (void)testExample
+{
+    STAssertNil(nil, @"This object should be nil");
+}
+</code></pre>
+
+<p>Check that the tests pass by hitting <code>cmd</code>+<code>u</code>. Now that I have my unit tests passing, I&rsquo;m going to add this project to GitHub. I&rsquo;ll leave the details out here, as this isn&rsquo;t the focus of this tutorial but you can find my example project here: <a href="https://github.com/daniel-beard/SettingUpTravisCIForiOS">https://github.com/daniel-beard/SettingUpTravisCIForiOS</a>.</p>
+
+<p>Now we can setup the TravisCI build. I use the <code>xctool</code> to build my projects as it has a nicer output and is easier to use than the built in <code>xcodebuild</code> tool. Add <code>xctool</code> as a submodule to the git repository using the following commands:</p>
+
+<pre><code>git submodule add https://github.com/facebook/xctool.git ./xctool
+git submodule update --init
+git commit ./xctool -m "Added xctool as a submodule"
+</code></pre>
+
+<p>Then we need to add a config file so that travis-ci knows how to build our project. This file is named <code>.travis.yml</code> and lives in the root of the git repository. Here is the contents of mine:</p>
+
+<pre><code>language: objective-c
+before_install: "git submodule init &amp;&amp; git submodule update &amp;&amp; sudo gem update --system &amp;&amp; sudo gem install bundler &amp;&amp; bundle install"
+script: "bundle exec rake test --trace"
+</code></pre>
+
+<p>Then we have to add a <code>Rakefile</code> that tells the <code>xctool</code> which project and target to build:</p>
+
+<pre><code>desc 'Run the tests'
+task :test do
+   exec('xctool/xctool.sh -project SettingUpTravisCIForiOS.xcodeproj -scheme SettingUpTravisCIForiOS test')
+end
+
+task :default =&gt; :test
+</code></pre>
+
+<p>And finally the <code>Gemfile</code></p>
+
+<pre><code>source 'https://rubygems.org'
+
+gem 'rake'
+</code></pre>
+
+<p>You can then test locally that your project builds using the command <code>rake</code> in your root git repository.
+I get build messages, then <code>** TEST SUCCEEDED: 1 of 1 tests passed ** (25285 ms)</code>. Now that we have the unit tests running locally, all that is left is to set up the travis-ci build. Login to <a href="https://travis-ci.org/">https://travis-ci.org/</a> with your GitHub account and under account settings select the repository that should be unit tested automatically. This automatically sets up a service hook in GitHub so that every time you push to your repository, it will get unit tested.</p>
+
+<p>You can also use the status images from travis-ci to show the test status directly in your README file on GitHub. Check out my example project here: <a href="https://github.com/daniel-beard/SettingUpTravisCIForiOS">SettingUpTravisCIForiOS</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/04/29/developing-xcode-4-plugins/">Developing Xcode 4 Plugins</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-29T09:15:20-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This is a quick guide that documents how to start developing plugins for Xcode4. You need to have Xcode installed to create plugins.</p>
+
+<h3>Step 1 - Xcode Plugin Project Template</h3>
+
+<ul>
+<li>Grab the Xcode project template for creating plugins from <a href="https://github.com/kattrali/Xcode4-Plugin-Template">here</a></li>
+<li>Create the plugin template folder <code>~/Library/Developer/Xcode/Templates/Project Templates/Application Plug-in/Xcode4 Plugin.xctemplate</code> if it doesn&rsquo;t already exist.</li>
+<li>A quick way to do this is with the following command <code>mkdir -p "~/Library/Developer/Xcode/Templates/Project Templates/Application Plug-in/Xcode4 Plugin.xctemplate"</code></li>
+<li>Copy the contents of the GitHub repository to the folder you just created.</li>
+<li>Restart Xcode.</li>
+</ul>
+
+
+<h3>Step 2 - Create a test project</h3>
+
+<ul>
+<li>Open Xcode, and select <code>File &gt; New &gt; Project</code></li>
+<li>Then under <code>OS X &gt; Templates</code> tap <code>Xcode4 Plugin</code> (shown below)</li>
+</ul>
+
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-44-05-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-44-05-pm.png?w=300" alt="Screen Shot 2013-04-29 at 3.44.05 PM" /></a></p>
+
+<p>From the GitHub repo:</p>
+
+<pre><code>The default plugin file links against AppKit and Foundation, and, when built 
+(and Xcode is restarted), creates a menu item labeled "Do Action" in the File menu. 
+Pressing the menu item should open an alert. Customize at will!
+</code></pre>
+
+<p>If we run the project we just created, it will automatically build and copy the plugin to the right location. In this case it is <code>~/Library/Application Support/Developer/Shared/Xcode/Plug-ins/[Project Name].xcplugin</code>. Restarting Xcode, we get a new menu item under the <code>File</code> menu!</p>
+
+<h3><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png" alt="Screen Shot 2013-04-29 at 3.53.02 PM" /></a></h3>
+
+<p>When we click on the menu item, we get an alert:</p>
+
+<h3><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png?w=300" alt="Screen Shot 2013-04-29 at 3.53.49 PM" /></a></h3>
+
+<p>Notes:</p>
+
+<ul>
+<li>Xcode plugins have to be written using Objective-C GC, this means you have to use <code>retain</code> and <code>release</code> calls in your code. (No ARC support).</li>
+</ul>
+
+
+<h3>Where to go from here?</h3>
+
+<ul>
+<li><a href="http://stackoverflow.com/a/12478484/1144632">This StackOverflow answer</a> has some great ideas on where to go next</li>
+<li>You can get a dump of the private headers that Xcode uses by using the <a href="https://github.com/nygard/class-dump">class-dump</a> tool</li>
+<li><code>brew install class-dump</code> is the quickest way to get it if you have homebrew installed.</li>
+<li>IDEKit and IDEFoundation are present at <code>Xcode.app/Contents/Frameworks</code></li>
+<li>DVTKit and DVTFoundation are present at <code>Xcode.app/Contents/SharedFrameworks</code></li>
+<li>By registering an observer for <code>nil</code> you can see all the notifications that are being called. This is useful to find out which actions are called and when, and what notifications you might need to listen for.</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins/">Automated Unit Testing an iOS App With Jenkins</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-24T05:00:23-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>Setting up and executing automated unit tests is slightly more involved than generating built apps for distribution.</li>
+<li>The following is the set up that I use for some of my projects, I have just renamed the project to <code>TestProject</code> for convenience.</li>
+<li>For this article I am assuming that you have Jenkins, Xcode, Xcode Command Line Tools, and the Xcode Jenkins plugin already installed.</li>
+<li>Because I use cocoaPods for dependency management, I build a workspace using custom build schemes. To build a single project with a unit-test target would make these steps easier.</li>
+</ul>
+
+
+<h3>Dependencies</h3>
+
+<ul>
+<li><strong>HomeBrew</strong>
+
+<ul>
+<li>Used as a package manager on OSX for easy installation of dependencies.</li>
+<li>Install from this website: <a href="http://mxcl.github.io/homebrew/">http://mxcl.github.io/homebrew/</a> or by copy-pasting the following into the terminal: <code>ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"</code></li>
+</ul>
+</li>
+<li><strong>Ruby 1.9.3</strong>
+
+<ul>
+<li>Needed for other dependencies.</li>
+<li>Can be installed via brew, or with RVM.</li>
+<li>I used RVM to set up my ruby install.</li>
+</ul>
+</li>
+<li><strong>Sinatra</strong>
+
+<ul>
+<li>Sinatra is a ruby based server that we use for serving JSON fixtures to the unit tests.</li>
+<li>Can be installed using the ruby package manager <code>sudo gem install sinatra</code></li>
+</ul>
+</li>
+<li><strong>ios-sim</strong>
+
+<ul>
+<li>Required because Xcode doesn&rsquo;t allow unit tests to be run natively in the iOS simulator from the command line.</li>
+<li>Can be installed using brew: <code>brew install ios-sim</code></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Step 1 - Poll SCM</h3>
+
+<ul>
+<li>The <code>TestProject</code> Jenkins job polls the SCM looking for changes to the <code>master</code> branch at midnight every night.</li>
+<li>If no changes have occurred, then the project is not built.</li>
+<li>If modifications have been made, the next step is executed.</li>
+<li>If you want, Jenkins can be set up to build on a push to a branch. E.g. Pushing to the remote master branch.</li>
+</ul>
+
+
+<h3>Step 2 - Simulator and Sinatra setup</h3>
+
+<p>We run the following script:</p>
+
+<pre><code>#!/bin/bash
+
+#reset the content and settings of the iphone sim
+rm -r ~/Library/Application\ Support/iPhone\ Simulator/
+
+#open the iphonesimulator and kill it
+#this is required after a system restart
+#so the simulator knows to run iPad rather than iPhone apps
+echo "Opening iphone simulator"
+open "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app"
+sleep 10
+killall 'iPhone Simulator'
+echo "iphone simulator killed"
+
+#delete previous build folders
+echo "Removing previous build folder"
+rm -r ${WORKSPACE}/build
+mkdir ${WORKSPACE}/build
+
+#Start sinatra server in the background
+ruby TestProject/server.rb &amp;
+
+#get the PID of the process
+PID=$!
+
+#save PID to file
+echo $PID &gt; ${WORKSPACE}/sinatra.pid
+</code></pre>
+
+<ul>
+<li>We first remove the iPhone Simulator folder
+
+<ul>
+<li>This makes sure that no previous <code>TestProject</code> apps are installed on the simulator. Otherwise we may get core data upgrade problems.</li>
+</ul>
+</li>
+<li>We then have to open the iphone simulator and then kill it
+
+<ul>
+<li>This is a stupid workaround that has to be done so that the iphonesimulator recognizes that we have to run an iPad application rather than an iPhone app.</li>
+</ul>
+</li>
+<li>We then remove any previous build folders.
+
+<ul>
+<li>Because we have our project set up as a workspace, there are multiple <code>.xcodeproj</code> files and libraries that we have to build, including our <code>pods</code> dependencies. Because of this, our default build location is relative to the project, not located in the <code>iPhone Simulator</code> folder or in Xcode&rsquo;s <code>DerivedData</code> folder.</li>
+</ul>
+</li>
+<li>We then start the sinatra server in the background
+
+<ul>
+<li>The <code>&amp;</code> operator detaches the ruby process from the current shell so that once this script has finished, the sinatra server is still running.</li>
+<li>We store the PID of the process to the <code>PID</code> variable.</li>
+<li>The <code>$!</code> expands to the process ID of the most recently executed background (asynchronous) command. More details <a href="http://www.tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_02.html">here</a></li>
+<li>The PID is then written to file so it persists.</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Step 3 - Xcode Build</h3>
+
+<p>Below is a screenshot from jenkins showing the fields used for the xcode plugin</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-33-32-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-33-32-pm.png?w=300" alt="Screen Shot 2013-04-23 at 3.33.32 PM" /></a></p>
+
+<ul>
+<li><code>Clean before build</code> - we don&rsquo;t want any cached compiled objects hanging around.</li>
+<li><code>Xcode Schema File</code> - <code>TestProjectTests</code>
+
+<ul>
+<li>Because of a limitation where workspaces can&rsquo;t build targets directly, we have to use a Build Scheme to run unit tests. This scheme is set up the run the attached unit test target included in the production scheme <code>TestProject</code></li>
+</ul>
+</li>
+<li><code>SDK</code> - <code>iphonesimulator</code>
+
+<ul>
+<li>We are targeting the simulator to run unit tests so we specify it here.</li>
+</ul>
+</li>
+<li><code>Configuration</code> - <code>Debug</code>
+
+<ul>
+<li>Unit tests only execute in <code>Debug</code> mode, so this option has to be this.</li>
+</ul>
+</li>
+<li><code>Custom xcodebuild arguments</code>
+
+<ul>
+<li><code>TEST_AFTER_BUILD</code> - We manually specify that we want to run unit tests after building the project.</li>
+<li><code>ARCHS=i386</code> - We have to force the architecture to <code>i386</code> because xcode wants to default to <code>armv6</code>, <code>armv7</code> or <code>armv7s</code>.</li>
+<li><code>ONLY_ACTIVE_ARCH=NO</code> - Tell Xcode to not build just the architectures that it wants to by default.</li>
+<li><code>VALID_ARCHS=i386</code> - We have to specify the architecture here again. Xcode does not make this easy for us.</li>
+<li><code>SL_RUN_UNIT_TESTS=YES</code> - This is where the magic happens, this will be explained in more detail in the next section.</li>
+</ul>
+</li>
+<li><code>Clean test reports?</code>
+
+<ul>
+<li>This outputs clean test reports so we can export them to <code>JUnit</code> reports later.</li>
+</ul>
+</li>
+<li><code>Unlock keychain?</code>
+
+<ul>
+<li>Required so we don&rsquo;t have to enter the password to use debugging.</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Step 4 - Unit testing</h3>
+
+<p>As explained in the previous step, the <code>SL_RUN_UNIT_TESTS=YES</code> xcodebuild argument is extremely important.</p>
+
+<p>The <code>TestProjectTests</code> target in Xcode has a custom script that it executes <strong>after</strong> building. The script can be found in <code>Project Settings -&gt; TestProjectTest -&gt; Build Phases -&gt; Run Script</code></p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-38-26-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-38-26-pm.png?w=300" alt="Screen Shot 2013-04-23 at 3.38.26 PM" /></a></p>
+
+<p>The script is shown below:</p>
+
+<pre><code>ruby -v
+ruby "${SRCROOT}/commandlineunittests.rb"
+</code></pre>
+
+<ul>
+<li>The first line is unnecessary, and just used for outputting the ruby version.</li>
+<li>The second line calls a ruby script that is present in the repository that kicks off the unit tests.</li>
+</ul>
+
+
+<p>The second ruby script is shown below:</p>
+
+<pre><code>if ENV['SL_RUN_UNIT_TESTS'] then
+    launcher_path = "/usr/local/bin/ios-sim"    
+    #File.join(ENV['SRCROOT'], "Scripts", "ios-sim")
+    test_bundle_path= File.join(ENV['BUILT_PRODUCTS_DIR'], "#{ENV['PRODUCT_NAME']}.#{ENV['WRAPPER_EXTENSION']}")
+
+    environment = {
+        'DYLD_INSERT_LIBRARIES' =&gt; "/../../Library/PrivateFrameworks/IDEBundleInjection.framework/IDEBundleInjection",
+        'XCInjectBundle' =&gt; test_bundle_path,
+        'XCInjectBundleInto' =&gt; ENV["TEST_HOST"]
+    }
+
+    environment_args = environment.collect { |key, value| "--setenv #{key}=\"#{value}\""}.join(" ")
+
+    app_test_host = File.dirname(ENV["TEST_HOST"])
+    system("#{launcher_path} launch \"#{app_test_host}\" #{environment_args} --args -SenTest All #{test_bundle_path}")
+else
+    puts "SL_RUN_UNIT_TESTS not set - Did not run unit tests!"
+end
+</code></pre>
+
+<ul>
+<li>The script checks for that magic variable <code>SL_RUN_UNIT_TESTS</code> and if it&rsquo;s present runs the unit tests.</li>
+<li>Using the <code>ios-sim</code> dependency, the script dynamically patches the <code>TEST_HOST</code> of the ios simulator and runs the unit tests. This is really complicated to try and do by hand, which is what we were doing before using <code>ios-sim</code></li>
+</ul>
+
+
+<h3>Step 5 - Cleanup</h3>
+
+<p>The following script is executing after the unit tests have finished, regardless of the output status (<code>PASS</code> or <code>FAIL</code>).</p>
+
+<pre><code>#!/bin/bash
+
+PID=$(&lt;${WORKSPACE}/sinatra.pid)
+echo "Sinatra server pid $PID"
+
+kill -9 $PID
+</code></pre>
+
+<ul>
+<li>This script reads the process id (<code>PID</code>) from the file we stored earlier containing the <code>sinatra</code> server&rsquo;s PID.</li>
+<li>We then kill the <code>sinatra</code> process.
+
+<ul>
+<li>We don&rsquo;t want the <code>sinatra</code> server hanging around after the unit tests have run, because subsequent tests will fail because they will try to start a <code>sinatra</code> server using the same port as the previous process.</li>
+</ul>
+</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins/">Auto Build and Deploy iOS Apps Using Jenkins</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-23T09:18:15-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>We will have a look at a <code>TestProject</code> to get an idea of how jenkins can be used to build, sign and deploy iOS projects. The whole process consists of 4 steps. Note that to deploy an app in this manner, an enterprise distribution certificate is required for each app.
+This guide is how I have set up my enterprise builds for my apps that use <code>cocoaPods</code> for dependencies, but most of the same principles apply for any iOS apps.
+Because the project uses <code>cocoaPods</code>, it means we have to build a workspace and have a build scheme set up.</p>
+
+<p><strong>Note: Apple Enterprise licenses can ONLY be used for builds internal to your company. I am not responsible for anything that may happen if you try to distribute apps outside your company using an enterprise license.</strong></p>
+
+<p>This guide may be a bit brief, don&rsquo;t hesitate to ask me any questions. This is mostly for my own reference.</p>
+
+<h3>Step 1 - Poll SCM</h3>
+
+<ul>
+<li>Dev builds poll the SCM looking for changes to the <code>master</code> branch at midnight every night.</li>
+<li>If no changes have occurred, then the project is not built.</li>
+<li>If modifications have been made, the next step is executed.</li>
+</ul>
+
+
+<h3>Step 2 - Xcode build</h3>
+
+<p>Below is a screenshot from jenkins showing the fields used for the xcode plugin.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-4-01-12-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-4-01-12-pm.png?w=300" alt="Screen Shot 2013-04-23 at 4.01.12 PM" /></a></p>
+
+<ul>
+<li><code>Clean before build</code> - we don&rsquo;t want any cached compiled objects hanging around.</li>
+<li><code>Xcode Schema File</code> - <code>TestProjectDev</code>
+
+<ul>
+<li>Because of the way we have our project set up, our top level item is a workspace (<code>TestProject.xcworkspace</code>), we have to build based on Schemes as Xcode does not support building a target from a workspace.</li>
+<li><code>TestProjectDev</code> specifies the scheme we want to build with.</li>
+</ul>
+</li>
+<li><code>Configuration</code> - <code>Release</code>
+
+<ul>
+<li>We want the release version. There are several subtle differences between <code>Debug</code> and <code>Release</code> versions. The most notable is that <code>Debug</code> builds are usually built for just one architecture, where <code>Release</code> builds are built for all supported architectures, usually with compile time optimisations as well.</li>
+</ul>
+</li>
+<li><code>Workspace File</code> - This is our top level workspace file (<code>TestProject.xcworkspace</code>) that we build from. If this option wasn&rsquo;t specified, by default the xcode build would look for the first <code>*.xcodeproj</code> file it can find. This would cause our build to fail.</li>
+<li><code>Unlock Keychain</code>
+
+<ul>
+<li>This allows us to unlock the keychain which is required for signing or resigning <code>.ipa</code> files.</li>
+<li>The location of the keychain is the default OSX location</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Step 3 - Resigning</h3>
+
+<ul>
+<li>This step only occurs if previous steps were successful</li>
+<li>This step only occurs if the text <code>BUILD</code> is present in the log text (basically every build)</li>
+<li>The result of this build will be escalated to the job status. If this step fails and other steps before it were successful, the job will still fail.</li>
+</ul>
+
+
+<p>Below is the script used for resigning:</p>
+
+<pre><code>#!/bin/sh
+
+PROJECT_BUILDDIR="${WORKSPACE}/build/TestProject/Build/Products/Release-iphoneos"
+APPLICATION_NAME="TestProjectDev"
+BUILD_HISTORY_DIR="/Users/administrator/Provisioning/builds"
+DEVELOPER_NAME="iPhone Distribution: Test Company LTD"
+PROVISIONING_PROFILE="/Users/administrator/Provisioning/TestProjectDevDistributionProfile.mobileprovision"
+HOST_LOCATION="/Library/WebServer/Documents/apps"
+
+#Sign The .app file and create .ipa file
+/usr/bin/xcrun -sdk iphoneos PackageApplication -v  "${PROJECT_BUILDDIR}/${APPLICATION_NAME}.app" -o  "${BUILD_HISTORY_DIR}/${APPLICATION_NAME}.ipa" --sign ${DEVELOPER_NAME} --embed ${PROVISIONING_PROFILE}
+
+#Get the version from the Info.plist file
+APP_PATH="${PROJECT_BUILDDIR}/${APPLICATION_NAME}.app"
+VERSION=`defaults read ${APP_PATH}/Info CFBundleShortVersionString`
+BUNDLE_ID=`defaults read ${APP_PATH}/Info CFBundleIdentifier`
+
+# Create plist
+cat ${HOST_LOCATION}/template.plist | sed -e "s/\${APP_NAME}/$APPLICATION_NAME/" -e "s/\${BUNDLE_ID}/$BUNDLE_ID/" -e "s/\${BUNDLE_VERSION}/$VERSION/" &gt; ${HOST_LOCATION}/${APPLICATION_NAME}.plist
+</code></pre>
+
+<ul>
+<li><p>The first part of this script sets up the locations and script variables</p>
+
+<ul>
+<li><code>PROJECT_BUILDDIR</code> - The folder that the built <code>.ipa</code> file resides from the previous build step.</li>
+<li><code>APPLICATION_NAME</code> - In this case it is <code>TestProjectDev</code></li>
+<li><code>BUILD_HISTORY_DIR</code> - The folder that the re-signed app will be output to</li>
+<li><code>DEVELOPER_NAME</code> - Has to match the <code>.mobileprovision</code> file used for signing.</li>
+<li><code>PROVISIONING_PROFILE</code> - The location of the <code>.mobileprovision</code> file used for signing. These must be downloaded from the Apple developer website or shown in Finder from the Xcode organizer.</li>
+<li><code>HOST_LOCATION</code> - Where the final signed app will exist</li>
+</ul>
+</li>
+<li><p>The next stage of the build process is actually re-signing the app using the Xcode command line tool called <code>xcrun</code>. Note that the version in <code>/usr/bin/</code> is a symlink to the Xcode version that has been selected by the <code>xcodeselect</code> command line tool. This is important if more than one version of xcode is installed. Each version of Xcode stores command line tools inside the <code>.app</code> file in applications.</p></li>
+<li>After re-signing, we grab the version, and bundle-id. These are used in the next part
+
+<ul>
+<li><code>APP_PATH</code> - The full path including the <code>.app</code> extension of the re-signed app</li>
+<li><code>VERSION</code> - This is the <code>CFBundleShortVersionString</code>. This value is set when you change the version in Xcode for each of the build schemes.</li>
+<li><code>BUNDLE_ID</code> - The <code>CFBundleIdentifier</code> for the built app. For <code>TestProject</code>, this will be <code>au.com.wordpress.danielbeard.TestProject</code>. These can be set by modifying the build Schemes, but shouldn&rsquo;t be changed for existing applications. Production has a different bundleId, which is what allows for both the dev and prod versions to exist on a single iPad at the same time.</li>
+</ul>
+</li>
+<li>We then auto generate the enterprise install PLIST file. This is needed to install apps from a URL location and acts as a &ldquo;description&rdquo; of the app that is about to be installed.
+
+<ul>
+<li>The actual creation of this file is quite simple, we use <code>cat</code> to copy the <code>template.plist</code> file to the new location and then using <code>sed</code> we replace the <code>BUNDLE_ID</code> and <code>BUNDLE_VERSION</code> values. These values are read from the Apps Info.plist from inside the .app folder.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Below is an example template.plist file</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+        &lt;key&gt;items&lt;/key&gt;
+        &lt;array&gt;
+                &lt;dict&gt;
+                        &lt;key&gt;assets&lt;/key&gt;
+                        &lt;array&gt;
+                                &lt;dict&gt;
+                                        &lt;key&gt;kind&lt;/key&gt;
+                                        &lt;string&gt;software-package&lt;/string&gt;
+                                        &lt;key&gt;url&lt;/key&gt;
+                                        &lt;string&gt;http://hostlocation/apps/${APP_NAME}.ipa&lt;/string&gt;
+                                &lt;/dict&gt;
+                        &lt;/array&gt;
+                        &lt;key&gt;metadata&lt;/key&gt;
+                        &lt;dict&gt;
+                                &lt;key&gt;bundle-identifier&lt;/key&gt;
+                                &lt;string&gt;${BUNDLE_ID}&lt;/string&gt;
+                                &lt;key&gt;bundle-version&lt;/key&gt;
+                                &lt;string&gt;${BUNDLE_VERSION}&lt;/string&gt;
+                                &lt;key&gt;kind&lt;/key&gt;
+                                &lt;string&gt;software&lt;/string&gt;
+                                &lt;key&gt;title&lt;/key&gt;
+                                &lt;string&gt;${APP_NAME}&lt;/string&gt;
+                        &lt;/dict&gt;
+                &lt;/dict&gt;
+        &lt;/array&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;
+</code></pre>
+
+<h3>Step 4 - Copying to host location</h3>
+
+<ul>
+<li>This step simple grabs the signed <code>.ipa</code> file and puts it in the host location so that the macmini website can serve it over a URL. The host location is <code>/Library/Webserver/Documents/apps</code></li>
+</ul>
+
+
+<p>Script looks like this:</p>
+
+<pre><code>#!/bin/sh
+
+APPLICATION_NAME="TestProjectDev.ipa"
+BUILD_HISTORY_DIR="/Users/administrator/Provisioning/builds"
+HOST_LOCATION="/Library/WebServer/Documents/apps/"
+
+cp "${BUILD_HISTORY_DIR}/${APPLICATION_NAME}" "${HOST_LOCATION}${APPLICATION_NAME}"
+</code></pre>
+
+<p>And that&rsquo;s it! The output is a .ipa file and a .plist file. These are both required to install an enterprise app.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/04/17/objective-c-style-guide/">Objective-C Style Guide</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-17T05:58:03-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This is the style guide that I follow when programming in Objective-C, this is for my own reference, but other people may find this useful.</p>
+
+<h3>General</h3>
+
+<ul>
+<li>Use modern objective-c 2.0 syntax</li>
+<li>Use ARC whenever possible.</li>
+<li>Manual memory management should only be used when using older libraries that haven&rsquo;t been updated yet.</li>
+<li>Use tabs when indenting, not spaces.</li>
+</ul>
+
+
+<h3>Code Naming Basics</h3>
+
+<ul>
+<li>Follow the <a href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/CodingGuidelines/Articles/NamingBasics.html#//apple_ref/doc/uid/20001281-BBCHBFAH">Apple naming guidelines</a></li>
+<li>Use descriptive names, even if they are long. Xcode has great code completion features. <em>Use them</em>.
+
+<ul>
+<li>Clarity is preferred over all else.</li>
+<li>E.g. Compare the two methods: <code>[spaceship fly: 10.0f]</code> and <code>[spaceship flyAtSpeed: 10.0f]</code>.</li>
+<li>Note how much clearer the second declaration is, the method describes its intentions and parameter names.</li>
+</ul>
+</li>
+<li>Don&rsquo;t use abbreviations. E.g. <code>bgColor</code> vs. <code>backgroundColor</code></li>
+<li>Custom resuseable classes should be prefixed with <code>AFG</code>
+
+<ul>
+<li>Application level classes do not have to be prefixed. E.g. ViewControllers</li>
+</ul>
+</li>
+<li>All view controllers should be descriptively named and end with <code>ViewController</code>.
+
+<ul>
+<li>E.g. <code>CalculatorSettingsViewController</code></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Commenting</h3>
+
+<ul>
+<li>Follow the <a href="http://gentlebytes.com/appledoc/">appledoc</a> code formatting style.</li>
+<li>Only comment the method declarations. E.g. In the <code>@interface</code> or private <code>@interface ... ()</code> code blocks.</li>
+<li>Describe what the method does, the parameter names and the return value and what it signifies.</li>
+</ul>
+
+
+<p>The following is a good example of method commenting:</p>
+
+<pre><code>/** This method asks the delegate if the AFGContainerViewController should pop the current view from the view stack.
+ @param - The current AFGContainerViewController object
+ @return A BOOL value indicating if the current view controller should be removed from the AFGContainerViewController's view stack.
+ */
+-(BOOL) AFGContainerViewControllerShouldPopContainerViewController: (AFGContainerViewController*) containerViewController;
+</code></pre>
+
+<h3>Spacing</h3>
+
+<pre><code>-(void) performOperationWithObject: (NSObject*) objectName {
+
+  NSLog(@"This is a well spaced method");
+  [objectName performSomeOperation];
+}
+</code></pre>
+
+<ul>
+<li>No space between the class or instance specifier <code>(+,-)</code></li>
+<li>Single space between the return type and method name</li>
+<li>Single spaces between method signature, object types and object names</li>
+<li>Brace on the same line as the method signature.</li>
+<li>Optional newline below the method signature for readability</li>
+<li>No newline before the closing brace</li>
+</ul>
+
+
+<h3>Variables and Initializers</h3>
+
+<ul>
+<li>Variable names should always start with lower case.
+
+<ul>
+<li>Good: <code>numberOfObjects</code></li>
+<li>Bad: <code>NumberOfObjects</code></li>
+</ul>
+</li>
+<li>Clearly identify the designated initializer for the class
+
+<ul>
+<li>All other initializers should propagate up to and use the designated initializer.</li>
+</ul>
+</li>
+<li>Override the superclass&#8217; designated initializer.</li>
+<li>Initialization method should be at the top of the <code>@implementation</code></li>
+<li>Don&rsquo;t explicitly initialize variables to nil. Under ARC this happens automatically.</li>
+</ul>
+
+
+<h3>Properties</h3>
+
+<ul>
+<li>Don&rsquo;t <code>@synthesize</code> properties. Modern objective-c does this for us automatically.</li>
+<li>Always start with a lower case letter.</li>
+<li><code>NSString</code> properties should always be <code>copy</code></li>
+<li><code>IBOutlets</code> should always be <code>weak</code></li>
+</ul>
+
+
+<h3>Other readings</h3>
+
+<p>These are some good references / starting points for creating your own style guide or just to see other coding styles.</p>
+
+<ul>
+<li><a href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/CodingGuidelines/CodingGuidelines.html#//apple_ref/doc/uid/10000146-SW1">Apple Coding Guidelines</a></li>
+<li><a href="http://cocoadevcentral.com/articles/000082.php">CocoaDevCentral coding guidelines</a></li>
+<li><a href="http://google-styleguide.googlecode.com/svn/trunk/objcguide.xml">Google Code Style</a></li>
+<li><a href="http://www.techotopia.com/index.php/The_Basics_of_Modern_Objective-C">Basics of Modern Objective-C</a></li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/04/16/objective-c-runtime/">Objective-C Runtime</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-16T05:38:24-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>It is pretty rare to actually have to dive into the objc-runtime for any day to day coding. Most developers wont have to touch the runtime, however it is helpful to know what is possible and be able to use it if required. The objective-c runtime is written in C and is how the underlying parts of the objective-c language work including message sending, ivars and properties. This post shows an example of where I have used the Objective-C runtime in one of my projects.</p>
+
+<p>One example of where I have used the runtime in my projects is the validation code in <code>DBValidator</code>. The validation code is implemented as a category on <code>NSObject</code> called <code>NSObject+DBValidator</code>. This is so we can add validation rules to <strong>any</strong> objective-c object. The only problem with this approach is that you <em>can&rsquo;t</em> add any properties or ivars to an object using a category.</p>
+
+<p>We can work around this limitation by using the objective-c runtime directly.</p>
+
+<p>Below is the implementation of the <code>NSObject+DBValidator</code> category:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="cp">#import &quot;NSObject+DBValidator.h&quot;</span>
+</span><span class='line'>    <span class="cp">#import &lt;objc/runtime.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cp">#define VALIDATION_RULES_KEY @&quot;validationruleskey&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">@implementation</span> <span class="bp">NSObject</span> <span class="nl">(DBValidator)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="nl">setValidationRules</span><span class="p">:(</span><span class="bp">NSMutableArray</span> <span class="o">*</span><span class="p">)</span><span class="n">validationRules</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">objc_setAssociatedObject</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">VALIDATION_RULES_KEY</span><span class="p">,</span> <span class="n">validationRules</span><span class="p">,</span> <span class="n">OBJC_ASSOCIATION_RETAIN_NONATOMIC</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">-</span><span class="p">(</span><span class="bp">NSMutableArray</span><span class="o">*</span><span class="p">)</span> <span class="n">validationRules</span> <span class="p">{</span>
+</span><span class='line'>        <span class="bp">NSMutableArray</span> <span class="o">*</span><span class="n">validationRules</span> <span class="o">=</span> <span class="n">objc_getAssociatedObject</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">VALIDATION_RULES_KEY</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">validationRules</span><span class="p">)</span>
+</span><span class='line'>            <span class="n">validationRules</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSMutableArray</span> <span class="n">array</span><span class="p">];</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">validationRules</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="nl">addValidationRule</span><span class="p">:</span> <span class="p">(</span><span class="n">DBValidationRule</span><span class="o">*</span><span class="p">)</span> <span class="n">validationRule</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="bp">NSMutableArray</span> <span class="o">*</span><span class="n">validationRules</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">validationRules</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">validationRule</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">validationRules</span> <span class="nl">addObject</span><span class="p">:</span><span class="n">validationRule</span><span class="p">];</span>
+</span><span class='line'>        <span class="nb">self</span><span class="p">.</span><span class="n">validationRules</span> <span class="o">=</span> <span class="n">validationRules</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">removeAllValidationRules</span> <span class="p">{</span>
+</span><span class='line'>        <span class="bp">NSMutableArray</span> <span class="o">*</span><span class="n">validationRules</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">validationRules</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">[</span><span class="n">validationRules</span> <span class="n">removeAllObjects</span><span class="p">];</span>
+</span><span class='line'>        <span class="nb">self</span><span class="p">.</span><span class="n">validationRules</span> <span class="o">=</span> <span class="n">validationRules</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">-</span><span class="p">(</span><span class="bp">NSMutableArray</span><span class="o">*</span><span class="p">)</span> <span class="n">validate</span> <span class="p">{</span>
+</span><span class='line'>        <span class="bp">NSMutableArray</span> <span class="o">*</span><span class="n">failureMessages</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSMutableArray</span> <span class="n">array</span><span class="p">];</span>
+</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="n">DBValidationRule</span> <span class="o">*</span><span class="n">rule</span> <span class="k">in</span> <span class="nb">self</span><span class="p">.</span><span class="n">validationRules</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="kt">BOOL</span> <span class="n">isValid</span> <span class="o">=</span> <span class="p">[</span><span class="n">rule</span> <span class="n">passesValidation</span><span class="p">];</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isValid</span><span class="p">)</span>
+</span><span class='line'>                 <span class="p">[</span><span class="n">failureMessages</span> <span class="nl">addObject</span><span class="p">:</span> <span class="n">rule</span><span class="p">.</span><span class="n">failureMessage</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">failureMessages</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">@end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We have a <code>@property</code> defined in the header called <code>validationRules</code> and we override both the setter and getter in the implementation. In the <code>setValidationRules:</code> method we use a C function from the objective-c runtime called <a href="https://developer.apple.com/library/mac/#documentation/Cocoa/Reference/ObjCRuntimeRef/Reference/reference.html"><code>objc_setAssociatedObject</code></a>. This function allows us to set a reference on the <code>self</code> object. We give it a key, the object (in this case the <code>validationRules</code> passed to the method) and the association policy.</p>
+
+<p>The valid options for the association policy are:</p>
+
+<pre><code>enum {
+   OBJC_ASSOCIATION_ASSIGN = 0,
+   OBJC_ASSOCIATION_RETAIN_NONATOMIC = 1,
+   OBJC_ASSOCIATION_COPY_NONATOMIC = 3,
+   OBJC_ASSOCIATION_RETAIN = 01401,
+   OBJC_ASSOCIATION_COPY = 01403
+};
+</code></pre>
+
+<p>Notice how these options map directly to <code>@property</code> storage options! We are using <code>OBJC_ASSOCIATION_RETAIN_NONATOMIC</code> because we want our <code>NSObject</code> to retain the validation rules that are set on it.</p>
+
+<p>In our <code>validationRules</code> method, we use a similar call from the objective-c runtime called <a href="https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ObjCRuntimeRef/Reference/reference.html#//apple_ref/doc/uid/TP40001418-CH1g-SW68"><code>objc_getAssociatedObject</code></a>. This allows us to retrieve the object we set a reference to in the preious method. We have to pass the parent object and the key for the associated object we want. We return an empty array if validation rules are not yet set for this object.</p>
+
+<p>Check out the full source code in the <a href="https://github.com/daniel-beard/DBValidator">DBValidator GitHub Project</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/04/15/git-notes/">Git Notes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-15T05:18:17-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This is a list of git notes that I use everyday. Hopefully someone else finds it useful. I will update this list over time.</p>
+
+<ul>
+<li>The master branch reflects production ready code only. This branch should be deployable at any time and merges to this branch should not break the build process.</li>
+<li>Feature branches should be merged into the master when they are complete.</li>
+<li>Feature branches consist of a single feature or discrete unit of work</li>
+<li>Commit early and commit often!</li>
+</ul>
+
+
+<h3>Generating SSH-Public Key</h3>
+
+<ol>
+<li> Switch to your .ssh directory and check if the id_rsa.pub file exists, this is your public key</li>
+<li> If it doesn&rsquo;t exist, generate one with the following command<code>ssh-keygen -t rsa -C "youremail@email.com"</code></li>
+</ol>
+
+
+<p>Output is something like the following:</p>
+
+<pre><code>Generating public/private rsa key pair.
+Enter file in which to save the key (/Users/danielbeard/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /Users/danielbeard/.ssh/id_rsa.
+Your public key has been saved in /Users/danielbeard/.ssh/id_rsa.pub.
+The key fingerprint is:
+43:c5:5b:5h:b1:f1:51:43:ad:20:a6:92:6a:1f:8a:3a danielbeard@iosdev.local
+</code></pre>
+
+<p>Copy the contents of the public key file to your clipboard:
+<code>pbcopy &lt; ~/.ssh/id_rsa.pub</code></p>
+
+<h3>Normal Workflow</h3>
+
+<ul>
+<li>Checkout the remote repository with: <code>git clone git@github.com:RepoOwner/RepoName.git</code></li>
+<li>Updating the repository (won&rsquo;t need to be done the first time): <code>git pull</code></li>
+<li>Create a new branch from the master or current development branch <code>git checkout -b featurebranchname master</code></li>
+<li>Make changes to local files</li>
+<li>Check local modifications with <code>git status</code></li>
+<li>Stage certain files with <code>git add &lt;file1&gt; &lt;file2&gt;</code> etc or add all changes <code>git add .</code></li>
+<li>Commit to you local repository <code>git commit -m 'commit message'</code></li>
+<li>Push the local commit to the remote repository and set up for tracking <code>git push -u origin featurebranchname</code></li>
+<li>Repeat until feature branch is complete.</li>
+<li>Merge master or development branch into the working branch
+
+<ul>
+<li><code>git checkout master</code></li>
+<li><code>git pull</code></li>
+<li><code>git checkout featurebranchname</code></li>
+<li><code>git merge master</code></li>
+</ul>
+</li>
+<li>Push to remote repository <code>git push -u origin featurebranchname</code></li>
+<li>Submit pull request and wait for code review</li>
+</ul>
+
+
+<h3>Repository Changes</h3>
+
+<ul>
+<li>Checking which files are in what state: <code>git status</code></li>
+<li>Tracking new files: <code>git add README</code></li>
+<li>Committing your changes: <code>git commit -m 'Commit message goes here'</code></li>
+<li>Push your current master to the remote origin: <code>git push -u origin master</code></li>
+<li>Unstaging a staged file: <code>git reset HEAD &lt;file&gt;</code></li>
+<li>Stage all untracked files - <code>git add -u</code></li>
+<li>Unmodifying a modified file: <code>git checkout -- benchmarks.rb</code></li>
+</ul>
+
+
+<p>Notes:
+  * The git add command stages a file for a commit. Calling git status shows which files are staged/unstaged or if they are untracked.
+  * If you modify a file after calling git add, the git status command will show the file as being both staged and unstaged.
+  * If you modify a file after calling git add, you have to run git add again to stage the latest version of the file
+Providing the -a option to git commit makes git automatically stage every file before doing the commit. (Letting you skip the git add part)</p>
+
+<p>Basic repository changes: <a href="http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository">http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository</a></p>
+
+<h3>Branching</h3>
+
+<ul>
+<li>Creating a new branch: <code>git checkout -b branchname</code></li>
+<li>Branching from a current branch: <code>git checkout -b feature devbranch</code></li>
+<li>Pushing branch to remote with tracking: <code>git push -u origin branchname</code></li>
+<li>Rename branch <code>git branch -m &lt;oldname&gt; &lt;newname&gt;</code></li>
+<li>Delete the local branch: <code>git branch -d branchname</code></li>
+<li>Delete the remote branch: <code>git push origin :branchname</code></li>
+<li>Listing all branches: <code>git branch -a</code></li>
+<li>Just list remote branches: <code>git branch -r</code></li>
+<li>Checking out a tracked remote branch: <code>git checkout --track origin/branch_name</code></li>
+<li>Merging a branch
+
+<ul>
+<li>Must have committed all changes (at least locally) like so: <code>git commit -a -m "Made a change in this branch"</code></li>
+<li>Switch to whichever branch you are merging back into, e.g. master <code>git checkout master</code></li>
+<li>Merge the branch (ALWAYS USE NO-FF): <code>git merge --no-ff branchname</code></li>
+</ul>
+</li>
+</ul>
+
+
+<p>Notes:</p>
+
+<p>Tracked branches are local branches that have a direct relationship to a remote branch.
+If you&rsquo;re on a tracking branch and type git push or git pull, git automatically knows which branch and server to push/pull from.</p>
+
+<p>Git remote branches :<a href="http://git-scm.com/book/en/Git-Branching-Remote-Branches#Tracking-Branches">http://git-scm.com/book/en/Git-Branching-Remote-Branches#Tracking-Branches</a>
+Git local branches: <a href="http://git-scm.com/book/en/Git-Branching-Basic-Branching-and-Merging">http://git-scm.com/book/en/Git-Branching-Basic-Branching-and-Merging</a></p>
+
+<h3>Tagging</h3>
+
+<ul>
+<li>Only used for tagging master branch merges or &ldquo;releases&rdquo;</li>
+<li>You can tag at any point, it doesn&rsquo;t have to be immediately.</li>
+</ul>
+
+
+<p>Show the commit history like this: <code>git log --pretty=oneline</code></p>
+
+<pre><code>15027957951b64cf874c3557a0f3547bd83b3ff6 Merge branch 'experiment'
+a6b4c97498bd301d84096da251c98a07c7723e65 beginning write support
+0d52aaab4479697da7686c15f77a3d64d9165190 one more thing
+6d52a271eda8725415634dd79daabbc4d9b6008e Merge branch 'experiment'
+0b7434d86859cc7b8c3d5e1dddfed66ff742fcbc added a commit function
+4682c3261057305bdd616e23b64b0857d832627b added a todo file
+166ae0c4d3f420721acbb115cc33848dfcc2121a started write support
+9fceb02d0ae598e95dc970b74767f19372d61af8 updated rakefile
+964f16d36dfccde844893cac5b347e7b3d44abbc commit the todo
+8a5cbc430f1a9c3d00faaeffd07798508422908a updated readme
+</code></pre>
+
+<ul>
+<li>To tag a certain commit, specify the commit checksum (or part of it) at the end of the command <code>git tag -a v1.2.1 9fceb02</code></li>
+<li>Then to transfer all your tags to the remote repository <code>git push origin --tags</code></li>
+</ul>
+
+
+<p>Git tags: <a href="http://git-scm.com/book/en/Git-Basics-Tagging">http://git-scm.com/book/en/Git-Basics-Tagging</a></p>
+
+<h3>Tracking changes between branches</h3>
+
+<ul>
+<li>Show the modified files between two branches: <code>git diff --name-status master..branch</code></li>
+<li>Show side by side comparison : <code>git difftool -t vimdiff master..branch</code></li>
+</ul>
+
+
+<h3>Other notes and links</h3>
+
+<p>Git aliases: <a href="http://git-scm.com/book/en/Git-Basics-Tips-and-Tricks#Git-Aliases">http://git-scm.com/book/en/Git-Basics-Tips-and-Tricks#Git-Aliases</a>
+Branching model: <a href="http://nvie.com/posts/a-successful-git-branching-model/">http://nvie.com/posts/a-successful-git-branching-model/</a>
+GitHub flow: <a href="http://scottchacon.com/2011/08/31/github-flow.html">http://scottchacon.com/2011/08/31/github-flow.html</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/01/09/general-purpose-validation-library-for-objective-c-and-ios/">General Purpose Validation Library for Objective-c and iOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-09T07:43:53-08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This is a simple validation framework that I created for one of my projects that I am releasing under an open source MIT license.</p>
+
+<p>The framework supports a number of different types of validations including string length, number range, email validation, regex validation and equality.</p>
+
+<p>Validation rules can be added to any keypath of any object that inherits from NSObject, as well as having multiple validation rules per object. Here is a screenshot:</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-09-at-3-35-54-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-09-at-3-35-54-pm.png?w=569" alt="Image" /></a></p>
+
+<p>And here is the project on Github - <a href="https://github.com/daniel-beard/DBValidator">DBValidator</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/01/04/adding-a-border-to-uilabel/">Adding a Border to UILabel</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-04T01:17:06-08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I have created a simple control that subclasses UILabel to add a border. Here&rsquo;s a screenshot:</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-04-at-9-12-11-am.png"><img src="http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-04-at-9-12-11-am.png?w=580" alt="Image" /></a></p>
+
+<p>Check out the project on <a href="https://github.com/daniel-beard/DBBorderedLabel">GitHub</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/09/20/metro-themed-button-for-ios/">Metro Themed Button for iOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-20T07:34:12-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Just for fun, I have created a metro themed UIButton for iOS complete with perspective 3D transform animations. Check out the screen shot and video below.</p>
+
+<p><img src="http://i.imgur.com/4oJ8F.png" alt="" /></p>
+
+<div class="embed-video-container"><iframe src="http://www.youtube.com/embed/jk9uoD9curk" allowfullscreen></iframe></div>
+
+
+<p>Get the project on GitHub here: <a href="https://github.com/paintstripper/DBTileButton">https://github.com/paintstripper/DBTileButton</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="2">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Daniel Beard -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Automated Unit Testing an iOS App With Jenkins - Daniel Beard</title>
+  <meta name="author" content="Daniel Beard">
+
+  
+  <meta name="description" content="Setting up and executing automated unit tests is slightly more involved than generating built apps for distribution.
+The following is the set up &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://danielbeard.io/blog/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Daniel Beard" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin" rel="stylesheet" type="text/css" />
+<link href='http://fonts.googleapis.com/css?family=Noto+Serif:400,700' rel='stylesheet' type='text/css'>
+
+
+
+  
+
+</head>
+
+<body    class="collapse-sidebar sidebar-footer" >
+  <nav id="main-nav" role="navigation">
+<ul class="main-navigation">
+  <li><a href="/" class="nav-link">Blog</a></li>
+  <li><a href="/blog/archives" class="nav-link">Archives</a></li>
+	<li><a href="https://github.com/daniel-beard">GitHub</a></li>
+	<li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Automated Unit Testing an iOS App With Jenkins</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-24T05:00:23-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><ul>
+<li>Setting up and executing automated unit tests is slightly more involved than generating built apps for distribution.</li>
+<li>The following is the set up that I use for some of my projects, I have just renamed the project to <code>TestProject</code> for convenience.</li>
+<li>For this article I am assuming that you have Jenkins, Xcode, Xcode Command Line Tools, and the Xcode Jenkins plugin already installed.</li>
+<li>Because I use cocoaPods for dependency management, I build a workspace using custom build schemes. To build a single project with a unit-test target would make these steps easier.</li>
+</ul>
+
+
+<h3>Dependencies</h3>
+
+<ul>
+<li><strong>HomeBrew</strong>
+
+<ul>
+<li>Used as a package manager on OSX for easy installation of dependencies.</li>
+<li>Install from this website: <a href="http://mxcl.github.io/homebrew/">http://mxcl.github.io/homebrew/</a> or by copy-pasting the following into the terminal: <code>ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"</code></li>
+</ul>
+</li>
+<li><strong>Ruby 1.9.3</strong>
+
+<ul>
+<li>Needed for other dependencies.</li>
+<li>Can be installed via brew, or with RVM.</li>
+<li>I used RVM to set up my ruby install.</li>
+</ul>
+</li>
+<li><strong>Sinatra</strong>
+
+<ul>
+<li>Sinatra is a ruby based server that we use for serving JSON fixtures to the unit tests.</li>
+<li>Can be installed using the ruby package manager <code>sudo gem install sinatra</code></li>
+</ul>
+</li>
+<li><strong>ios-sim</strong>
+
+<ul>
+<li>Required because Xcode doesn&rsquo;t allow unit tests to be run natively in the iOS simulator from the command line.</li>
+<li>Can be installed using brew: <code>brew install ios-sim</code></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Step 1 - Poll SCM</h3>
+
+<ul>
+<li>The <code>TestProject</code> Jenkins job polls the SCM looking for changes to the <code>master</code> branch at midnight every night.</li>
+<li>If no changes have occurred, then the project is not built.</li>
+<li>If modifications have been made, the next step is executed.</li>
+<li>If you want, Jenkins can be set up to build on a push to a branch. E.g. Pushing to the remote master branch.</li>
+</ul>
+
+
+<h3>Step 2 - Simulator and Sinatra setup</h3>
+
+<p>We run the following script:</p>
+
+<pre><code>#!/bin/bash
+
+#reset the content and settings of the iphone sim
+rm -r ~/Library/Application\ Support/iPhone\ Simulator/
+
+#open the iphonesimulator and kill it
+#this is required after a system restart
+#so the simulator knows to run iPad rather than iPhone apps
+echo "Opening iphone simulator"
+open "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app"
+sleep 10
+killall 'iPhone Simulator'
+echo "iphone simulator killed"
+
+#delete previous build folders
+echo "Removing previous build folder"
+rm -r ${WORKSPACE}/build
+mkdir ${WORKSPACE}/build
+
+#Start sinatra server in the background
+ruby TestProject/server.rb &amp;
+
+#get the PID of the process
+PID=$!
+
+#save PID to file
+echo $PID &gt; ${WORKSPACE}/sinatra.pid
+</code></pre>
+
+<ul>
+<li>We first remove the iPhone Simulator folder
+
+<ul>
+<li>This makes sure that no previous <code>TestProject</code> apps are installed on the simulator. Otherwise we may get core data upgrade problems.</li>
+</ul>
+</li>
+<li>We then have to open the iphone simulator and then kill it
+
+<ul>
+<li>This is a stupid workaround that has to be done so that the iphonesimulator recognizes that we have to run an iPad application rather than an iPhone app.</li>
+</ul>
+</li>
+<li>We then remove any previous build folders.
+
+<ul>
+<li>Because we have our project set up as a workspace, there are multiple <code>.xcodeproj</code> files and libraries that we have to build, including our <code>pods</code> dependencies. Because of this, our default build location is relative to the project, not located in the <code>iPhone Simulator</code> folder or in Xcode&rsquo;s <code>DerivedData</code> folder.</li>
+</ul>
+</li>
+<li>We then start the sinatra server in the background
+
+<ul>
+<li>The <code>&amp;</code> operator detaches the ruby process from the current shell so that once this script has finished, the sinatra server is still running.</li>
+<li>We store the PID of the process to the <code>PID</code> variable.</li>
+<li>The <code>$!</code> expands to the process ID of the most recently executed background (asynchronous) command. More details <a href="http://www.tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_02.html">here</a></li>
+<li>The PID is then written to file so it persists.</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Step 3 - Xcode Build</h3>
+
+<p>Below is a screenshot from jenkins showing the fields used for the xcode plugin</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-33-32-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-33-32-pm.png?w=300" alt="Screen Shot 2013-04-23 at 3.33.32 PM" /></a></p>
+
+<ul>
+<li><code>Clean before build</code> - we don&rsquo;t want any cached compiled objects hanging around.</li>
+<li><code>Xcode Schema File</code> - <code>TestProjectTests</code>
+
+<ul>
+<li>Because of a limitation where workspaces can&rsquo;t build targets directly, we have to use a Build Scheme to run unit tests. This scheme is set up the run the attached unit test target included in the production scheme <code>TestProject</code></li>
+</ul>
+</li>
+<li><code>SDK</code> - <code>iphonesimulator</code>
+
+<ul>
+<li>We are targeting the simulator to run unit tests so we specify it here.</li>
+</ul>
+</li>
+<li><code>Configuration</code> - <code>Debug</code>
+
+<ul>
+<li>Unit tests only execute in <code>Debug</code> mode, so this option has to be this.</li>
+</ul>
+</li>
+<li><code>Custom xcodebuild arguments</code>
+
+<ul>
+<li><code>TEST_AFTER_BUILD</code> - We manually specify that we want to run unit tests after building the project.</li>
+<li><code>ARCHS=i386</code> - We have to force the architecture to <code>i386</code> because xcode wants to default to <code>armv6</code>, <code>armv7</code> or <code>armv7s</code>.</li>
+<li><code>ONLY_ACTIVE_ARCH=NO</code> - Tell Xcode to not build just the architectures that it wants to by default.</li>
+<li><code>VALID_ARCHS=i386</code> - We have to specify the architecture here again. Xcode does not make this easy for us.</li>
+<li><code>SL_RUN_UNIT_TESTS=YES</code> - This is where the magic happens, this will be explained in more detail in the next section.</li>
+</ul>
+</li>
+<li><code>Clean test reports?</code>
+
+<ul>
+<li>This outputs clean test reports so we can export them to <code>JUnit</code> reports later.</li>
+</ul>
+</li>
+<li><code>Unlock keychain?</code>
+
+<ul>
+<li>Required so we don&rsquo;t have to enter the password to use debugging.</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Step 4 - Unit testing</h3>
+
+<p>As explained in the previous step, the <code>SL_RUN_UNIT_TESTS=YES</code> xcodebuild argument is extremely important.</p>
+
+<p>The <code>TestProjectTests</code> target in Xcode has a custom script that it executes <strong>after</strong> building. The script can be found in <code>Project Settings -&gt; TestProjectTest -&gt; Build Phases -&gt; Run Script</code></p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-38-26-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-38-26-pm.png?w=300" alt="Screen Shot 2013-04-23 at 3.38.26 PM" /></a></p>
+
+<p>The script is shown below:</p>
+
+<pre><code>ruby -v
+ruby "${SRCROOT}/commandlineunittests.rb"
+</code></pre>
+
+<ul>
+<li>The first line is unnecessary, and just used for outputting the ruby version.</li>
+<li>The second line calls a ruby script that is present in the repository that kicks off the unit tests.</li>
+</ul>
+
+
+<p>The second ruby script is shown below:</p>
+
+<pre><code>if ENV['SL_RUN_UNIT_TESTS'] then
+    launcher_path = "/usr/local/bin/ios-sim"    
+    #File.join(ENV['SRCROOT'], "Scripts", "ios-sim")
+    test_bundle_path= File.join(ENV['BUILT_PRODUCTS_DIR'], "#{ENV['PRODUCT_NAME']}.#{ENV['WRAPPER_EXTENSION']}")
+
+    environment = {
+        'DYLD_INSERT_LIBRARIES' =&gt; "/../../Library/PrivateFrameworks/IDEBundleInjection.framework/IDEBundleInjection",
+        'XCInjectBundle' =&gt; test_bundle_path,
+        'XCInjectBundleInto' =&gt; ENV["TEST_HOST"]
+    }
+
+    environment_args = environment.collect { |key, value| "--setenv #{key}=\"#{value}\""}.join(" ")
+
+    app_test_host = File.dirname(ENV["TEST_HOST"])
+    system("#{launcher_path} launch \"#{app_test_host}\" #{environment_args} --args -SenTest All #{test_bundle_path}")
+else
+    puts "SL_RUN_UNIT_TESTS not set - Did not run unit tests!"
+end
+</code></pre>
+
+<ul>
+<li>The script checks for that magic variable <code>SL_RUN_UNIT_TESTS</code> and if it&rsquo;s present runs the unit tests.</li>
+<li>Using the <code>ios-sim</code> dependency, the script dynamically patches the <code>TEST_HOST</code> of the ios simulator and runs the unit tests. This is really complicated to try and do by hand, which is what we were doing before using <code>ios-sim</code></li>
+</ul>
+
+
+<h3>Step 5 - Cleanup</h3>
+
+<p>The following script is executing after the unit tests have finished, regardless of the output status (<code>PASS</code> or <code>FAIL</code>).</p>
+
+<pre><code>#!/bin/bash
+
+PID=$(&lt;${WORKSPACE}/sinatra.pid)
+echo "Sinatra server pid $PID"
+
+kill -9 $PID
+</code></pre>
+
+<ul>
+<li>This script reads the process id (<code>PID</code>) from the file we stored earlier containing the <code>sinatra</code> server&rsquo;s PID.</li>
+<li>We then kill the <code>sinatra</code> process.
+
+<ul>
+<li>We don&rsquo;t want the <code>sinatra</code> server hanging around after the unit tests have run, because subsequent tests will fail because they will try to start a <code>sinatra</code> server using the same port as the previous process.</li>
+</ul>
+</li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">danielbeard</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-24T05:00:23-07:00" pubdate data-updated="true"></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/general-dev/'>general dev</a>, <a class='category' href='/blog/categories/ios/'>ios</a>, <a class='category' href='/blog/categories/objective-c/'>objective-c</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://danielbeard.io/blog/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins/" data-via="_danielbeard" data-counturl="http://danielbeard.io/blog/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins/" title="Previous Post: Auto build and deploy iOS apps using Jenkins">&laquo; Auto build and deploy iOS apps using Jenkins</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/04/29/developing-xcode-4-plugins/" title="Next Post: Developing Xcode 4 Plugins">Developing Xcode 4 Plugins &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Daniel Beard -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

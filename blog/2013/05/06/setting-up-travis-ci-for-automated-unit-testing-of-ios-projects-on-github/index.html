@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Setting Up Travis-ci for Automated Unit Testing of iOS Projects on GitHub - Daniel Beard</title>
+  <meta name="author" content="Daniel Beard">
+
+  
+  <meta name="description" content="This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects. The first &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://danielbeard.io/blog/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Daniel Beard" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin" rel="stylesheet" type="text/css" />
+<link href='http://fonts.googleapis.com/css?family=Noto+Serif:400,700' rel='stylesheet' type='text/css'>
+
+
+
+  
+
+</head>
+
+<body    class="collapse-sidebar sidebar-footer" >
+  <nav id="main-nav" role="navigation">
+<ul class="main-navigation">
+  <li><a href="/" class="nav-link">Blog</a></li>
+  <li><a href="/blog/archives" class="nav-link">Archives</a></li>
+	<li><a href="https://github.com/daniel-beard">GitHub</a></li>
+	<li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Setting Up Travis-ci for Automated Unit Testing of iOS Projects on GitHub</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-06T17:16:04-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects.</p>
+
+<p>The first step is to create a new project in Xcode. I am going to select a single view application and enable storyboards, Automatic Reference Counting and Unit Tests.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png?w=300" alt="Screen Shot 2013-05-06 at 11.42.27 PM" /></a></p>
+
+<p>All I&rsquo;m going to change is the <code>testExample</code> method in the unit testing bundle to something that will pass. For now I have just gone with this:</p>
+
+<pre><code>- (void)testExample
+{
+    STAssertNil(nil, @"This object should be nil");
+}
+</code></pre>
+
+<p>Check that the tests pass by hitting <code>cmd</code>+<code>u</code>. Now that I have my unit tests passing, I&rsquo;m going to add this project to GitHub. I&rsquo;ll leave the details out here, as this isn&rsquo;t the focus of this tutorial but you can find my example project here: <a href="https://github.com/daniel-beard/SettingUpTravisCIForiOS">https://github.com/daniel-beard/SettingUpTravisCIForiOS</a>.</p>
+
+<p>Now we can setup the TravisCI build. I use the <code>xctool</code> to build my projects as it has a nicer output and is easier to use than the built in <code>xcodebuild</code> tool. Add <code>xctool</code> as a submodule to the git repository using the following commands:</p>
+
+<pre><code>git submodule add https://github.com/facebook/xctool.git ./xctool
+git submodule update --init
+git commit ./xctool -m "Added xctool as a submodule"
+</code></pre>
+
+<p>Then we need to add a config file so that travis-ci knows how to build our project. This file is named <code>.travis.yml</code> and lives in the root of the git repository. Here is the contents of mine:</p>
+
+<pre><code>language: objective-c
+before_install: "git submodule init &amp;&amp; git submodule update &amp;&amp; sudo gem update --system &amp;&amp; sudo gem install bundler &amp;&amp; bundle install"
+script: "bundle exec rake test --trace"
+</code></pre>
+
+<p>Then we have to add a <code>Rakefile</code> that tells the <code>xctool</code> which project and target to build:</p>
+
+<pre><code>desc 'Run the tests'
+task :test do
+   exec('xctool/xctool.sh -project SettingUpTravisCIForiOS.xcodeproj -scheme SettingUpTravisCIForiOS test')
+end
+
+task :default =&gt; :test
+</code></pre>
+
+<p>And finally the <code>Gemfile</code></p>
+
+<pre><code>source 'https://rubygems.org'
+
+gem 'rake'
+</code></pre>
+
+<p>You can then test locally that your project builds using the command <code>rake</code> in your root git repository.
+I get build messages, then <code>** TEST SUCCEEDED: 1 of 1 tests passed ** (25285 ms)</code>. Now that we have the unit tests running locally, all that is left is to set up the travis-ci build. Login to <a href="https://travis-ci.org/">https://travis-ci.org/</a> with your GitHub account and under account settings select the repository that should be unit tested automatically. This automatically sets up a service hook in GitHub so that every time you push to your repository, it will get unit tested.</p>
+
+<p>You can also use the status images from travis-ci to show the test status directly in your README file on GitHub. Check out my example project here: <a href="https://github.com/daniel-beard/SettingUpTravisCIForiOS">SettingUpTravisCIForiOS</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">danielbeard</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-06T17:16:04-07:00" pubdate data-updated="true"></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/general-dev/'>general dev</a>, <a class='category' href='/blog/categories/git/'>git</a>, <a class='category' href='/blog/categories/ios/'>ios</a>, <a class='category' href='/blog/categories/objective-c/'>objective-c</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://danielbeard.io/blog/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github/" data-via="_danielbeard" data-counturl="http://danielbeard.io/blog/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/04/29/developing-xcode-4-plugins/" title="Previous Post: Developing Xcode 4 Plugins">&laquo; Developing Xcode 4 Plugins</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Daniel Beard -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

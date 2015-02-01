@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Auto Build and Deploy iOS Apps Using Jenkins - Daniel Beard</title>
+  <meta name="author" content="Daniel Beard">
+
+  
+  <meta name="description" content="We will have a look at a TestProject to get an idea of how jenkins can be used to build, sign and deploy iOS projects. The whole process consists of &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://danielbeard.io/blog/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Daniel Beard" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin" rel="stylesheet" type="text/css" />
+<link href='http://fonts.googleapis.com/css?family=Noto+Serif:400,700' rel='stylesheet' type='text/css'>
+
+
+
+  
+
+</head>
+
+<body    class="collapse-sidebar sidebar-footer" >
+  <nav id="main-nav" role="navigation">
+<ul class="main-navigation">
+  <li><a href="/" class="nav-link">Blog</a></li>
+  <li><a href="/blog/archives" class="nav-link">Archives</a></li>
+	<li><a href="https://github.com/daniel-beard">GitHub</a></li>
+	<li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Auto Build and Deploy iOS Apps Using Jenkins</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-23T09:18:15-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>We will have a look at a <code>TestProject</code> to get an idea of how jenkins can be used to build, sign and deploy iOS projects. The whole process consists of 4 steps. Note that to deploy an app in this manner, an enterprise distribution certificate is required for each app.
+This guide is how I have set up my enterprise builds for my apps that use <code>cocoaPods</code> for dependencies, but most of the same principles apply for any iOS apps.
+Because the project uses <code>cocoaPods</code>, it means we have to build a workspace and have a build scheme set up.</p>
+
+<p><strong>Note: Apple Enterprise licenses can ONLY be used for builds internal to your company. I am not responsible for anything that may happen if you try to distribute apps outside your company using an enterprise license.</strong></p>
+
+<p>This guide may be a bit brief, don&rsquo;t hesitate to ask me any questions. This is mostly for my own reference.</p>
+
+<h3>Step 1 - Poll SCM</h3>
+
+<ul>
+<li>Dev builds poll the SCM looking for changes to the <code>master</code> branch at midnight every night.</li>
+<li>If no changes have occurred, then the project is not built.</li>
+<li>If modifications have been made, the next step is executed.</li>
+</ul>
+
+
+<h3>Step 2 - Xcode build</h3>
+
+<p>Below is a screenshot from jenkins showing the fields used for the xcode plugin.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-4-01-12-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-4-01-12-pm.png?w=300" alt="Screen Shot 2013-04-23 at 4.01.12 PM" /></a></p>
+
+<ul>
+<li><code>Clean before build</code> - we don&rsquo;t want any cached compiled objects hanging around.</li>
+<li><code>Xcode Schema File</code> - <code>TestProjectDev</code>
+
+<ul>
+<li>Because of the way we have our project set up, our top level item is a workspace (<code>TestProject.xcworkspace</code>), we have to build based on Schemes as Xcode does not support building a target from a workspace.</li>
+<li><code>TestProjectDev</code> specifies the scheme we want to build with.</li>
+</ul>
+</li>
+<li><code>Configuration</code> - <code>Release</code>
+
+<ul>
+<li>We want the release version. There are several subtle differences between <code>Debug</code> and <code>Release</code> versions. The most notable is that <code>Debug</code> builds are usually built for just one architecture, where <code>Release</code> builds are built for all supported architectures, usually with compile time optimisations as well.</li>
+</ul>
+</li>
+<li><code>Workspace File</code> - This is our top level workspace file (<code>TestProject.xcworkspace</code>) that we build from. If this option wasn&rsquo;t specified, by default the xcode build would look for the first <code>*.xcodeproj</code> file it can find. This would cause our build to fail.</li>
+<li><code>Unlock Keychain</code>
+
+<ul>
+<li>This allows us to unlock the keychain which is required for signing or resigning <code>.ipa</code> files.</li>
+<li>The location of the keychain is the default OSX location</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Step 3 - Resigning</h3>
+
+<ul>
+<li>This step only occurs if previous steps were successful</li>
+<li>This step only occurs if the text <code>BUILD</code> is present in the log text (basically every build)</li>
+<li>The result of this build will be escalated to the job status. If this step fails and other steps before it were successful, the job will still fail.</li>
+</ul>
+
+
+<p>Below is the script used for resigning:</p>
+
+<pre><code>#!/bin/sh
+
+PROJECT_BUILDDIR="${WORKSPACE}/build/TestProject/Build/Products/Release-iphoneos"
+APPLICATION_NAME="TestProjectDev"
+BUILD_HISTORY_DIR="/Users/administrator/Provisioning/builds"
+DEVELOPER_NAME="iPhone Distribution: Test Company LTD"
+PROVISIONING_PROFILE="/Users/administrator/Provisioning/TestProjectDevDistributionProfile.mobileprovision"
+HOST_LOCATION="/Library/WebServer/Documents/apps"
+
+#Sign The .app file and create .ipa file
+/usr/bin/xcrun -sdk iphoneos PackageApplication -v  "${PROJECT_BUILDDIR}/${APPLICATION_NAME}.app" -o  "${BUILD_HISTORY_DIR}/${APPLICATION_NAME}.ipa" --sign ${DEVELOPER_NAME} --embed ${PROVISIONING_PROFILE}
+
+#Get the version from the Info.plist file
+APP_PATH="${PROJECT_BUILDDIR}/${APPLICATION_NAME}.app"
+VERSION=`defaults read ${APP_PATH}/Info CFBundleShortVersionString`
+BUNDLE_ID=`defaults read ${APP_PATH}/Info CFBundleIdentifier`
+
+# Create plist
+cat ${HOST_LOCATION}/template.plist | sed -e "s/\${APP_NAME}/$APPLICATION_NAME/" -e "s/\${BUNDLE_ID}/$BUNDLE_ID/" -e "s/\${BUNDLE_VERSION}/$VERSION/" &gt; ${HOST_LOCATION}/${APPLICATION_NAME}.plist
+</code></pre>
+
+<ul>
+<li><p>The first part of this script sets up the locations and script variables</p>
+
+<ul>
+<li><code>PROJECT_BUILDDIR</code> - The folder that the built <code>.ipa</code> file resides from the previous build step.</li>
+<li><code>APPLICATION_NAME</code> - In this case it is <code>TestProjectDev</code></li>
+<li><code>BUILD_HISTORY_DIR</code> - The folder that the re-signed app will be output to</li>
+<li><code>DEVELOPER_NAME</code> - Has to match the <code>.mobileprovision</code> file used for signing.</li>
+<li><code>PROVISIONING_PROFILE</code> - The location of the <code>.mobileprovision</code> file used for signing. These must be downloaded from the Apple developer website or shown in Finder from the Xcode organizer.</li>
+<li><code>HOST_LOCATION</code> - Where the final signed app will exist</li>
+</ul>
+</li>
+<li><p>The next stage of the build process is actually re-signing the app using the Xcode command line tool called <code>xcrun</code>. Note that the version in <code>/usr/bin/</code> is a symlink to the Xcode version that has been selected by the <code>xcodeselect</code> command line tool. This is important if more than one version of xcode is installed. Each version of Xcode stores command line tools inside the <code>.app</code> file in applications.</p></li>
+<li>After re-signing, we grab the version, and bundle-id. These are used in the next part
+
+<ul>
+<li><code>APP_PATH</code> - The full path including the <code>.app</code> extension of the re-signed app</li>
+<li><code>VERSION</code> - This is the <code>CFBundleShortVersionString</code>. This value is set when you change the version in Xcode for each of the build schemes.</li>
+<li><code>BUNDLE_ID</code> - The <code>CFBundleIdentifier</code> for the built app. For <code>TestProject</code>, this will be <code>au.com.wordpress.danielbeard.TestProject</code>. These can be set by modifying the build Schemes, but shouldn&rsquo;t be changed for existing applications. Production has a different bundleId, which is what allows for both the dev and prod versions to exist on a single iPad at the same time.</li>
+</ul>
+</li>
+<li>We then auto generate the enterprise install PLIST file. This is needed to install apps from a URL location and acts as a &ldquo;description&rdquo; of the app that is about to be installed.
+
+<ul>
+<li>The actual creation of this file is quite simple, we use <code>cat</code> to copy the <code>template.plist</code> file to the new location and then using <code>sed</code> we replace the <code>BUNDLE_ID</code> and <code>BUNDLE_VERSION</code> values. These values are read from the Apps Info.plist from inside the .app folder.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Below is an example template.plist file</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+        &lt;key&gt;items&lt;/key&gt;
+        &lt;array&gt;
+                &lt;dict&gt;
+                        &lt;key&gt;assets&lt;/key&gt;
+                        &lt;array&gt;
+                                &lt;dict&gt;
+                                        &lt;key&gt;kind&lt;/key&gt;
+                                        &lt;string&gt;software-package&lt;/string&gt;
+                                        &lt;key&gt;url&lt;/key&gt;
+                                        &lt;string&gt;http://hostlocation/apps/${APP_NAME}.ipa&lt;/string&gt;
+                                &lt;/dict&gt;
+                        &lt;/array&gt;
+                        &lt;key&gt;metadata&lt;/key&gt;
+                        &lt;dict&gt;
+                                &lt;key&gt;bundle-identifier&lt;/key&gt;
+                                &lt;string&gt;${BUNDLE_ID}&lt;/string&gt;
+                                &lt;key&gt;bundle-version&lt;/key&gt;
+                                &lt;string&gt;${BUNDLE_VERSION}&lt;/string&gt;
+                                &lt;key&gt;kind&lt;/key&gt;
+                                &lt;string&gt;software&lt;/string&gt;
+                                &lt;key&gt;title&lt;/key&gt;
+                                &lt;string&gt;${APP_NAME}&lt;/string&gt;
+                        &lt;/dict&gt;
+                &lt;/dict&gt;
+        &lt;/array&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;
+</code></pre>
+
+<h3>Step 4 - Copying to host location</h3>
+
+<ul>
+<li>This step simple grabs the signed <code>.ipa</code> file and puts it in the host location so that the macmini website can serve it over a URL. The host location is <code>/Library/Webserver/Documents/apps</code></li>
+</ul>
+
+
+<p>Script looks like this:</p>
+
+<pre><code>#!/bin/sh
+
+APPLICATION_NAME="TestProjectDev.ipa"
+BUILD_HISTORY_DIR="/Users/administrator/Provisioning/builds"
+HOST_LOCATION="/Library/WebServer/Documents/apps/"
+
+cp "${BUILD_HISTORY_DIR}/${APPLICATION_NAME}" "${HOST_LOCATION}${APPLICATION_NAME}"
+</code></pre>
+
+<p>And that&rsquo;s it! The output is a .ipa file and a .plist file. These are both required to install an enterprise app.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">danielbeard</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-23T09:18:15-07:00" pubdate data-updated="true"></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/general-dev/'>general dev</a>, <a class='category' href='/blog/categories/ios/'>ios</a>, <a class='category' href='/blog/categories/objective-c/'>objective-c</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://danielbeard.io/blog/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins/" data-via="_danielbeard" data-counturl="http://danielbeard.io/blog/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/04/17/objective-c-style-guide/" title="Previous Post: Objective-C Style Guide">&laquo; Objective-C Style Guide</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins/" title="Next Post: Automated Unit testing an iOS app with Jenkins">Automated Unit testing an iOS app with Jenkins &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Daniel Beard -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

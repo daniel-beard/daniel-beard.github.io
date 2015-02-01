@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Dark Matter - Daniel Beard</title>
+  <meta name="author" content="Daniel Beard">
+
+  
+  <meta name="description" content="I have been working on displaying the dark matter from the HDF5 data sets that I have been working on for my astronomy work. Over the last couple of &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://danielbeard.io/blog/2010/09/10/dark-matter">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Daniel Beard" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin" rel="stylesheet" type="text/css" />
+<link href='http://fonts.googleapis.com/css?family=Noto+Serif:400,700' rel='stylesheet' type='text/css'>
+
+
+
+  
+
+</head>
+
+<body    class="collapse-sidebar sidebar-footer" >
+  <nav id="main-nav" role="navigation">
+<ul class="main-navigation">
+  <li><a href="/" class="nav-link">Blog</a></li>
+  <li><a href="/blog/archives" class="nav-link">Archives</a></li>
+	<li><a href="https://github.com/daniel-beard">GitHub</a></li>
+	<li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Dark Matter</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-09-10T10:53:29-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I have been working on displaying the dark matter from the HDF5 data sets that I have been working on for my astronomy work. Over the last couple of days, I got the loading from HDF5 working and the translation into my local coordinates. The volume is changed from point coordinates to voxel coordinates, then scaled and clamped to the bounding box size. This has to be done because the camera slowly zooms in over the course of the animation and some of the gas / dark matter can leave the simulation.</p>
+
+<p>The first result was encouraging, but wasn&rsquo;t what I expected. In the following image, the green points is the dark matter volume displayed in Drishti.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/09/darkmatter_001.png"><img src="http://danielbeard.files.wordpress.com/2010/09/darkmatter_001.png?w=300" alt="" /></a></p>
+
+<p>The problem was that Drishti sucks at displaying dynamic range. The internal possible range of values is limited to the size of an unsigned char (0-255). While this would limit the memory usage, I wish there was an option to use short int, or even float because in the image above, all the dark matter points are physically there but the dynamic range is too high to accurately display them. This may have implications on how my other volumes are being displayed as well. I realised that dark matter for this simulation doesn&rsquo;t have a mass associated with it and doesn&rsquo;t share mass between voxels either. To check that the points were actually there, I fired up stereo2 and took an image of the raw points.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/09/darkmatterpoints.png"><img src="http://danielbeard.files.wordpress.com/2010/09/darkmatterpoints.png?w=300" alt="" /></a></p>
+
+<p>So the points are there, my code and Drishti just weren&rsquo;t displaying them properly. I fixed the dynamic range issue by setting voxels that contained dark matter points to 1. The end result is shown below, and what is expected. Hopefully I can get some awesome movies going with the dark matter as well.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/09/output_001.png"><img src="http://danielbeard.files.wordpress.com/2010/09/output_001.png?w=300" alt="" /></a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">danielbeard</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-09-10T10:53:29-07:00" pubdate data-updated="true"></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/astronomy/'>astronomy</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://danielbeard.io/blog/2010/09/10/dark-matter/" data-via="_danielbeard" data-counturl="http://danielbeard.io/blog/2010/09/10/dark-matter/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2010/08/11/opengl-openframeworks-terrain-loader-update/" title="Previous Post: OpenGL / openFrameworks Terrain Loader Update">&laquo; OpenGL / openFrameworks Terrain Loader Update</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2010/09/27/sidebyside-video-player/" title="Next Post: SideBySide video player">SideBySide video player &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Daniel Beard -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

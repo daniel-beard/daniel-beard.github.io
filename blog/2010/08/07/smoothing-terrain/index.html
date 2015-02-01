@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Smoothing Terrain - Daniel Beard</title>
+  <meta name="author" content="Daniel Beard">
+
+  
+  <meta name="description" content="The terrain generated in the last post was quite bumpy, what if I want smooth rolling hills or something that isn&rsquo;t quite so bumpy. There are &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://danielbeard.io/blog/2010/08/07/smoothing-terrain">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Daniel Beard" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin" rel="stylesheet" type="text/css" />
+<link href='http://fonts.googleapis.com/css?family=Noto+Serif:400,700' rel='stylesheet' type='text/css'>
+
+
+
+  
+
+</head>
+
+<body    class="collapse-sidebar sidebar-footer" >
+  <nav id="main-nav" role="navigation">
+<ul class="main-navigation">
+  <li><a href="/" class="nav-link">Blog</a></li>
+  <li><a href="/blog/archives" class="nav-link">Archives</a></li>
+	<li><a href="https://github.com/daniel-beard">GitHub</a></li>
+	<li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Smoothing Terrain</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-08-07T04:38:55-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>The terrain generated in the last post was quite bumpy, what if I want smooth rolling hills or something that isn&rsquo;t quite so bumpy. There are two options here - you can either play around with the diamond-square weights and method of generating the terrain or you can smooth the result. The method I have chosen is a mean (average) filter also known as a box filter. The filter works by moving a square (say 3x3) across the terrain values taking the average of the pixels surrounding it to give the center value an averaged result.</p>
+
+<p>The box filter size is usually a power of 2 + 1. Some examples are 3x3, 5x5, 9x9, etc. The image below shows how the filter works. The 3x3 square is slid over the terrain averaging it&rsquo;s neighbours. The center pixel is also taken into account.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/filter.png"><img src="http://danielbeard.files.wordpress.com/2010/08/filter.png?w=300" alt="" /></a></p>
+
+<p>Ok, time for some source code. The following code loops over the 2d array of pixels, the inner loop loops from the position minus the filter size to the position plus the filter size in each dimension, this allows us to have an arbitrary filter size without hand coding the weights and positions of each pixel in the filter. The count variable keeps track of how many points contribute to the average and we ignore edge cases meaning that if a point in the filter is outside the array, it gives no contribution to the average.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/code.png"><img src="http://danielbeard.files.wordpress.com/2010/08/code.png" alt="" /></a></p>
+
+<p>So the results for running this on the terrain in the previous post are as follows first with no smoothing, then with a box size of 9x9:</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/terrain-simple.png"><img src="http://danielbeard.files.wordpress.com/2010/08/terrain-simple.png?w=300" alt="" /></a></p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/smoothterrain2.png"><img src="http://danielbeard.files.wordpress.com/2010/08/smoothterrain2.png?w=300" alt="" /></a></p>
+
+<p>And of course the smoothing can be iterated over many times. Here is the same filter size as above, but repeated 50 times.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/really-smooth.png"><img src="http://danielbeard.files.wordpress.com/2010/08/really-smooth.png?w=300" alt="" /></a></p>
+
+<p>Here is a link to the code in the image for use with the previous terrain code : <a href="http://www.divshare.com/download/12208159-2b8">Download Link</a></p>
+
+<p>Other useful links:</p>
+
+<p>Band filtering example : <a href="http://www.lighthouse3d.com/opengl/terrain/index.php3?smoothing">http://www.lighthouse3d.com/opengl/terrain/index.php3?smoothing</a>
+Filter functions: <a href="http://www.wheatchex.com/projects/filters/">http://www.wheatchex.com/projects/filters/</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">danielbeard</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-08-07T04:38:55-07:00" pubdate data-updated="true"></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/games-development/'>games development</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://danielbeard.io/blog/2010/08/07/smoothing-terrain/" data-via="_danielbeard" data-counturl="http://danielbeard.io/blog/2010/08/07/smoothing-terrain/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2010/08/06/terrain-generation-and-smoothing/" title="Previous Post: Terrain Generation - Diamond Square Algorithm">&laquo; Terrain Generation - Diamond Square Algorithm</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2010/08/11/opengl-openframeworks-terrain-loader-update/" title="Next Post: OpenGL / openFrameworks Terrain Loader Update">OpenGL / openFrameworks Terrain Loader Update &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Daniel Beard -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

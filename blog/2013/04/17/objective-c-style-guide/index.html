@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Objective-C Style Guide - Daniel Beard</title>
+  <meta name="author" content="Daniel Beard">
+
+  
+  <meta name="description" content="This is the style guide that I follow when programming in Objective-C, this is for my own reference, but other people may find this useful. General &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://danielbeard.io/blog/2013/04/17/objective-c-style-guide">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Daniel Beard" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin" rel="stylesheet" type="text/css" />
+<link href='http://fonts.googleapis.com/css?family=Noto+Serif:400,700' rel='stylesheet' type='text/css'>
+
+
+
+  
+
+</head>
+
+<body    class="collapse-sidebar sidebar-footer" >
+  <nav id="main-nav" role="navigation">
+<ul class="main-navigation">
+  <li><a href="/" class="nav-link">Blog</a></li>
+  <li><a href="/blog/archives" class="nav-link">Archives</a></li>
+	<li><a href="https://github.com/daniel-beard">GitHub</a></li>
+	<li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Objective-C Style Guide</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-17T05:58:03-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This is the style guide that I follow when programming in Objective-C, this is for my own reference, but other people may find this useful.</p>
+
+<h3>General</h3>
+
+<ul>
+<li>Use modern objective-c 2.0 syntax</li>
+<li>Use ARC whenever possible.</li>
+<li>Manual memory management should only be used when using older libraries that haven&rsquo;t been updated yet.</li>
+<li>Use tabs when indenting, not spaces.</li>
+</ul>
+
+
+<h3>Code Naming Basics</h3>
+
+<ul>
+<li>Follow the <a href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/CodingGuidelines/Articles/NamingBasics.html#//apple_ref/doc/uid/20001281-BBCHBFAH">Apple naming guidelines</a></li>
+<li>Use descriptive names, even if they are long. Xcode has great code completion features. <em>Use them</em>.
+
+<ul>
+<li>Clarity is preferred over all else.</li>
+<li>E.g. Compare the two methods: <code>[spaceship fly: 10.0f]</code> and <code>[spaceship flyAtSpeed: 10.0f]</code>.</li>
+<li>Note how much clearer the second declaration is, the method describes its intentions and parameter names.</li>
+</ul>
+</li>
+<li>Don&rsquo;t use abbreviations. E.g. <code>bgColor</code> vs. <code>backgroundColor</code></li>
+<li>Custom resuseable classes should be prefixed with <code>AFG</code>
+
+<ul>
+<li>Application level classes do not have to be prefixed. E.g. ViewControllers</li>
+</ul>
+</li>
+<li>All view controllers should be descriptively named and end with <code>ViewController</code>.
+
+<ul>
+<li>E.g. <code>CalculatorSettingsViewController</code></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Commenting</h3>
+
+<ul>
+<li>Follow the <a href="http://gentlebytes.com/appledoc/">appledoc</a> code formatting style.</li>
+<li>Only comment the method declarations. E.g. In the <code>@interface</code> or private <code>@interface ... ()</code> code blocks.</li>
+<li>Describe what the method does, the parameter names and the return value and what it signifies.</li>
+</ul>
+
+
+<p>The following is a good example of method commenting:</p>
+
+<pre><code>/** This method asks the delegate if the AFGContainerViewController should pop the current view from the view stack.
+ @param - The current AFGContainerViewController object
+ @return A BOOL value indicating if the current view controller should be removed from the AFGContainerViewController's view stack.
+ */
+-(BOOL) AFGContainerViewControllerShouldPopContainerViewController: (AFGContainerViewController*) containerViewController;
+</code></pre>
+
+<h3>Spacing</h3>
+
+<pre><code>-(void) performOperationWithObject: (NSObject*) objectName {
+
+  NSLog(@"This is a well spaced method");
+  [objectName performSomeOperation];
+}
+</code></pre>
+
+<ul>
+<li>No space between the class or instance specifier <code>(+,-)</code></li>
+<li>Single space between the return type and method name</li>
+<li>Single spaces between method signature, object types and object names</li>
+<li>Brace on the same line as the method signature.</li>
+<li>Optional newline below the method signature for readability</li>
+<li>No newline before the closing brace</li>
+</ul>
+
+
+<h3>Variables and Initializers</h3>
+
+<ul>
+<li>Variable names should always start with lower case.
+
+<ul>
+<li>Good: <code>numberOfObjects</code></li>
+<li>Bad: <code>NumberOfObjects</code></li>
+</ul>
+</li>
+<li>Clearly identify the designated initializer for the class
+
+<ul>
+<li>All other initializers should propagate up to and use the designated initializer.</li>
+</ul>
+</li>
+<li>Override the superclass&#8217; designated initializer.</li>
+<li>Initialization method should be at the top of the <code>@implementation</code></li>
+<li>Don&rsquo;t explicitly initialize variables to nil. Under ARC this happens automatically.</li>
+</ul>
+
+
+<h3>Properties</h3>
+
+<ul>
+<li>Don&rsquo;t <code>@synthesize</code> properties. Modern objective-c does this for us automatically.</li>
+<li>Always start with a lower case letter.</li>
+<li><code>NSString</code> properties should always be <code>copy</code></li>
+<li><code>IBOutlets</code> should always be <code>weak</code></li>
+</ul>
+
+
+<h3>Other readings</h3>
+
+<p>These are some good references / starting points for creating your own style guide or just to see other coding styles.</p>
+
+<ul>
+<li><a href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/CodingGuidelines/CodingGuidelines.html#//apple_ref/doc/uid/10000146-SW1">Apple Coding Guidelines</a></li>
+<li><a href="http://cocoadevcentral.com/articles/000082.php">CocoaDevCentral coding guidelines</a></li>
+<li><a href="http://google-styleguide.googlecode.com/svn/trunk/objcguide.xml">Google Code Style</a></li>
+<li><a href="http://www.techotopia.com/index.php/The_Basics_of_Modern_Objective-C">Basics of Modern Objective-C</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">danielbeard</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-17T05:58:03-07:00" pubdate data-updated="true"></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/general-dev/'>general dev</a>, <a class='category' href='/blog/categories/ios/'>ios</a>, <a class='category' href='/blog/categories/objective-c/'>objective-c</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://danielbeard.io/blog/2013/04/17/objective-c-style-guide/" data-via="_danielbeard" data-counturl="http://danielbeard.io/blog/2013/04/17/objective-c-style-guide/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/04/16/objective-c-runtime/" title="Previous Post: Objective-C Runtime">&laquo; Objective-C Runtime</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins/" title="Next Post: Auto build and deploy iOS apps using Jenkins">Auto build and deploy iOS apps using Jenkins &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Daniel Beard -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

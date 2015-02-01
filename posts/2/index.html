@@ -1,0 +1,878 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Daniel Beard</title>
+  <meta name="author" content="Daniel Beard">
+
+  
+  <meta name="description" content="This is the code that I use when setting up a UIScrollView to contain multiple images that can be scrolled through. I add this code in the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://danielbeard.io/posts/2">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Daniel Beard" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin" rel="stylesheet" type="text/css" />
+<link href='http://fonts.googleapis.com/css?family=Noto+Serif:400,700' rel='stylesheet' type='text/css'>
+
+
+
+  
+
+</head>
+
+<body    class="collapse-sidebar sidebar-footer" >
+  <nav id="main-nav" role="navigation">
+<ul class="main-navigation">
+  <li><a href="/" class="nav-link">Blog</a></li>
+  <li><a href="/blog/archives" class="nav-link">Archives</a></li>
+	<li><a href="https://github.com/daniel-beard">GitHub</a></li>
+	<li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <header role="banner"><hgroup>
+	
+  <h1><a href="/">Daniel Beard</a></h1>
+  
+    <h2>iOS and other stuff</h2>
+  
+</hgroup>
+
+</header> 
+  
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/09/17/adding-a-uiscrollview-to-a-uiview-ios/">Adding a Multiple Images to a UIScrollView (iOS)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-17T01:26:42-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This is the code that I use when setting up a <code>UIScrollView</code> to contain multiple images that can be scrolled through. I add this code in the <code>viewDidLoad</code> or <code>viewWillAppear</code> methods and then set the <code>numberOfViews</code> to the number of images I want to display. This will also scale the images to fit the size of the screen using an aspect fit scaling. The example code loads images named &ldquo;image1&rdquo;, &ldquo;image2&rdquo; etc.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">setupScrollView</span> <span class="p">{</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span> <span class="c1">//add the scrollview to the view</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span><span class="nb">self</span><span class="p">.</span><span class="n">scrollView</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">UIScrollView</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithFrame</span><span class="p">:</span><span class="n">CGRectMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>                                               <span class="nb">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span>
+</span><span class='line'>                                               <span class="nb">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">)];</span>
+</span><span class='line'>       <span class="nb">self</span><span class="p">.</span><span class="n">scrollView</span><span class="p">.</span><span class="n">pagingEnabled</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+</span><span class='line'>       <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">scrollView</span> <span class="nl">setAlwaysBounceVertical</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span> <span class="c1">//setup internal views</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span><span class="bp">NSInteger</span> <span class="n">numberOfViews</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numberOfViews</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="n">CGFloat</span> <span class="n">xOrigin</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="nb">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="bp">UIImageView</span> <span class="o">*</span><span class="n">image</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">UIImageView</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithFrame</span><span class="p">:</span>
+</span><span class='line'>                                                    <span class="n">CGRectMake</span><span class="p">(</span><span class="n">xOrigin</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>                                                    <span class="nb">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span>
+</span><span class='line'>                                                    <span class="nb">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">)];</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="n">image</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIImage</span> <span class="nl">imageNamed</span><span class="p">:[</span><span class="bp">NSString</span> <span class="nl">stringWithFormat</span><span class="p">:</span>
+</span><span class='line'>                                            <span class="s">@&quot;image%d&quot;</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]];</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="n">image</span><span class="p">.</span><span class="n">contentMode</span> <span class="o">=</span> <span class="n">UIViewContentModeScaleAspectFit</span><span class="p">;</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">scrollView</span> <span class="nl">addSubview</span><span class="p">:</span><span class="n">image</span><span class="p">];</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span> <span class="p">}</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span> <span class="c1">//set the scroll view content size</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span><span class="nb">self</span><span class="p">.</span><span class="n">scrollView</span><span class="p">.</span><span class="n">contentSize</span> <span class="o">=</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span> <span class="o">*</span>
+</span><span class='line'>                                                <span class="n">numberOfViews</span><span class="p">,</span>
+</span><span class='line'>                                                <span class="nb">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span> <span class="c1">//add the scrollview to this view</span>
+</span><span class='line'>    <span class="err"> </span> <span class="err"> </span><span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">view</span> <span class="nl">addSubview</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">scrollView</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/09/06/dbsignatureview/">DBSignatureView</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-06T02:16:42-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>One of the projects I am currently working on needs to capture a signature from a user. So I am releasing the simple library that I created for it.</p>
+
+<p>Check out the project on GitHub here: <a href="http://github.com/paintstripper/DBSignatureView">DBSignatureView</a></p>
+
+<p><img src="http://i.imgur.com/KD8Ym.png" alt="" /></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/16/ios-updating-ui-when-using-blocks-background-threads/">iOS Updating UI When Using Blocks</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-16T12:48:07-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Here is the method that I use to update the UI when a background async thread. This is mostly for my own reference:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_global_queue</span><span class="p">(</span><span class="n">DISPATCH_QUEUE_PRIORITY_DEFAULT</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">^</span><span class="p">{</span>
+</span><span class='line'>            <span class="c1">//background processing goes here</span>
+</span><span class='line'>            <span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_main_queue</span><span class="p">(),</span> <span class="o">^</span><span class="p">{</span>
+</span><span class='line'>                    <span class="c1">//update UI here</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/05/qr-code-encoding-on-an-ios-device/">QR Code Encoding / Generation on an iOS Device</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-05T02:01:07-08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In one of my recent projects, the need to encode QR codes on the device came up. I tried a few different methods and wasn&rsquo;t really satisfied with any of them.
+The method detailed here is the one I chose based on ease of use and the quick set up time.
+The core library is written in c and the base version can be found here: <a href="http://fukuchi.org/works/qrencode/index.html.en">http://fukuchi.org/works/qrencode/index.html.en</a> (download the entire project below).</p>
+
+<p>I am using a modified version with a few helper methods written in objective-c. Then my usage is as follows:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="bp">UIImage</span> <span class="o">*</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="nb">self</span> <span class="nl">quickResponseImageForString</span><span class="p">:</span><span class="s">@&quot;http://danielbeard.wordpress.com&quot;</span>
+</span><span class='line'>                                         <span class="nl">withDimension</span><span class="p">:</span><span class="mi">182</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//set the image</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">imageView</span> <span class="nl">setImage</span><span class="p">:</span> <span class="n">image</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And the result:
+<a href="http://danielbeard.files.wordpress.com/2012/03/qrcode.png"><img src="http://danielbeard.files.wordpress.com/2012/03/qrcode.png?w=358" alt="Image" /></a></p>
+
+<p><strong>Here is the full project with an example</strong>: <a href="http://dl.dropbox.com/u/5387570/Blog/QREncoderProject.zip">Download Project</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/02/25/gradient-background-for-uiview-in-ios/">Gradient Background for UIView in iOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-25T04:05:21-08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>One of the pieces of code I find myself re-using constantly is creating a gradient background for a UIView in iOS. This example will show two examples of how to create a simple gradient background.</p>
+
+<p>First, in Xcode, create a new Single View iOS application</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2012/02/singleview.jpg"><img src="http://danielbeard.files.wordpress.com/2012/02/singleview.jpg?w=300" alt="" /></a></p>
+
+<p>Then create a new file File > New > New File and call this file &ldquo;BackgroundLayer&rdquo;, this will create BackgroundLayer.h and BackgroundLayer.m automatically for you.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2012/02/newfile.png"><img src="http://danielbeard.files.wordpress.com/2012/02/newfile.png?w=300" alt="" /></a></p>
+
+<p>Then copy the following code into the BackgroundLayer.h header file</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="cp">#import &lt;Foundation/Foundation.h&gt;</span>
+</span><span class='line'>    <span class="cp">#import &lt;QuartzCore/QuartzCore.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">@interface</span> <span class="nc">BackgroundLayer</span> : <span class="bp">NSObject</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">+</span><span class="p">(</span><span class="bp">CAGradientLayer</span><span class="o">*</span><span class="p">)</span> <span class="n">greyGradient</span><span class="p">;</span>
+</span><span class='line'>    <span class="o">+</span><span class="p">(</span><span class="bp">CAGradientLayer</span><span class="o">*</span><span class="p">)</span> <span class="n">blueGradient</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">@end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then copy the following code into the BackgroundLayer.m file</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="cp">#import &quot;BackgroundLayer.h&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">@implementation</span> <span class="nc">BackgroundLayer</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//Metallic grey gradient background</span>
+</span><span class='line'>    <span class="o">+</span> <span class="p">(</span><span class="bp">CAGradientLayer</span><span class="o">*</span><span class="p">)</span> <span class="n">greyGradient</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="bp">UIColor</span> <span class="o">*</span><span class="n">colorOne</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="nl">colorWithWhite</span><span class="p">:</span><span class="mf">0.9</span> <span class="nl">alpha</span><span class="p">:</span><span class="mf">1.0</span><span class="p">];</span>
+</span><span class='line'>        <span class="bp">UIColor</span> <span class="o">*</span><span class="n">colorTwo</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="nl">colorWithHue</span><span class="p">:</span><span class="mf">0.625</span> <span class="nl">saturation</span><span class="p">:</span><span class="mf">0.0</span> <span class="nl">brightness</span><span class="p">:</span><span class="mf">0.85</span> <span class="nl">alpha</span><span class="p">:</span><span class="mf">1.0</span><span class="p">];</span>
+</span><span class='line'>        <span class="bp">UIColor</span> <span class="o">*</span><span class="n">colorThree</span> <span class="err"> </span> <span class="err"> </span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="nl">colorWithHue</span><span class="p">:</span><span class="mf">0.625</span> <span class="nl">saturation</span><span class="p">:</span><span class="mf">0.0</span> <span class="nl">brightness</span><span class="p">:</span><span class="mf">0.7</span> <span class="nl">alpha</span><span class="p">:</span><span class="mf">1.0</span><span class="p">];</span>
+</span><span class='line'>        <span class="bp">UIColor</span> <span class="o">*</span><span class="n">colorFour</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="nl">colorWithHue</span><span class="p">:</span><span class="mf">0.625</span> <span class="nl">saturation</span><span class="p">:</span><span class="mf">0.0</span> <span class="nl">brightness</span><span class="p">:</span><span class="mf">0.4</span> <span class="nl">alpha</span><span class="p">:</span><span class="mf">1.0</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="bp">NSArray</span> <span class="o">*</span><span class="n">colors</span> <span class="o">=</span><span class="err"> </span> <span class="p">[</span><span class="bp">NSArray</span> <span class="nl">arrayWithObjects</span><span class="p">:(</span><span class="kt">id</span><span class="p">)</span><span class="n">colorOne</span><span class="p">.</span><span class="bp">CGColor</span><span class="p">,</span> <span class="n">colorTwo</span><span class="p">.</span><span class="bp">CGColor</span><span class="p">,</span> <span class="n">colorThree</span><span class="p">.</span><span class="bp">CGColor</span><span class="p">,</span> <span class="n">colorFour</span><span class="p">.</span><span class="bp">CGColor</span><span class="p">,</span> <span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="bp">NSNumber</span> <span class="o">*</span><span class="n">stopOne</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSNumber</span> <span class="nl">numberWithFloat</span><span class="p">:</span><span class="mf">0.0</span><span class="p">];</span>
+</span><span class='line'>        <span class="bp">NSNumber</span> <span class="o">*</span><span class="n">stopTwo</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSNumber</span> <span class="nl">numberWithFloat</span><span class="p">:</span><span class="mf">0.02</span><span class="p">];</span>
+</span><span class='line'>        <span class="bp">NSNumber</span> <span class="o">*</span><span class="n">stopThree</span> <span class="err"> </span> <span class="err"> </span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSNumber</span> <span class="nl">numberWithFloat</span><span class="p">:</span><span class="mf">0.99</span><span class="p">];</span>
+</span><span class='line'>        <span class="bp">NSNumber</span> <span class="o">*</span><span class="n">stopFour</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSNumber</span> <span class="nl">numberWithFloat</span><span class="p">:</span><span class="mf">1.0</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="bp">NSArray</span> <span class="o">*</span><span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSArray</span> <span class="nl">arrayWithObjects</span><span class="p">:</span><span class="n">stopOne</span><span class="p">,</span> <span class="n">stopTwo</span><span class="p">,</span> <span class="n">stopThree</span><span class="p">,</span> <span class="n">stopFour</span><span class="p">,</span> <span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>        <span class="bp">CAGradientLayer</span> <span class="o">*</span><span class="n">headerLayer</span> <span class="o">=</span> <span class="p">[</span><span class="bp">CAGradientLayer</span> <span class="n">layer</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">headerLayer</span><span class="p">.</span><span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">headerLayer</span><span class="p">.</span><span class="n">locations</span> <span class="o">=</span> <span class="n">locations</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="n">headerLayer</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//Blue gradient background</span>
+</span><span class='line'>    <span class="o">+</span> <span class="p">(</span><span class="bp">CAGradientLayer</span><span class="o">*</span><span class="p">)</span> <span class="n">blueGradient</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="bp">UIColor</span> <span class="o">*</span><span class="n">colorOne</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="nl">colorWithRed</span><span class="p">:(</span><span class="mi">120</span><span class="o">/</span><span class="mf">255.0</span><span class="p">)</span> <span class="nl">green</span><span class="p">:(</span><span class="mi">135</span><span class="o">/</span><span class="mf">255.0</span><span class="p">)</span> <span class="nl">blue</span><span class="p">:(</span><span class="mi">150</span><span class="o">/</span><span class="mf">255.0</span><span class="p">)</span> <span class="nl">alpha</span><span class="p">:</span><span class="mf">1.0</span><span class="p">];</span>
+</span><span class='line'>        <span class="bp">UIColor</span> <span class="o">*</span><span class="n">colorTwo</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="nl">colorWithRed</span><span class="p">:(</span><span class="mi">57</span><span class="o">/</span><span class="mf">255.0</span><span class="p">)</span><span class="err"> </span> <span class="nl">green</span><span class="p">:(</span><span class="mi">79</span><span class="o">/</span><span class="mf">255.0</span><span class="p">)</span><span class="err"> </span> <span class="nl">blue</span><span class="p">:(</span><span class="mi">96</span><span class="o">/</span><span class="mf">255.0</span><span class="p">)</span><span class="err"> </span> <span class="nl">alpha</span><span class="p">:</span><span class="mf">1.0</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="bp">NSArray</span> <span class="o">*</span><span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSArray</span> <span class="nl">arrayWithObjects</span><span class="p">:(</span><span class="kt">id</span><span class="p">)</span><span class="n">colorOne</span><span class="p">.</span><span class="bp">CGColor</span><span class="p">,</span> <span class="n">colorTwo</span><span class="p">.</span><span class="bp">CGColor</span><span class="p">,</span> <span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>        <span class="bp">NSNumber</span> <span class="o">*</span><span class="n">stopOne</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSNumber</span> <span class="nl">numberWithFloat</span><span class="p">:</span><span class="mf">0.0</span><span class="p">];</span>
+</span><span class='line'>        <span class="bp">NSNumber</span> <span class="o">*</span><span class="n">stopTwo</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSNumber</span> <span class="nl">numberWithFloat</span><span class="p">:</span><span class="mf">1.0</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="bp">NSArray</span> <span class="o">*</span><span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSArray</span> <span class="nl">arrayWithObjects</span><span class="p">:</span><span class="n">stopOne</span><span class="p">,</span> <span class="n">stopTwo</span><span class="p">,</span> <span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="bp">CAGradientLayer</span> <span class="o">*</span><span class="n">headerLayer</span> <span class="o">=</span> <span class="p">[</span><span class="bp">CAGradientLayer</span> <span class="n">layer</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">headerLayer</span><span class="p">.</span><span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">headerLayer</span><span class="p">.</span><span class="n">locations</span> <span class="o">=</span> <span class="n">locations</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="n">headerLayer</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">@end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then finally, in your ViewController #import &ldquo;BackgroundLayer.h&rdquo; and add the following code to the viewWillAppear method:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="bp">CAGradientLayer</span> <span class="o">*</span><span class="n">bgLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">BackgroundLayer</span> <span class="n">blueGradient</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">bgLayer</span><span class="p">.</span><span class="n">frame</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">bounds</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">layer</span> <span class="nl">insertSublayer</span><span class="p">:</span><span class="n">bgLayer</span> <span class="nl">atIndex</span><span class="p">:</span><span class="mi">0</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>And don&rsquo;t forget to add the QuartzCore framework to your project.</p>
+
+<p>Run the project and you get a result like this:</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2012/02/gradient.png"><img src="http://danielbeard.files.wordpress.com/2012/02/gradient.png?w=154" alt="" /></a>
+<a href="http://dl.dropbox.com/u/5387570/Blog/GradientBackground.zip">Click here to download the project</a></p>
+
+<p>Edit: Thanks to moi in the comments below, add the following code to your view controller so that the CALayer rotates with the view</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="o">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">willAnimateRotationToInterfaceOrientation</span><span class="p">:(</span><span class="n">UIInterfaceOrientation</span><span class="p">)</span><span class="n">toInterfaceOrientation</span> <span class="nl">duration</span><span class="p">:(</span><span class="n">NSTimeInterval</span><span class="p">)</span><span class="n">duration</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// resize your layers based on the view’s new bounds</span>
+</span><span class='line'>        <span class="p">[[[</span><span class="nb">self</span><span class="p">.</span><span class="n">subview</span><span class="p">.</span><span class="n">layer</span> <span class="n">sublayers</span><span class="p">]</span> <span class="nl">objectAtIndex</span><span class="p">:</span><span class="mi">0</span><span class="p">]</span> <span class="nl">setFrame</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">subview</span><span class="p">.</span><span class="n">bounds</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/02/25/setting-up-kinect-on-osx-the-easy-way/">Setting Up Kinect on OSX the Easy Way</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-25T03:33:28-08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Open Terminal</p>
+
+<p>Install homebrew with the following command</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    /usr/bin/ruby -e <span class="s2">&quot;$(curl -fsSL https://raw.github.com/gist/323731)&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Make sure homebrew is up to date with</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    sudo brew update
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Change directory to your brew home folder with</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nb">cd</span> /usr/local/Library/Formula
+</span><span class='line'>    curl --insecure -O <span class="s2">&quot;https://raw.github.com/OpenKinect/libfreenect/master/platform/osx/homebrew/libfreenect.rb&quot;</span>
+</span><span class='line'>    curl --insecure -O <span class="s2">&quot;https://raw.github.com/OpenKinect/libfreenect/master/platform/osx/homebrew/libusb-freenect.rb&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    brew install libfreenect
+</span><span class='line'>
+</span><span class='line'>    glview
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://danielbeard.files.wordpress.com/2012/02/kinect.png"><img src="http://danielbeard.files.wordpress.com/2012/02/kinect.png?w=300" alt="" /></a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/08/09/dstarlite-java-pathfinding/">DStarLite Java Pathfinding</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-08-09T13:15:16-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>D*Lite is an incremental heuristic search algorithm that is used by agents (game ai, or robots) where the surrounding terrain is not completely known. The algorithm makes assumptions about the unknown terrain. D*Lite finds the shortest route from the start to the goal position, and as it encounters new obstacles these are taken into account and only part of the path is modified. Alternatively, pathfinding algorithms like A* typically have to replan the entire path when the environment changes.</p>
+
+<p>D*Lite was developed by Sven Koenig in 2002 is based on the LPA* algorithm. I needed a suitable, computationally efficient algorithm for pathfinding in my current project and couldn&rsquo;t find any java versions of the D*Lite algorithm that would have suited my purpose. My version is a standalone java version of D*Lite based on an existing C++ implementation.</p>
+
+<p>This implementation is based on the original research paper <a href="http://idm-lab.org/bib/abstracts/Koen02e.html">http://idm-lab.org/bib/abstracts/Koen02e.html</a> and also based on the c++ version located here: <a href="http://code.google.com/p/dstarlite/">http://code.google.com/p/dstarlite/</a></p>
+
+<p>For further reading check out the wikipedia article: <a href="http://en.wikipedia.org/wiki/D*">Here</a>
+Sven Koenig&rsquo;s personal page: <a href="http://idm-lab.org/project-a.html">Here</a>
+There is also an applet to help understand the algorithm: <a href="http://homepages.dcc.ufmg.br/~lhrios/applet_d_lite/index.html">Here </a></p>
+
+<p><strong>You can find my DStarLiteJava project on GitHub</strong>: <a href="https://github.com/paintstripper/DStarLiteJava">Here</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/06/08/detaching-a-running-process-from-a-bash-shell/">Detaching a Running Process From a Bash Shell</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-06-08T14:09:44-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>When I run a command on a machine that I am ssh&#8217;ed into, most of the time I want to kill the connection but have the command continue to execute.</p>
+
+<p>There are several ways to detach a process from the current shell:</p>
+
+<p>The first is to start the process with:</p>
+
+<pre><code>nohup command &amp;
+</code></pre>
+
+<p>However, I usually start a command and forget to detach it initially. An easy way to detach a currently running process from a shell is like this:</p>
+
+<pre><code>Ctrl-Z
+bg
+disown %1
+</code></pre>
+
+<p>These methods daemonise a running process and make the process ignore the SIGHUP command so that when you close you shell or ssh connection, the command continues to run. For more information check out the man pages for <a href="http://ss64.com/osx/disown.html">disown</a> and <a href="http://ss64.com/osx/nohup.html">nohup</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/06/06/image-saving-code-c/">Simple Image Saving Code C++</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-06-06T06:05:26-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>A major annoyance for me is saving images from c++. I can&rsquo;t really find any libraries that I like, they are either too complex for the task or they don&rsquo;t do what I want them to do. So I have created my own, extremely lightweight image library.</p>
+
+<p>All you need to run this is two files, the cpp file and the header. I chose .tga because it is one of the easiest, straightforward formats to save to.</p>
+
+<p>Here is some example code of saving an image with this library:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#include "Image.h"
+</span><span class='line'>    
+</span><span class='line'>    int main(int argc, char **argv) {
+</span><span class='line'>       //declare image
+</span><span class='line'>       short width = 256;
+</span><span class='line'>       short height = 256;
+</span><span class='line'>    
+</span><span class='line'>       TGAImage *img = new TGAImage(width,height);
+</span><span class='line'>    
+</span><span class='line'>       //declare a temporary color variable
+</span><span class='line'>       Colour c;
+</span><span class='line'>    
+</span><span class='line'>       //Loop through image and set all pixels to red
+</span><span class='line'>       for(int x=0; x&lt;width; x++)
+</span><span class='line'>          for(int y=0; ysetPixel(c,x,y);
+</span><span class='line'>          }
+</span><span class='line'>    
+</span><span class='line'>       //write the image to disk
+</span><span class='line'>       string filename = "/Users/daniel/test.tga";
+</span><span class='line'>       img->WriteImage(filename);
+</span><span class='line'>    
+</span><span class='line'>       return 0;
+</span><span class='line'>    }</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This outputs a red image like so:</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2011/06/test.png"><img src="http://danielbeard.files.wordpress.com/2011/06/test.png" alt="" /></a></p>
+
+<p>Anyway, have fun using this in your projects,
+Here is the download link for the source: <a href="http://dl.dropbox.com/u/5387570/Blog/ImageSaverCode.zip">Download</a>
+For more information on the TGA file format visit the following links:
+<a href="http://paulbourke.net/dataformats/tga/">http://paulbourke.net/dataformats/tga/ </a>
+<a href="http://en.wikipedia.org/wiki/Truevision_TGA">http://en.wikipedia.org/wiki/Truevision_TGA</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/01/16/hardware-instancing-with-xna-minecraft-style/">Hardware Instancing With XNA (Minecraft Style)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-01-16T07:52:28-08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Lately I have been really enjoying a game called Minecraft. It&rsquo;s an indie game made by one guy, I highly recommend it!</p>
+
+<p>I have ported the heightmap generation code in one of my earlier posts to C# and using XNA I have been creating a minecraft style rendering for fun. My first approach was a brute force, render everything test. As you might have guessed, that didn&rsquo;t turn out so well when rendering a decent sized terrain. The method I am using now is hardware instancing without any kind of occlusion culling at the moment. I am getting a decent frame rate (about 80fps for 20000 models) for the moment and I am going to continue on improving this method. The example that is linked at the bottom of this article shows how to perform hardware, and shader instancing.</p>
+
+<p>Here&rsquo;s a video of it in action:</p>
+
+<div class="embed-video-container"><iframe src="http://www.youtube.com/embed/iTlSHS_8iiQ" allowfullscreen></iframe></div>
+
+
+<p>Links:</p>
+
+<p><a href="http://minecraft.net">Minecraft</a></p>
+
+<p><a href="http://create.msdn.com/en-US/education/catalog/sample/mesh_instancing">XNA Mesh Instancing</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="3">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="1">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Daniel Beard -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
