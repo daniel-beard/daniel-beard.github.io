@@ -102,8 +102,7 @@ git commit ./xctool -m "Added xctool as a submodule"
 
 <p>Then we need to add a config file so that travis-ci knows how to build our project. This file is named <code>.travis.yml</code> and lives in the root of the git repository. Here is the contents of mine:</p>
 
-<pre><code>language: objective-c
-before_install: "git submodule init &amp;&amp; git submodule update &amp;&amp; sudo gem update --system &amp;&amp; sudo gem install bundler &amp;&amp; bundle install"
+<pre><code>before_install: "git submodule init &amp;&amp; git submodule update &amp;&amp; sudo gem update --system &amp;&amp; sudo gem install bundler &amp;&amp; bundle install"
 script: "bundle exec rake test --trace"
 </code></pre>
 
@@ -175,6 +174,8 @@ I get build messages, then <code>** TEST SUCCEEDED: 1 of 1 tests passed ** (2528
       
         <a class="basic-alignment left" href="/blog/2013/04/29/developing-xcode-4-plugins/" title="Previous Post: Developing Xcode 4 Plugins">&laquo; Developing Xcode 4 Plugins</a>
       
+      
+        <a class="basic-alignment right" href="/blog/2015/07/17/xcode-ui-testing-and-location-permission-alerts/" title="Next Post: Xcode UI Testing and Location Permission Alerts">Xcode UI Testing and Location Permission Alerts &raquo;</a>
       
     </p>
   </footer>

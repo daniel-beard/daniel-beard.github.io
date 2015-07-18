@@ -9,7 +9,7 @@
   <meta name="author" content="Daniel Beard">
 
   
-  <meta name="description" content="I am starting to learn XNA at the moment, so I am doing what everyone does when they learn a new language - remake their favourite game! I am making &hellip;">
+  <meta name="description" content="Lately I have been really enjoying a game called Minecraft. It&rsquo;s an indie game made by one guy, I highly recommend it! I have ported the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -60,6 +60,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/01/16/hardware-instancing-with-xna-minecraft-style/">Hardware Instancing With XNA (Minecraft Style)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-01-16T07:52:28-08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Lately I have been really enjoying a game called Minecraft. It&rsquo;s an indie game made by one guy, I highly recommend it!</p>
+
+<p>I have ported the heightmap generation code in one of my earlier posts to C# and using XNA I have been creating a minecraft style rendering for fun. My first approach was a brute force, render everything test. As you might have guessed, that didn&rsquo;t turn out so well when rendering a decent sized terrain. The method I am using now is hardware instancing without any kind of occlusion culling at the moment. I am getting a decent frame rate (about 80fps for 20000 models) for the moment and I am going to continue on improving this method. The example that is linked at the bottom of this article shows how to perform hardware, and shader instancing.</p>
+
+<p>Here&rsquo;s a video of it in action:</p>
+
+<div class="embed-video-container"><iframe src="http://www.youtube.com/embed/iTlSHS_8iiQ" allowfullscreen></iframe></div>
+
+
+<p>Links:</p>
+
+<p><a href="http://minecraft.net">Minecraft</a></p>
+
+<p><a href="http://create.msdn.com/en-US/education/catalog/sample/mesh_instancing">XNA Mesh Instancing</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -532,44 +581,6 @@ Filter functions: <a href="http://www.wheatchex.com/projects/filters/">http://ww
 <p>The image that is attached is rendered with jittered sampling with 64 samples per pixel.</p>
 
 <p><img src="http://simplertracer.sourceforge.net/images/anti-aliased.png" alt="" /></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2010/07/29/raytracing-svn/">Raytracing SVN</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-07-29T15:33:50-07:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Just a quick update, my raytracing project - SimpleRTracer is now available on sourceforge at this address - <a href="http://simplertracer.sourceforge.net">http://simplertracer.sourceforge.net</a></p>
-
-<p>The skeleton ray tracer is working, the next update will include anti-aliasing and the rest will go from there. The next update should be next week some time, so far this project is on schedule.</p>
 </div>
   
   

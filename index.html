@@ -9,7 +9,8 @@
   <meta name="author" content="Daniel Beard">
 
   
-  <meta name="description" content="This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects. The first &hellip;">
+  <meta name="description" content="With Xcode 7, Apple has given us a new tool for user interface testing.
+I&rsquo;m not going to cover the basics here, but for an great introduction &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +67,94 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/07/17/xcode-ui-testing-and-location-permission-alerts/">Xcode UI Testing and Location Permission Alerts</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-17T19:08:28-07:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>With Xcode 7, Apple has given us a new tool for user interface testing.
+I&rsquo;m not going to cover the basics here, but for an great introduction to user interface testing in Xcode, check out this awesome article: <a href="http://masilotti.com/ui-testing-xcode-7/">UI Testing in Xcode 7</a></p>
+
+<p>As of beta 3, there is no way to handle native system alerts. This is a pretty big roadblock to actually UI testing apps that support location. Luckily, we can work around this by digging a little bit into the CoreLocation framework.</p>
+
+<p>A prerequisite for this is the <a href="http://www.hopperapp.com">Hopper Disassembler</a>, which I can&rsquo;t recommend highly enough. It&rsquo;s a great starting point for poking at and tearing apart system frameworks, libraries and executables.</p>
+
+<p>First, lets open the CoreLocation framework with Hopper. As of writing, this framework existed on the file system at:</p>
+
+<pre><code>/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/CoreLocation.framework
+</code></pre>
+
+<p>Let&rsquo;s open the binary within the framework.</p>
+
+<p><img src="http://danielbeard.io/images/corelocationhopper.png" alt="CoreLocationHopper" /></p>
+
+<p>Looking on the left panel under &ldquo;labels&rdquo;, there are lots of <code>CLLocationManager</code> methods. Scrolling through, we can see a couple of interesting authorization related ones.</p>
+
+<pre><code>+[CLLocationManager _authorizationStatus]
++[CLLocationManager authorizationStatus]
++[CLLocationManager setAuthorizationStatus:forBundleIdentifier:]
++[CLLocationManager setAuthorizationStatus:forBundle:]
+</code></pre>
+
+<p>The <code>setAuthorizationStatus:forBundle:</code> method is a private method, but since we are going to be only calling it from a test, we can use it.
+Note: Do NOT use this in a production app, you will absolutely be rejected from the app store.
+This is going to let us set the location permission to whatever we want, while supressing the location alert from showing.</p>
+
+<p>While we can&rsquo;t call the method directly, we can build a method signature and invoke a custom invocation like this:</p>
+
+<div><script src='https://gist.github.com/8238e12afd926a234813.js'></script>
+<noscript><pre><code>    SEL selector = NSSelectorFromString(@&quot;setAuthorizationStatus:forBundleIdentifier:&quot;);
+    NSMethodSignature *methodSignature = [CLLocationManager methodSignatureForSelector:selector];
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:methodSignature];
+    invocation.selector = selector;
+    
+    CLAuthorizationStatus status = kCLAuthorizationStatusAuthorizedAlways;
+    NSString *identifier = @&quot;com.test.testapp&quot;;
+    
+    [invocation setArgument:&amp;status atIndex:2];
+    [invocation setArgument:&amp;identifier atIndex:3];
+    [invocation invokeWithTarget:[CLLocationManager class]];</code></pre></noscript></div>
+
+
+<ul>
+<li>Notice that the invocation argument indexes start at 2, this is because the first two arguments are implicit (<code>self</code> and <code>_cmd</code>)</li>
+<li>We used a bundle identifier string rather than loading the bundle, this is because as UI tests run they run inside a different TestRunner bundle.</li>
+</ul>
+
+
+<p>That&rsquo;s it! Enjoy!</p>
+
+<blockquote><p>Beta 4 is coming tomorrow, hopefully  fixes all the pain points of UI testing :)</p></blockquote>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github/">Setting Up Travis-ci for Automated Unit Testing of iOS Projects on GitHub</a></h1>
     
     
@@ -114,8 +203,7 @@ git commit ./xctool -m "Added xctool as a submodule"
 
 <p>Then we need to add a config file so that travis-ci knows how to build our project. This file is named <code>.travis.yml</code> and lives in the root of the git repository. Here is the contents of mine:</p>
 
-<pre><code>language: objective-c
-before_install: "git submodule init &amp;&amp; git submodule update &amp;&amp; sudo gem update --system &amp;&amp; sudo gem install bundler &amp;&amp; bundle install"
+<pre><code>before_install: "git submodule init &amp;&amp; git submodule update &amp;&amp; sudo gem update --system &amp;&amp; sudo gem install bundler &amp;&amp; bundle install"
 script: "bundle exec rake test --trace"
 </code></pre>
 
@@ -1282,49 +1370,6 @@ GitHub flow: <a href="http://scottchacon.com/2011/08/31/github-flow.html">http:/
 <p><a href="http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-04-at-9-12-11-am.png"><img src="http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-04-at-9-12-11-am.png?w=580" alt="Image" /></a></p>
 
 <p>Check out the project on <a href="https://github.com/daniel-beard/DBBorderedLabel">GitHub</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/09/20/metro-themed-button-for-ios/">Metro Themed Button for iOS</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-20T07:34:12-07:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Just for fun, I have created a metro themed UIButton for iOS complete with perspective 3D transform animations. Check out the screen shot and video below.</p>
-
-<p><img src="http://i.imgur.com/4oJ8F.png" alt="" /></p>
-
-<div class="embed-video-container"><iframe src="http://www.youtube.com/embed/jk9uoD9curk" allowfullscreen></iframe></div>
-
-
-<p>Get the project on GitHub here: <a href="https://github.com/paintstripper/DBTileButton">https://github.com/paintstripper/DBTileButton</a></p>
 </div>
   
   
