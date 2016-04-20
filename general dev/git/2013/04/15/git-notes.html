@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Git notes | Daniel Beard</title>
+	<meta name="description" content="This is a list of git notes that I use everyday. Hopefully someone else finds it useful. I will update this list over time.">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/general%20dev/git/2013/04/15/git-notes.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Git notes</h1>
+    <p class="meta">
+    April 15, 2013
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>This is a list of git notes that I use everyday. Hopefully someone else finds it useful. I will update this list over time.</p>
+
+<ul>
+  <li>The master branch reflects production ready code only. This branch should be deployable at any time and merges to this branch should not break the build process.</li>
+  <li>Feature branches should be merged into the master when they are complete.</li>
+  <li>Feature branches consist of a single feature or discrete unit of work</li>
+  <li>Commit early and commit often!</li>
+</ul>
+
+<h3 id="generating-ssh-public-key">Generating SSH-Public Key</h3>
+
+<ol>
+  <li>Switch to your .ssh directory and check if the id_rsa.pub file exists, this is your public key</li>
+  <li>If it doesn’t exist, generate one with the following command<code class="highlighter-rouge">ssh-keygen -t rsa -C "youremail@email.com"</code></li>
+</ol>
+
+<p>Output is something like the following:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Generating public/private rsa key pair.
+Enter file in which to save the key (/Users/danielbeard/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /Users/danielbeard/.ssh/id_rsa.
+Your public key has been saved in /Users/danielbeard/.ssh/id_rsa.pub.
+The key fingerprint is:
+43:c5:5b:5h:b1:f1:51:43:ad:20:a6:92:6a:1f:8a:3a danielbeard@iosdev.local
+</code></pre>
+</div>
+
+<p>Copy the contents of the public key file to your clipboard:
+<code class="highlighter-rouge">pbcopy &lt; ~/.ssh/id_rsa.pub</code></p>
+
+<h3 id="normal-workflow">Normal Workflow</h3>
+
+<ul>
+  <li>Checkout the remote repository with: <code class="highlighter-rouge">git clone git@github.com:RepoOwner/RepoName.git</code></li>
+  <li>Updating the repository (won’t need to be done the first time): <code class="highlighter-rouge">git pull</code></li>
+  <li>Create a new branch from the master or current development branch <code class="highlighter-rouge">git checkout -b featurebranchname master</code></li>
+  <li>Make changes to local files</li>
+  <li>Check local modifications with <code class="highlighter-rouge">git status</code></li>
+  <li>Stage certain files with <code class="highlighter-rouge">git add &lt;file1&gt; &lt;file2&gt;</code> etc or add all changes <code class="highlighter-rouge">git add .</code></li>
+  <li>Commit to you local repository <code class="highlighter-rouge">git commit -m 'commit message'</code></li>
+  <li>Push the local commit to the remote repository and set up for tracking <code class="highlighter-rouge">git push -u origin featurebranchname</code></li>
+  <li>Repeat until feature branch is complete.</li>
+  <li>Merge master or development branch into the working branch
+    <ul>
+      <li><code class="highlighter-rouge">git checkout master</code></li>
+      <li><code class="highlighter-rouge">git pull</code></li>
+      <li><code class="highlighter-rouge">git checkout featurebranchname</code></li>
+      <li><code class="highlighter-rouge">git merge master</code></li>
+    </ul>
+  </li>
+  <li>Push to remote repository <code class="highlighter-rouge">git push -u origin featurebranchname</code></li>
+  <li>Submit pull request and wait for code review</li>
+</ul>
+
+<h3 id="repository-changes">Repository Changes</h3>
+<ul>
+  <li>Checking which files are in what state: <code class="highlighter-rouge">git status</code></li>
+  <li>Tracking new files: <code class="highlighter-rouge">git add README</code></li>
+  <li>Committing your changes: <code class="highlighter-rouge">git commit -m 'Commit message goes here'</code></li>
+  <li>Push your current master to the remote origin: <code class="highlighter-rouge">git push -u origin master</code></li>
+  <li>Unstaging a staged file: <code class="highlighter-rouge">git reset HEAD &lt;file&gt;</code></li>
+  <li>Stage all untracked files - <code class="highlighter-rouge">git add -u</code></li>
+  <li>Unmodifying a modified file: <code class="highlighter-rouge">git checkout -- benchmarks.rb</code></li>
+</ul>
+
+<p>Notes:
+  * The git add command stages a file for a commit. Calling git status shows which files are staged/unstaged or if they are untracked.
+  * If you modify a file after calling git add, the git status command will show the file as being both staged and unstaged.
+  * If you modify a file after calling git add, you have to run git add again to stage the latest version of the file
+Providing the -a option to git commit makes git automatically stage every file before doing the commit. (Letting you skip the git add part)</p>
+
+<p>Basic repository changes: <a href="http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository">http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository</a></p>
+
+<h3 id="branching">Branching</h3>
+
+<ul>
+  <li>Creating a new branch: <code class="highlighter-rouge">git checkout -b branchname</code></li>
+  <li>Branching from a current branch: <code class="highlighter-rouge">git checkout -b feature devbranch</code></li>
+  <li>Pushing branch to remote with tracking: <code class="highlighter-rouge">git push -u origin branchname</code></li>
+  <li>Rename branch <code class="highlighter-rouge">git branch -m &lt;oldname&gt; &lt;newname&gt;</code></li>
+  <li>Delete the local branch: <code class="highlighter-rouge">git branch -d branchname</code></li>
+  <li>Delete the remote branch: <code class="highlighter-rouge">git push origin :branchname</code></li>
+  <li>Listing all branches: <code class="highlighter-rouge">git branch -a</code></li>
+  <li>Just list remote branches: <code class="highlighter-rouge">git branch -r</code></li>
+  <li>Checking out a tracked remote branch: <code class="highlighter-rouge">git checkout --track origin/branch_name</code></li>
+  <li>Merging a branch
+    <ul>
+      <li>Must have committed all changes (at least locally) like so: <code class="highlighter-rouge">git commit -a -m "Made a change in this branch"</code></li>
+      <li>Switch to whichever branch you are merging back into, e.g. master <code class="highlighter-rouge">git checkout master</code></li>
+      <li>Merge the branch (ALWAYS USE NO-FF): <code class="highlighter-rouge">git merge --no-ff branchname</code></li>
+    </ul>
+  </li>
+</ul>
+
+<p>Notes:</p>
+
+<p>Tracked branches are local branches that have a direct relationship to a remote branch.
+If you’re on a tracking branch and type git push or git pull, git automatically knows which branch and server to push/pull from.</p>
+
+<p>Git remote branches :<a href="http://git-scm.com/book/en/Git-Branching-Remote-Branches#Tracking-Branches">http://git-scm.com/book/en/Git-Branching-Remote-Branches#Tracking-Branches</a>
+Git local branches: <a href="http://git-scm.com/book/en/Git-Branching-Basic-Branching-and-Merging">http://git-scm.com/book/en/Git-Branching-Basic-Branching-and-Merging</a></p>
+
+<h3 id="tagging">Tagging</h3>
+
+<ul>
+  <li>Only used for tagging master branch merges or “releases”</li>
+  <li>You can tag at any point, it doesn’t have to be immediately.</li>
+</ul>
+
+<p>Show the commit history like this: <code class="highlighter-rouge">git log --pretty=oneline</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>15027957951b64cf874c3557a0f3547bd83b3ff6 Merge branch 'experiment'
+a6b4c97498bd301d84096da251c98a07c7723e65 beginning write support
+0d52aaab4479697da7686c15f77a3d64d9165190 one more thing
+6d52a271eda8725415634dd79daabbc4d9b6008e Merge branch 'experiment'
+0b7434d86859cc7b8c3d5e1dddfed66ff742fcbc added a commit function
+4682c3261057305bdd616e23b64b0857d832627b added a todo file
+166ae0c4d3f420721acbb115cc33848dfcc2121a started write support
+9fceb02d0ae598e95dc970b74767f19372d61af8 updated rakefile
+964f16d36dfccde844893cac5b347e7b3d44abbc commit the todo
+8a5cbc430f1a9c3d00faaeffd07798508422908a updated readme
+</code></pre>
+</div>
+
+<ul>
+  <li>To tag a certain commit, specify the commit checksum (or part of it) at the end of the command <code class="highlighter-rouge">git tag -a v1.2.1 9fceb02</code></li>
+  <li>Then to transfer all your tags to the remote repository <code class="highlighter-rouge">git push origin --tags</code></li>
+</ul>
+
+<p>Git tags: <a href="http://git-scm.com/book/en/Git-Basics-Tagging">http://git-scm.com/book/en/Git-Basics-Tagging</a></p>
+
+<h3 id="tracking-changes-between-branches">Tracking changes between branches</h3>
+
+<ul>
+  <li>Show the modified files between two branches: <code class="highlighter-rouge">git diff --name-status master..branch</code></li>
+  <li>Show side by side comparison : <code class="highlighter-rouge">git difftool -t vimdiff master..branch</code></li>
+</ul>
+
+<h3 id="other-notes-and-links">Other notes and links</h3>
+
+<p>Git aliases: <a href="http://git-scm.com/book/en/Git-Basics-Tips-and-Tricks#Git-Aliases">http://git-scm.com/book/en/Git-Basics-Tips-and-Tricks#Git-Aliases</a>
+Branching model: <a href="http://nvie.com/posts/a-successful-git-branching-model/">http://nvie.com/posts/a-successful-git-branching-model/</a>
+GitHub flow: <a href="http://scottchacon.com/2011/08/31/github-flow.html">http://scottchacon.com/2011/08/31/github-flow.html</a></p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

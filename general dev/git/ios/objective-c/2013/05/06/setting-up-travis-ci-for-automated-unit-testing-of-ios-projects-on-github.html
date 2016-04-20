@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Setting up travis-ci for automated unit testing of iOS projects on GitHub | Daniel Beard</title>
+	<meta name="description" content="This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects.">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Setting up travis-ci for automated unit testing of iOS projects on GitHub</h1>
+    <p class="meta">
+    May 6, 2013
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects.</p>
+
+<p>The first step is to create a new project in Xcode. I am going to select a single view application and enable storyboards, Automatic Reference Counting and Unit Tests.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png?w=300" alt="Screen Shot 2013-05-06 at 11.42.27 PM" /></a></p>
+
+<p>All I’m going to change is the <code class="highlighter-rouge">testExample</code> method in the unit testing bundle to something that will pass. For now I have just gone with this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>- (void)testExample
+{
+    STAssertNil(nil, @"This object should be nil");
+}
+</code></pre>
+</div>
+
+<p>Check that the tests pass by hitting <code class="highlighter-rouge">cmd</code>+<code class="highlighter-rouge">u</code>. Now that I have my unit tests passing, I’m going to add this project to GitHub. I’ll leave the details out here, as this isn’t the focus of this tutorial but you can find my example project here: <a href="https://github.com/daniel-beard/SettingUpTravisCIForiOS">https://github.com/daniel-beard/SettingUpTravisCIForiOS</a>.</p>
+
+<p>Now we can setup the TravisCI build. I use the <code class="highlighter-rouge">xctool</code> to build my projects as it has a nicer output and is easier to use than the built in <code class="highlighter-rouge">xcodebuild</code> tool. Add <code class="highlighter-rouge">xctool</code> as a submodule to the git repository using the following commands:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>git submodule add https://github.com/facebook/xctool.git ./xctool
+git submodule update --init
+git commit ./xctool -m "Added xctool as a submodule"
+</code></pre>
+</div>
+
+<p>Then we need to add a config file so that travis-ci knows how to build our project. This file is named <code class="highlighter-rouge">.travis.yml</code> and lives in the root of the git repository. Here is the contents of mine:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>before_install: "git submodule init &amp;&amp; git submodule update &amp;&amp; sudo gem update --system &amp;&amp; sudo gem install bundler &amp;&amp; bundle install"
+script: "bundle exec rake test --trace"
+</code></pre>
+</div>
+
+<p>Then we have to add a <code class="highlighter-rouge">Rakefile</code> that tells the <code class="highlighter-rouge">xctool</code> which project and target to build:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>desc 'Run the tests'
+task :test do
+   exec('xctool/xctool.sh -project SettingUpTravisCIForiOS.xcodeproj -scheme SettingUpTravisCIForiOS test')
+end
+
+task :default =&gt; :test
+</code></pre>
+</div>
+
+<p>And finally the <code class="highlighter-rouge">Gemfile</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>source 'https://rubygems.org'
+
+gem 'rake'
+</code></pre>
+</div>
+
+<p>You can then test locally that your project builds using the command <code class="highlighter-rouge">rake</code> in your root git repository.
+I get build messages, then <code class="highlighter-rouge">** TEST SUCCEEDED: 1 of 1 tests passed ** (25285 ms)</code>. Now that we have the unit tests running locally, all that is left is to set up the travis-ci build. Login to <a href="https://travis-ci.org/">https://travis-ci.org/</a> with your GitHub account and under account settings select the repository that should be unit tested automatically. This automatically sets up a service hook in GitHub so that every time you push to your repository, it will get unit tested.</p>
+
+<p>You can also use the status images from travis-ci to show the test status directly in your README file on GitHub. Check out my example project here: <a href="https://github.com/daniel-beard/SettingUpTravisCIForiOS">SettingUpTravisCIForiOS</a></p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

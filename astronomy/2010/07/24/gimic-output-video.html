@@ -2,8 +2,8 @@
 <html class="no-js">
   <head>
 	<meta charset="utf-8">
-	<title>About | Daniel Beard</title>
-	<meta name="description" content="iOS and other stuff">
+	<title>GIMIC Output Video | Daniel Beard</title>
+	<meta name="description" content="Just a quick update, the video in this post shows some of the work I have been doing for the International Centre for Radio Astronomy Research. This video co...">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="X-Frame-Options" content="sameorigin">
 
@@ -14,7 +14,7 @@
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
 	<!-- Canonical -->
-	<link rel="canonical" href="http://danielbeard.io/about/">
+	<link rel="canonical" href="http://danielbeard.io/astronomy/2010/07/24/gimic-output-video.html">
 
 	<!-- RSS -->
 	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
@@ -142,34 +142,35 @@
 </header>
 
     <div class="content">
-      <article class="feature-image">
-  <header style="background-image: url('/img/sample_feature_img_2.jpg')">
-    <h1 class="title">About</h1>
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">GIMIC Output Video</h1>
+    <p class="meta">
+    July 24, 2010
+     - danielbeard
+    </p>
   </header>
-  <section class="post-content"><p>Hi, I’m Daniel. I’m an iOS engineer. I graduated from Edith Cowan University in Perth, Australia with a B.CompSci / Games Programming and completed my honours degree. I’ve written apps, simulations, visualizations, and games. I now live in silicon valley and work on cool apps and problems.</p>
+  <section class="post-content"><p>Just a quick update, the video in this post shows some of the work I have been doing for the International Centre for Radio Astronomy Research. This video consists of 951 frames, each frame is a 3d volume that has been calculated from the GIMIC data set. The volumes are then rendered out from Drishti with a rainbow colour table.</p>
 
-<h2 id="work">Work</h2>
-<p>I worked as an intern at iVec from Nov ’09 to Feb ’10 in conjunction with the University of Western Australia and the International Centre for Radio Astronomy Research.</p>
+<p>From there, the 951 images are overlaid with the colour table and text in each corner using ImageMagick. The L value shows the redshift for that frame and the L value is the bounding box length in one direction (all sides of the cube are the same length). This simulation zooms in slowly on the dataset as the video progresses. Each frame takes about 40 minutes to calculate, these are calculated in parallel on the Cognac supercomputer, or the Nereus Cloud platform.</p>
 
-<p>I worked for Australian Finance Group for a year and a half as the iOS Technical Lead.</p>
+<p>The images are then combined into a movie with ffmpeg using the following command:</p>
 
-<p>I am currently employed at Groupon as an iOS Software Engineer</p>
+<p><code class="highlighter-rouge">ffmpeg -f image2 -i c_hidensity%d.png -sameq -r 25 -s 1024x1024 output_video.avi</code></p>
 
-<h2 id="other">Other</h2>
+<p>Here is the final output as a video:</p>
+<iframe width="560" height="420" src="http://www.youtube.com/embed/POxM8_Cxzr0?color=white&amp;theme=light"></iframe>
 
-<p>I enjoy solving Project Euler problems in Julia in my spare time:</p>
-
-<p><img src="https://projecteuler.net/profile/danielhasabeard.png" alt="ProjectEuler" /></p>
-
-<p>Sometimes I answer questions on StackOverflow</p>
-
-<p><img src="http://stackoverflow.com/users/flair/1144632.png?theme=clean" alt="Image" /></p>
-
-<p>And contributing to / creating open source projects on
-<a href="https://github.com/daniel-beard">Github</a></p>
-
+<p>Also, here is a spherical projection of the OWLS dataset rendered with POVray.</p>
+<iframe width="560" height="420" src="http://www.youtube.com/embed/xI98Ew3RzaU?color=white&amp;theme=light"></iframe>
 </section>
 </article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
 
     </div>
     

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Terrain Generation - Diamond Square Algorithm | Daniel Beard</title>
+	<meta name="description" content="I have posted previously about a simple terrain heightmap display program I have made, but never talked about some of the methods of generating and manipulat...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/games%20development/2010/08/06/terrain-generation-and-smoothing.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Terrain Generation - Diamond Square Algorithm</h1>
+    <p class="meta">
+    August 6, 2010
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>I have posted previously about a simple terrain heightmap display program I have made, but never talked about some of the methods of generating and manipulating heightmap based terrain systems.</p>
+
+<p>The method I have implemented in my terrain generation program is known as the Diamond-Square algorithm and is a method of procedural terrain generation. The Diamond-Square algorithm is also known as random midpoint displacement fractal, cloud fractal or the plasma fractal.</p>
+
+<p>We start with a 2D array of size (n^2 + 1) E.g. 257, 513 etc. Set the four corners to initial values, these can be random or preset it doesn’t really matter too much at this point.</p>
+
+<p>We then perform the diamond step which consists of taking the four points arranged in a square shape, averaging the four values and adding a random value to the average, creating diamond shapes. The square step then averages the four corners of the diamonds created in the previous step. The center value of this step becomes the corners of the next step. The diamond and square step are repeated until all the points in the grid have values assigned to them.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/diamond-square-algorithm.png"><img src="http://danielbeard.files.wordpress.com/2010/08/diamond-square-algorithm.png" alt="" /></a>The image above shows the alternating steps being carried out. The red dots are the pixels with new values, the black dots are pixels with existing values. The pseudocode from gameprogrammer.com is as follows:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code> While the length of the side of the squares
+ is greater than zero {
+ Pass through the array and perform the diamond
+ step for each square present.
+ Pass through the array and perform the square
+ step for each diamond present.
+ Reduce the random number range.
+ } (GameProgrammer.com)
+</code></pre>
+</div>
+
+<p>Then we end up with a program that can generate terrain / cloud maps / general fractal noise. Below is an example image that I have generated at 512x512.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/terrain.png"><img src="http://danielbeard.files.wordpress.com/2010/08/terrain.png?w=300" alt="Heightmap 512x512" /></a></p>
+
+<p>Below is a sample of what the terrain looks like with simple shading in OpenGL without textures. The shading effect is calculated by giving a colour based on the minimum and maximum values of the heightmap. E.g. VertexColour = (value - minY) / (maxY - minY);</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/terrain-simple.png"><img src="http://danielbeard.files.wordpress.com/2010/08/terrain-simple.png?w=300" alt="" /></a></p>
+
+<p>I find that the easiest way to import data from my terrain generation program into the display program is to use the built-in IO functions to create an easy to read file format. The advantage of using this method is that you can store heights as floating point values instead of bytes (0-255) this gives many more possible heights, a greater dynamic range. The code to write these files is quite simple:</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="n">SaveTerrFile</span><span class="p">(){</span>
+        <span class="c1">//Write to file
+</span>        <span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">;</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="n">fopen</span><span class="p">(</span><span class="s">"terrain.terr"</span><span class="p">,</span> <span class="s">"wb"</span><span class="p">);</span>
+
+        <span class="c1">//print out the data
+</span>        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">DATA_SIZE</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">){</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">DATA_SIZE</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="n">y</span><span class="o">++</span><span class="p">){</span>
+                  <span class="c1">//populate the point struct
+</span>                  <span class="n">point</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+                  <span class="n">point</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">];</span>
+                  <span class="n">point</span><span class="p">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+                  <span class="c1">//smooth out the range a bit
+</span>                  <span class="n">point</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">point</span><span class="p">.</span><span class="n">y</span><span class="o">-</span><span class="n">minY</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">maxY</span><span class="o">-</span><span class="n">minY</span><span class="p">);</span>
+                  <span class="n">point</span><span class="p">.</span><span class="n">y</span> <span class="o">*=</span> <span class="mi">255</span><span class="p">;</span>
+                  <span class="c1">//write to file
+</span>                  <span class="n">fwrite</span><span class="p">(</span><span class="o">&amp;</span><span class="n">point</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">point</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">fp</span><span class="p">);</span>
+           <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="c1">//close file pointer
+</span>        <span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Other features that I think need to be added to this code is the ability to generate textures as well based on the height values, smoothing of the terrain and improvements to the viewer. For now though, here is some source code. This code saves the height values to a file. I haven’t included any image saving functionality in this version because I am not sure of the licensing issues that may arise. Will find out soon, more updates to this coming in the next couple of days.</p>
+
+<p>Link: <a href="http://www.divshare.com/download/12203776-cbc">Download Source Code </a></p>
+
+<p>Other Useful Links / Articles:</p>
+
+<p><a href="http://www.gameprogrammer.com/fractal.html#diamond">http://www.gameprogrammer.com/fractal.html#diamond
+</a><a href="http://stackoverflow.com/questions/2755750/diamond-square-algorithm">http://stackoverflow.com/questions/2755750/diamond-square-algorithm
+</a><a href="http://en.wikipedia.org/wiki/Diamond-square_algorithm">http://en.wikipedia.org/wiki/Diamond-square_algorithm</a></p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

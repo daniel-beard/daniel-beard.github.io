@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title> Daniel Beard</title>
+	<meta name="description" content="iOS and other stuff">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/blog/page6/">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <div class="home">
+  
+  <div class="call-out" 
+  style="background-image: url('/')">
+    <p>iOS and other stuff</p>
+
+  </div>
+  
+
+  <div class="posts">
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/astronomy/2010/09/10/dark-matter.html">
+            Dark matter
+          </a>
+        </h1>
+        <p class="meta">
+          September 10, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>I have been working on displaying the dark matter from the HDF5 data sets that I have been working on for my astronomy work. Over the last couple of days, I got the loading from HDF5 working and the translation into my local coordinates. The volume is changed from point coordinates to voxel coordinates, then scaled and clamped to the bounding box size. This has to be done because the camera slowly zooms in over the course of the animation and some of the gas / dark matter can leave the simulation.</p>
+
+
+        <a class="button" href="/astronomy/2010/09/10/dark-matter.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/games%20development/opengl/2010/08/11/opengl-openframeworks-terrain-loader-update.html">
+            OpenGL / openFrameworks Terrain Loader Update
+          </a>
+        </h1>
+        <p class="meta">
+          August 11, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>Just a quick update on what I have been working on. One of the first posts on this blog was a terrain viewer. That project was thrown together very quickly for a weekly assessment, so it wasn’t coded very well and was exceptionally bloated for what it did. I have had some spare time, so I started a fresh and commenced building a minimal terrain loader from the ground up. So far, I have terrain loading from file (generated with the tool in previous posts), and displaying a texture mapped, shadowed terrain using glDrawElements. I have specifically not included loading from heightmap in this project because it is easier to load a point struct from a binary file, but heightmap loading could be added in easily and probably will be in the coming days / weeks.</p>
+
+
+        <a class="button" href="/games%20development/opengl/2010/08/11/opengl-openframeworks-terrain-loader-update.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/games%20development/2010/08/07/smoothing-terrain.html">
+            Smoothing Terrain
+          </a>
+        </h1>
+        <p class="meta">
+          August 7, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>The terrain generated in the last post was quite bumpy, what if I want smooth rolling hills or something that isn’t quite so bumpy. There are two options here - you can either play around with the diamond-square weights and method of generating the terrain or you can smooth the result. The method I have chosen is a mean (average) filter also known as a box filter. The filter works by moving a square (say 3x3) across the terrain values taking the average of the pixels surrounding it to give the center value an averaged result.</p>
+
+
+        <a class="button" href="/games%20development/2010/08/07/smoothing-terrain.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/games%20development/2010/08/06/terrain-generation-and-smoothing.html">
+            Terrain Generation - Diamond Square Algorithm
+          </a>
+        </h1>
+        <p class="meta">
+          August 6, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>I have posted previously about a simple terrain heightmap display program I have made, but never talked about some of the methods of generating and manipulating heightmap based terrain systems.</p>
+
+
+        <a class="button" href="/games%20development/2010/08/06/terrain-generation-and-smoothing.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/raytracing/2010/08/03/anti-aliased-raytracing.html">
+            Anti-Aliased Raytracing
+          </a>
+        </h1>
+        <p class="meta">
+          August 3, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>I added anti-aliasing to the rendering of the ray tracer. At first I tried regular sampling which is breaking a pixel down into smaller sub-pixels and shooting rays through the center of those pixels and averaging the result. This was better than nothing but still created some artifacts when rendering. The next trial was random sampling to replace aliasing with noise, but the samples can become clumped together and look unnatural. The method that I have settled on for now is jittered sampling which consists of breaking the target pixel down into sub-pixels and shooting rays at a random position through the sub-pixels so that each sub-pixels has at least one ray shot through it. Changing the amount of samples per pixel reduces the aliasing effect.</p>
+
+
+        <a class="button" href="/raytracing/2010/08/03/anti-aliased-raytracing.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+  </div>
+
+  
+  <div class="pagination">
+    
+    <a href="/blog/page5" class="button" >
+      <i class="fa fa-chevron-left"></i>
+      Prev
+    </a>
+    
+    
+    <a href="/blog/page7" class="button" >
+      Next
+      <i class="fa fa-chevron-right"></i>
+    </a>
+    
+  </div>
+  
+</div>
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

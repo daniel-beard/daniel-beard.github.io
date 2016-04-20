@@ -14,7 +14,7 @@
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
 	<!-- Canonical -->
-	<link rel="canonical" href="http://danielbeard.io/">
+	<link rel="canonical" href="http://danielbeard.io/blog/page3/">
 
 	<!-- RSS -->
 	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
@@ -156,20 +156,19 @@
     <div class="post-teaser">
       <header>
         <h1>
-          <a class="post-link" href="/2015/07/17/xcode-ui-testing-and-location-permission-alerts.html">
-            Xcode UI Testing and Location Permission Alerts
+          <a class="post-link" href="/ios/objective-c/2012/09/20/metro-themed-button-for-ios.html">
+            Metro themed button for iOS
           </a>
         </h1>
         <p class="meta">
-          July 17, 2015
+          September 20, 2012
         </p>
       </header>
       <div class="excerpt">
-        <p>With Xcode 7, Apple has given us a new tool for user interface testing.
-I’m not going to cover the basics here, but for an great introduction to user interface testing in Xcode, check out this awesome article: <a href="http://masilotti.com/ui-testing-xcode-7/">UI Testing in Xcode 7</a></p>
+        <p>Just for fun, I have created a metro themed UIButton for iOS complete with perspective 3D transform animations. Check out the screen shot and video below.</p>
 
 
-        <a class="button" href="/2015/07/17/xcode-ui-testing-and-location-permission-alerts.html">
+        <a class="button" href="/ios/objective-c/2012/09/20/metro-themed-button-for-ios.html">
           Continue reading
         </a>
       </div>
@@ -178,19 +177,19 @@ I’m not going to cover the basics here, but for an great introduction to user 
     <div class="post-teaser">
       <header>
         <h1>
-          <a class="post-link" href="/general%20dev/git/ios/objective-c/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html">
-            Setting up travis-ci for automated unit testing of iOS projects on GitHub
+          <a class="post-link" href="/ios/objective-c/2012/09/17/adding-a-uiscrollview-to-a-uiview-ios.html">
+            Adding a multiple images to a UIScrollView (iOS)
           </a>
         </h1>
         <p class="meta">
-          May 6, 2013
+          September 17, 2012
         </p>
       </header>
       <div class="excerpt">
-        <p>This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects.</p>
+        <p>This is the code that I use when setting up a <code class="highlighter-rouge">UIScrollView</code> to contain multiple images that can be scrolled through. I add this code in the <code class="highlighter-rouge">viewDidLoad</code> or <code class="highlighter-rouge">viewWillAppear</code> methods and then set the <code class="highlighter-rouge">numberOfViews</code> to the number of images I want to display. This will also scale the images to fit the size of the screen using an aspect fit scaling. The example code loads images named “image1”, “image2” etc.</p>
 
 
-        <a class="button" href="/general%20dev/git/ios/objective-c/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html">
+        <a class="button" href="/ios/objective-c/2012/09/17/adding-a-uiscrollview-to-a-uiview-ios.html">
           Continue reading
         </a>
       </div>
@@ -199,19 +198,19 @@ I’m not going to cover the basics here, but for an great introduction to user 
     <div class="post-teaser">
       <header>
         <h1>
-          <a class="post-link" href="/general%20dev/objective-c/osx%20development/2013/04/29/developing-xcode-4-plugins.html">
-            Developing Xcode 4 Plugins
+          <a class="post-link" href="/general%20dev/ios/objective-c/2012/09/06/dbsignatureview.html">
+            DBSignatureView
           </a>
         </h1>
         <p class="meta">
-          April 29, 2013
+          September 6, 2012
         </p>
       </header>
       <div class="excerpt">
-        <p>This is a quick guide that documents how to start developing plugins for Xcode4. You need to have Xcode installed to create plugins.</p>
+        <p>One of the projects I am currently working on needs to capture a signature from a user. So I am releasing the simple library that I created for it.</p>
 
 
-        <a class="button" href="/general%20dev/objective-c/osx%20development/2013/04/29/developing-xcode-4-plugins.html">
+        <a class="button" href="/general%20dev/ios/objective-c/2012/09/06/dbsignatureview.html">
           Continue reading
         </a>
       </div>
@@ -220,24 +219,19 @@ I’m not going to cover the basics here, but for an great introduction to user 
     <div class="post-teaser">
       <header>
         <h1>
-          <a class="post-link" href="/general%20dev/ios/objective-c/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins.html">
-            Automated Unit testing an iOS app with Jenkins
+          <a class="post-link" href="/ios/objective-c/2012/04/16/ios-updating-ui-when-using-blocks-background-threads.html">
+            iOS Updating UI when using blocks
           </a>
         </h1>
         <p class="meta">
-          April 24, 2013
+          April 16, 2012
         </p>
       </header>
       <div class="excerpt">
-        <ul>
-  <li>Setting up and executing automated unit tests is slightly more involved than generating built apps for distribution.</li>
-  <li>The following is the set up that I use for some of my projects, I have just renamed the project to <code class="highlighter-rouge">TestProject</code> for convenience.</li>
-  <li>For this article I am assuming that you have Jenkins, Xcode, Xcode Command Line Tools, and the Xcode Jenkins plugin already installed.</li>
-  <li>Because I use cocoaPods for dependency management, I build a workspace using custom build schemes. To build a single project with a unit-test target would make these steps easier.</li>
-</ul>
+        <p>Here is the method that I use to update the UI when a background async thread. This is mostly for my own reference:</p>
 
 
-        <a class="button" href="/general%20dev/ios/objective-c/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins.html">
+        <a class="button" href="/ios/objective-c/2012/04/16/ios-updating-ui-when-using-blocks-background-threads.html">
           Continue reading
         </a>
       </div>
@@ -246,21 +240,21 @@ I’m not going to cover the basics here, but for an great introduction to user 
     <div class="post-teaser">
       <header>
         <h1>
-          <a class="post-link" href="/general%20dev/ios/objective-c/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins.html">
-            Auto build and deploy iOS apps using Jenkins
+          <a class="post-link" href="/ios/objective-c/2012/03/05/qr-code-encoding-on-an-ios-device.html">
+            QR Code encoding / generation on an iOS Device
           </a>
         </h1>
         <p class="meta">
-          April 23, 2013
+          March 5, 2012
         </p>
       </header>
       <div class="excerpt">
-        <p>We will have a look at a <code class="highlighter-rouge">TestProject</code> to get an idea of how jenkins can be used to build, sign and deploy iOS projects. The whole process consists of 4 steps. Note that to deploy an app in this manner, an enterprise distribution certificate is required for each app.
-This guide is how I have set up my enterprise builds for my apps that use <code class="highlighter-rouge">cocoaPods</code> for dependencies, but most of the same principles apply for any iOS apps.
-Because the project uses <code class="highlighter-rouge">cocoaPods</code>, it means we have to build a workspace and have a build scheme set up.</p>
+        <p>In one of my recent projects, the need to encode QR codes on the device came up. I tried a few different methods and wasn’t really satisfied with any of them.
+The method detailed here is the one I chose based on ease of use and the quick set up time.
+The core library is written in c and the base version can be found here: <a href="http://fukuchi.org/works/qrencode/index.html.en">http://fukuchi.org/works/qrencode/index.html.en</a> (download the entire project below).</p>
 
 
-        <a class="button" href="/general%20dev/ios/objective-c/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins.html">
+        <a class="button" href="/ios/objective-c/2012/03/05/qr-code-encoding-on-an-ios-device.html">
           Continue reading
         </a>
       </div>
@@ -271,8 +265,13 @@ Because the project uses <code class="highlighter-rouge">cocoaPods</code>, it me
   
   <div class="pagination">
     
-    
     <a href="/blog/page2" class="button" >
+      <i class="fa fa-chevron-left"></i>
+      Prev
+    </a>
+    
+    
+    <a href="/blog/page4" class="button" >
       Next
       <i class="fa fa-chevron-right"></i>
     </a>

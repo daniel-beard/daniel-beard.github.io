@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>QR Code encoding / generation on an iOS Device | Daniel Beard</title>
+	<meta name="description" content="In one of my recent projects, the need to encode QR codes on the device came up. I tried a few different methods and wasn’t really satisfied with any of them...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/ios/objective-c/2012/03/05/qr-code-encoding-on-an-ios-device.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">QR Code encoding / generation on an iOS Device</h1>
+    <p class="meta">
+    March 5, 2012
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>In one of my recent projects, the need to encode QR codes on the device came up. I tried a few different methods and wasn’t really satisfied with any of them.
+The method detailed here is the one I chose based on ease of use and the quick set up time.
+The core library is written in c and the base version can be found here: <a href="http://fukuchi.org/works/qrencode/index.html.en">http://fukuchi.org/works/qrencode/index.html.en</a> (download the entire project below).</p>
+
+<p>I am using a modified version with a few helper methods written in objective-c. Then my usage is as follows:</p>
+
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">    <span class="n">UIImage</span> <span class="o">*</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="nf">quickResponseImageForString</span><span class="p">:</span><span class="s">@"http://danielbeard.wordpress.com"</span>
+                                         <span class="nf">withDimension</span><span class="p">:</span><span class="mi">182</span><span class="p">];</span>
+
+    <span class="c1">//set the image
+</span>    <span class="p">[</span><span class="n">imageView</span> <span class="nf">setImage</span><span class="p">:</span> <span class="n">image</span><span class="p">];</span></code></pre></figure>
+
+<p>And the result:
+<a href="http://danielbeard.files.wordpress.com/2012/03/qrcode.png"><img src="http://danielbeard.files.wordpress.com/2012/03/qrcode.png?w=358" alt="Image" /></a></p>
+
+<p><strong>Here is the full project with an example</strong>: <a href="http://dl.dropbox.com/u/5387570/Blog/QREncoderProject.zip">Download Project</a></p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

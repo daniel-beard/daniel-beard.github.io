@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Objective-C Runtime | Daniel Beard</title>
+	<meta name="description" content="It is pretty rare to actually have to dive into the objc-runtime for any day to day coding. Most developers wont have to touch the runtime, however it is hel...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Objective-C Runtime</h1>
+    <p class="meta">
+    April 16, 2013
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>It is pretty rare to actually have to dive into the objc-runtime for any day to day coding. Most developers wont have to touch the runtime, however it is helpful to know what is possible and be able to use it if required. The objective-c runtime is written in C and is how the underlying parts of the objective-c language work including message sending, ivars and properties. This post shows an example of where I have used the Objective-C runtime in one of my projects.</p>
+
+<p>One example of where I have used the runtime in my projects is the validation code in <code class="highlighter-rouge">DBValidator</code>. The validation code is implemented as a category on <code class="highlighter-rouge">NSObject</code> called <code class="highlighter-rouge">NSObject+DBValidator</code>. This is so we can add validation rules to <strong>any</strong> objective-c object. The only problem with this approach is that you <em>can’t</em> add any properties or ivars to an object using a category.</p>
+
+<p>We can work around this limitation by using the objective-c runtime directly.</p>
+
+<p>Below is the implementation of the <code class="highlighter-rouge">NSObject+DBValidator</code> category:</p>
+
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">    <span class="cp">#import "NSObject+DBValidator.h"
+</span>    <span class="cp">#import &lt;objc/runtime.h&gt;
+</span>
+    <span class="cp">#define VALIDATION_RULES_KEY @"validationruleskey"
+</span>
+    <span class="k">@implementation</span> <span class="nc">NSObject</span> <span class="p">(</span><span class="nl">DBValidator</span><span class="p">)</span>
+
+    <span class="err">-(</span><span class="nc">void</span><span class="p">)</span> <span class="n">setValidationRules</span><span class="o">:</span><span class="p">(</span><span class="n">NSMutableArray</span> <span class="o">*</span><span class="p">)</span><span class="n">validationRules</span> <span class="p">{</span>
+        <span class="n">objc_setAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">VALIDATION_RULES_KEY</span><span class="p">,</span> <span class="n">validationRules</span><span class="p">,</span> <span class="n">OBJC_ASSOCIATION_RETAIN_NONATOMIC</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="o">-</span><span class="p">(</span><span class="n">NSMutableArray</span><span class="o">*</span><span class="p">)</span> <span class="n">validationRules</span> <span class="p">{</span>
+        <span class="n">NSMutableArray</span> <span class="o">*</span><span class="n">validationRules</span> <span class="o">=</span> <span class="n">objc_getAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">VALIDATION_RULES_KEY</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">validationRules</span><span class="p">)</span>
+            <span class="n">validationRules</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSMutableArray</span> <span class="nf">array</span><span class="p">];</span>
+        <span class="k">return</span> <span class="n">validationRules</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">addValidationRule</span><span class="o">:</span> <span class="p">(</span><span class="n">DBValidationRule</span><span class="o">*</span><span class="p">)</span> <span class="n">validationRule</span> <span class="p">{</span>
+
+        <span class="n">NSMutableArray</span> <span class="o">*</span><span class="n">validationRules</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">validationRules</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">validationRule</span><span class="p">)</span>
+            <span class="p">[</span><span class="n">validationRules</span> <span class="nf">addObject</span><span class="p">:</span><span class="n">validationRule</span><span class="p">];</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">validationRules</span> <span class="o">=</span> <span class="n">validationRules</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">removeAllValidationRules</span> <span class="p">{</span>
+        <span class="n">NSMutableArray</span> <span class="o">*</span><span class="n">validationRules</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">validationRules</span><span class="p">;</span>
+        <span class="p">[</span><span class="n">validationRules</span> <span class="nf">removeAllObjects</span><span class="p">];</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">validationRules</span> <span class="o">=</span> <span class="n">validationRules</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="o">-</span><span class="p">(</span><span class="n">NSMutableArray</span><span class="o">*</span><span class="p">)</span> <span class="n">validate</span> <span class="p">{</span>
+        <span class="n">NSMutableArray</span> <span class="o">*</span><span class="n">failureMessages</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSMutableArray</span> <span class="nf">array</span><span class="p">];</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">DBValidationRule</span> <span class="o">*</span><span class="n">rule</span> <span class="k">in</span> <span class="n">self</span><span class="p">.</span><span class="n">validationRules</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">BOOL</span> <span class="n">isValid</span> <span class="o">=</span> <span class="p">[</span><span class="n">rule</span> <span class="nf">passesValidation</span><span class="p">];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isValid</span><span class="p">)</span>
+                 <span class="p">[</span><span class="n">failureMessages</span> <span class="nf">addObject</span><span class="p">:</span> <span class="n">rule</span><span class="p">.</span><span class="n">failureMessage</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">failureMessages</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">@end</span></code></pre></figure>
+
+<p>We have a <code class="highlighter-rouge"><span class="k">@property</span></code> defined in the header called <code class="highlighter-rouge">validationRules</code> and we override both the setter and getter in the implementation. In the <code class="highlighter-rouge">setValidationRules:</code> method we use a C function from the objective-c runtime called <a href="https://developer.apple.com/library/mac/#documentation/Cocoa/Reference/ObjCRuntimeRef/Reference/reference.html"><code class="highlighter-rouge">objc_setAssociatedObject</code></a>. This function allows us to set a reference on the <code class="highlighter-rouge">self</code> object. We give it a key, the object (in this case the <code class="highlighter-rouge">validationRules</code> passed to the method) and the association policy.</p>
+
+<p>The valid options for the association policy are:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>enum {
+   OBJC_ASSOCIATION_ASSIGN = 0,
+   OBJC_ASSOCIATION_RETAIN_NONATOMIC = 1,
+   OBJC_ASSOCIATION_COPY_NONATOMIC = 3,
+   OBJC_ASSOCIATION_RETAIN = 01401,
+   OBJC_ASSOCIATION_COPY = 01403
+};
+</code></pre>
+</div>
+
+<p>Notice how these options map directly to <code class="highlighter-rouge"><span class="k">@property</span></code> storage options! We are using <code class="highlighter-rouge">OBJC_ASSOCIATION_RETAIN_NONATOMIC</code> because we want our <code class="highlighter-rouge">NSObject</code> to retain the validation rules that are set on it.</p>
+
+<p>In our <code class="highlighter-rouge">validationRules</code> method, we use a similar call from the objective-c runtime called <a href="https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ObjCRuntimeRef/Reference/reference.html#//apple_ref/doc/uid/TP40001418-CH1g-SW68"><code class="highlighter-rouge">objc_getAssociatedObject</code></a>. This allows us to retrieve the object we set a reference to in the preious method. We have to pass the parent object and the key for the associated object we want. We return an empty array if validation rules are not yet set for this object.</p>
+
+<p>Check out the full source code in the <a href="https://github.com/daniel-beard/DBValidator">DBValidator GitHub Project</a></p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

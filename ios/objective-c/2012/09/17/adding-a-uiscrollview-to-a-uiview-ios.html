@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Adding a multiple images to a UIScrollView (iOS) | Daniel Beard</title>
+	<meta name="description" content="This is the code that I use when setting up a UIScrollView to contain multiple images that can be scrolled through. I add this code in the viewDidLoad or vie...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/ios/objective-c/2012/09/17/adding-a-uiscrollview-to-a-uiview-ios.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Adding a multiple images to a UIScrollView (iOS)</h1>
+    <p class="meta">
+    September 17, 2012
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>This is the code that I use when setting up a <code class="highlighter-rouge">UIScrollView</code> to contain multiple images that can be scrolled through. I add this code in the <code class="highlighter-rouge">viewDidLoad</code> or <code class="highlighter-rouge">viewWillAppear</code> methods and then set the <code class="highlighter-rouge">numberOfViews</code> to the number of images I want to display. This will also scale the images to fit the size of the screen using an aspect fit scaling. The example code loads images named “image1”, “image2” etc.</p>
+
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">    <span class="k">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">setupScrollView</span> <span class="p">{</span>
+    <span class="err"> </span> <span class="err"> </span> <span class="c1">//add the scrollview to the view
+</span>    <span class="err"> </span> <span class="err"> </span><span class="n">self</span><span class="p">.</span><span class="n">scrollView</span> <span class="o">=</span> <span class="p">[[</span><span class="n">UIScrollView</span> <span class="nf">alloc</span><span class="p">]</span> <span class="nf">initWithFrame</span><span class="p">:</span><span class="n">CGRectMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="n">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span>
+                                               <span class="n">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">)];</span>
+       <span class="n">self</span><span class="p">.</span><span class="n">scrollView</span><span class="p">.</span><span class="n">pagingEnabled</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+       <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">scrollView</span> <span class="nf">setAlwaysBounceVertical</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
+    <span class="err"> </span> <span class="err"> </span> <span class="c1">//setup internal views
+</span>    <span class="err"> </span> <span class="err"> </span><span class="n">NSInteger</span> <span class="n">numberOfViews</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+    <span class="err"> </span> <span class="err"> </span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numberOfViews</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="n">CGFloat</span> <span class="n">xOrigin</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
+    <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="n">UIImageView</span> <span class="o">*</span><span class="n">image</span> <span class="o">=</span> <span class="p">[[</span><span class="n">UIImageView</span> <span class="nf">alloc</span><span class="p">]</span> <span class="nf">initWithFrame</span><span class="p">:</span>
+                                                    <span class="n">CGRectMake</span><span class="p">(</span><span class="n">xOrigin</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                                                    <span class="n">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span>
+                                                    <span class="n">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">)];</span>
+    <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="n">image</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIImage</span> <span class="nf">imageNamed</span><span class="p">:[</span><span class="n">NSString</span> <span class="nf">stringWithFormat</span><span class="p">:</span>
+                                            <span class="s">@"image%d"</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]];</span>
+    <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="n">image</span><span class="p">.</span><span class="n">contentMode</span> <span class="o">=</span> <span class="n">UIViewContentModeScaleAspectFit</span><span class="p">;</span>
+    <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">scrollView</span> <span class="nf">addSubview</span><span class="p">:</span><span class="n">image</span><span class="p">];</span>
+    <span class="err"> </span> <span class="err"> </span> <span class="p">}</span>
+    <span class="err"> </span> <span class="err"> </span> <span class="c1">//set the scroll view content size
+</span>    <span class="err"> </span> <span class="err"> </span><span class="n">self</span><span class="p">.</span><span class="n">scrollView</span><span class="p">.</span><span class="n">contentSize</span> <span class="o">=</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span> <span class="o">*</span>
+                                                <span class="n">numberOfViews</span><span class="p">,</span>
+                                                <span class="n">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+    <span class="err"> </span> <span class="err"> </span> <span class="c1">//add the scrollview to this view
+</span>    <span class="err"> </span> <span class="err"> </span><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">view</span> <span class="nf">addSubview</span><span class="p">:</span><span class="n">self</span><span class="p">.</span><span class="n">scrollView</span><span class="p">];</span>
+    <span class="p">}</span></code></pre></figure>
+
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

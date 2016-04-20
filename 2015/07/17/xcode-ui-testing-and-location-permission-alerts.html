@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Xcode UI Testing and Location Permission Alerts | Daniel Beard</title>
+	<meta name="description" content="With Xcode 7, Apple has given us a new tool for user interface testing.I’m not going to cover the basics here, but for an great introduction to user interfac...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/2015/07/17/xcode-ui-testing-and-location-permission-alerts.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Xcode UI Testing and Location Permission Alerts</h1>
+    <p class="meta">
+    July 17, 2015
+    
+    </p>
+  </header>
+  <section class="post-content"><p>With Xcode 7, Apple has given us a new tool for user interface testing.
+I’m not going to cover the basics here, but for an great introduction to user interface testing in Xcode, check out this awesome article: <a href="http://masilotti.com/ui-testing-xcode-7/">UI Testing in Xcode 7</a></p>
+
+<p>As of beta 3, there is no way to handle native system alerts. This is a pretty big roadblock to actually UI testing apps that support location. Luckily, we can work around this by digging a little bit into the CoreLocation framework.</p>
+
+<p>A prerequisite for this is the <a href="http://www.hopperapp.com">Hopper Disassembler</a>, which I can’t recommend highly enough. It’s a great starting point for poking at and tearing apart system frameworks, libraries and executables.</p>
+
+<p>First, lets open the CoreLocation framework with Hopper. As of writing, this framework existed on the file system at:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/CoreLocation.framework
+</code></pre>
+</div>
+
+<p>Let’s open the binary within the framework.</p>
+
+<p><img src="http://danielbeard.io/images/corelocationhopper.png" alt="CoreLocationHopper" /></p>
+
+<p>Looking on the left panel under “labels”, there are lots of <code class="highlighter-rouge">CLLocationManager</code> methods. Scrolling through, we can see a couple of interesting authorization related ones.</p>
+
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">    <span class="o">+</span><span class="p">[</span><span class="n">CLLocationManager</span> <span class="nf">_authorizationStatus</span><span class="p">]</span>
+    <span class="o">+</span><span class="p">[</span><span class="n">CLLocationManager</span> <span class="nf">authorizationStatus</span><span class="p">]</span>
+    <span class="o">+</span><span class="p">[</span><span class="n">CLLocationManager</span> <span class="nf">setAuthorizationStatus</span><span class="p">:</span><span class="nf">forBundleIdentifier</span><span class="p">:]</span>
+    <span class="o">+</span><span class="p">[</span><span class="n">CLLocationManager</span> <span class="nf">setAuthorizationStatus</span><span class="p">:</span><span class="nf">forBundle</span><span class="p">:]</span></code></pre></figure>
+
+<p>The <code class="highlighter-rouge">setAuthorizationStatus:forBundle:</code> method is a private method, but since we are going to be only calling it from a test, we can use it.
+Note: Do NOT use this in a production app, you will absolutely be rejected from the app store.
+This is going to let us set the location permission to whatever we want, while supressing the location alert from showing.</p>
+
+<p>While we can’t call the method directly, we can build a method signature and invoke a custom invocation like this:</p>
+
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">    <span class="n">SEL</span> <span class="n">selector</span> <span class="o">=</span> <span class="n">NSSelectorFromString</span><span class="p">(</span><span class="s">@"setAuthorizationStatus:forBundleIdentifier:"</span><span class="p">);</span>
+    <span class="n">NSMethodSignature</span> <span class="o">*</span><span class="n">methodSignature</span> <span class="o">=</span> <span class="p">[</span><span class="n">CLLocationManager</span> <span class="nf">methodSignatureForSelector</span><span class="p">:</span><span class="n">selector</span><span class="p">];</span>
+    <span class="n">NSInvocation</span> <span class="o">*</span><span class="n">invocation</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSInvocation</span> <span class="nf">invocationWithMethodSignature</span><span class="p">:</span><span class="n">methodSignature</span><span class="p">];</span>
+    <span class="n">invocation</span><span class="p">.</span><span class="n">selector</span> <span class="o">=</span> <span class="n">selector</span><span class="p">;</span>
+
+    <span class="n">CLAuthorizationStatus</span> <span class="n">status</span> <span class="o">=</span> <span class="n">kCLAuthorizationStatusAuthorizedAlways</span><span class="p">;</span>
+    <span class="n">NSString</span> <span class="o">*</span><span class="n">identifier</span> <span class="o">=</span> <span class="s">@"com.test.testapp"</span><span class="p">;</span>
+
+    <span class="p">[</span><span class="n">invocation</span> <span class="nf">setArgument</span><span class="p">:</span><span class="o">&amp;</span><span class="n">status</span> <span class="nf">atIndex</span><span class="p">:</span><span class="mi">2</span><span class="p">];</span>
+    <span class="p">[</span><span class="n">invocation</span> <span class="nf">setArgument</span><span class="p">:</span><span class="o">&amp;</span><span class="n">identifier</span> <span class="nf">atIndex</span><span class="p">:</span><span class="mi">3</span><span class="p">];</span>
+    <span class="p">[</span><span class="n">invocation</span> <span class="nf">invokeWithTarget</span><span class="p">:[</span><span class="n">CLLocationManager</span> <span class="nf">class</span><span class="p">]];</span></code></pre></figure>
+
+<ul>
+  <li>Notice that the invocation argument indexes start at 2, this is because the first two arguments are implicit (<code class="highlighter-rouge">self</code> and <code class="highlighter-rouge">_cmd</code>)</li>
+  <li>We used a bundle identifier string rather than loading the bundle, this is because as UI tests run they run inside a different TestRunner bundle.</li>
+</ul>
+
+<p>That’s it! Enjoy!</p>
+
+<blockquote>
+  <p>Hopefully  fixes all the pain points and remaining concerns of UI testing before the final Xcode 7 release :)</p>
+</blockquote>
+
+<p>Edit: For supressing some other permission dialogs, check out this github issue: https://github.com/facebook/xctool/issues/276#issuecomment-30074325 (Thanks to Joe Masilotti for the tip!)</p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

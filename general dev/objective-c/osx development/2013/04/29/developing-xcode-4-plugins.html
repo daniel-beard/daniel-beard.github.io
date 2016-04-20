@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Developing Xcode 4 Plugins | Daniel Beard</title>
+	<meta name="description" content="This is a quick guide that documents how to start developing plugins for Xcode4. You need to have Xcode installed to create plugins.">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/general%20dev/objective-c/osx%20development/2013/04/29/developing-xcode-4-plugins.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Developing Xcode 4 Plugins</h1>
+    <p class="meta">
+    April 29, 2013
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>This is a quick guide that documents how to start developing plugins for Xcode4. You need to have Xcode installed to create plugins.</p>
+
+<h3 id="step-1---xcode-plugin-project-template">Step 1 - Xcode Plugin Project Template</h3>
+
+<ul>
+  <li>Grab the Xcode project template for creating plugins from <a href="https://github.com/kattrali/Xcode4-Plugin-Template">here</a></li>
+  <li>Create the plugin template folder <code class="highlighter-rouge">~/Library/Developer/Xcode/Templates/Project Templates/Application Plug-in/Xcode4 Plugin.xctemplate</code> if it doesn’t already exist.</li>
+  <li>A quick way to do this is with the following command <code class="highlighter-rouge">mkdir -p "~/Library/Developer/Xcode/Templates/Project Templates/Application Plug-in/Xcode4 Plugin.xctemplate"</code></li>
+  <li>Copy the contents of the GitHub repository to the folder you just created.</li>
+  <li>Restart Xcode.</li>
+</ul>
+
+<h3 id="step-2---create-a-test-project">Step 2 - Create a test project</h3>
+
+<ul>
+  <li>Open Xcode, and select <code class="highlighter-rouge">File &gt; New &gt; Project</code></li>
+  <li>Then under <code class="highlighter-rouge">OS X &gt; Templates</code> tap <code class="highlighter-rouge">Xcode4 Plugin</code> (shown below)</li>
+</ul>
+
+<p><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-44-05-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-44-05-pm.png?w=300" alt="Screen Shot 2013-04-29 at 3.44.05 PM" /></a></p>
+
+<p>From the GitHub repo:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>The default plugin file links against AppKit and Foundation, and, when built 
+(and Xcode is restarted), creates a menu item labeled "Do Action" in the File menu. 
+Pressing the menu item should open an alert. Customize at will!
+</code></pre>
+</div>
+
+<p>If we run the project we just created, it will automatically build and copy the plugin to the right location. In this case it is <code class="highlighter-rouge">~/Library/Application Support/Developer/Shared/Xcode/Plug-ins/[Project Name].xcplugin</code>. Restarting Xcode, we get a new menu item under the <code class="highlighter-rouge">File</code> menu!</p>
+
+<h3 id="screen-shot-2013-04-29-at-35302-pmhttpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-02-pmpnghttpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-02-pmpng"><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png" alt="Screen Shot 2013-04-29 at 3.53.02 PM" /></a></h3>
+
+<p>When we click on the menu item, we get an alert:</p>
+
+<h3 id="screen-shot-2013-04-29-at-35349-pmhttpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-49-pmpngw300httpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-49-pmpng"><a href="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png"><img src="http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png?w=300" alt="Screen Shot 2013-04-29 at 3.53.49 PM" /></a></h3>
+
+<p>Notes:</p>
+
+<ul>
+  <li>Xcode plugins have to be written using Objective-C GC, this means you have to use <code class="highlighter-rouge">retain</code> and <code class="highlighter-rouge">release</code> calls in your code. (No ARC support).</li>
+</ul>
+
+<h3 id="where-to-go-from-here">Where to go from here?</h3>
+
+<ul>
+  <li><a href="http://stackoverflow.com/a/12478484/1144632">This StackOverflow answer</a> has some great ideas on where to go next</li>
+  <li>You can get a dump of the private headers that Xcode uses by using the <a href="https://github.com/nygard/class-dump">class-dump</a> tool</li>
+  <li><code class="highlighter-rouge">brew install class-dump</code> is the quickest way to get it if you have homebrew installed.</li>
+  <li>IDEKit and IDEFoundation are present at <code class="highlighter-rouge">Xcode.app/Contents/Frameworks</code></li>
+  <li>DVTKit and DVTFoundation are present at <code class="highlighter-rouge">Xcode.app/Contents/SharedFrameworks</code></li>
+  <li>By registering an observer for <code class="highlighter-rouge">nil</code> you can see all the notifications that are being called. This is useful to find out which actions are called and when, and what notifications you might need to listen for.</li>
+</ul>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

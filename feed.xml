@@ -1,0 +1,1076 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Daniel Beard</title>
+    <atom:link href="http://danielbeard.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <link>http://danielbeard.io/</link>
+    <description>iOS and other stuff</description>
+    <pubDate>Tue, 19 Apr 2016 21:05:03 -0700</pubDate>
+    
+      <item>
+        <title>Xcode UI Testing and Location Permission Alerts</title>
+        <link>http://danielbeard.io/2015/07/17/xcode-ui-testing-and-location-permission-alerts.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/2015/07/17/xcode-ui-testing-and-location-permission-alerts.html</guid>
+        <description>&lt;p&gt;With Xcode 7, Apple has given us a new tool for user interface testing.
+I’m not going to cover the basics here, but for an great introduction to user interface testing in Xcode, check out this awesome article: &lt;a href=&quot;http://masilotti.com/ui-testing-xcode-7/&quot;&gt;UI Testing in Xcode 7&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;As of beta 3, there is no way to handle native system alerts. This is a pretty big roadblock to actually UI testing apps that support location. Luckily, we can work around this by digging a little bit into the CoreLocation framework.&lt;/p&gt;
+
+&lt;p&gt;A prerequisite for this is the &lt;a href=&quot;http://www.hopperapp.com&quot;&gt;Hopper Disassembler&lt;/a&gt;, which I can’t recommend highly enough. It’s a great starting point for poking at and tearing apart system frameworks, libraries and executables.&lt;/p&gt;
+
+&lt;p&gt;First, lets open the CoreLocation framework with Hopper. As of writing, this framework existed on the file system at:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/CoreLocation.framework
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Let’s open the binary within the framework.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://danielbeard.io/images/corelocationhopper.png&quot; alt=&quot;CoreLocationHopper&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Looking on the left panel under “labels”, there are lots of &lt;code class=&quot;highlighter-rouge&quot;&gt;CLLocationManager&lt;/code&gt; methods. Scrolling through, we can see a couple of interesting authorization related ones.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-objc&quot; data-lang=&quot;objc&quot;&gt;    &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CLLocationManager&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;_authorizationStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CLLocationManager&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;authorizationStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CLLocationManager&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setAuthorizationStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;forBundleIdentifier&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:]&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CLLocationManager&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setAuthorizationStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;forBundle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;setAuthorizationStatus:forBundle:&lt;/code&gt; method is a private method, but since we are going to be only calling it from a test, we can use it.
+Note: Do NOT use this in a production app, you will absolutely be rejected from the app store.
+This is going to let us set the location permission to whatever we want, while supressing the location alert from showing.&lt;/p&gt;
+
+&lt;p&gt;While we can’t call the method directly, we can build a method signature and invoke a custom invocation like this:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-objc&quot; data-lang=&quot;objc&quot;&gt;    &lt;span class=&quot;n&quot;&gt;SEL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;selector&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NSSelectorFromString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;@&quot;setAuthorizationStatus:forBundleIdentifier:&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;NSMethodSignature&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;methodSignature&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CLLocationManager&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;methodSignatureForSelector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;selector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;NSInvocation&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;invocation&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSInvocation&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;invocationWithMethodSignature&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;methodSignature&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;invocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;selector&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;selector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;CLAuthorizationStatus&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kCLAuthorizationStatusAuthorizedAlways&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;NSString&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;identifier&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;@&quot;com.test.testapp&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;invocation&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setArgument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;atIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;invocation&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setArgument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;identifier&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;atIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;invocation&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;invokeWithTarget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CLLocationManager&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]];&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Notice that the invocation argument indexes start at 2, this is because the first two arguments are implicit (&lt;code class=&quot;highlighter-rouge&quot;&gt;self&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;_cmd&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;We used a bundle identifier string rather than loading the bundle, this is because as UI tests run they run inside a different TestRunner bundle.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;That’s it! Enjoy!&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Hopefully  fixes all the pain points and remaining concerns of UI testing before the final Xcode 7 release :)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Edit: For supressing some other permission dialogs, check out this github issue: https://github.com/facebook/xctool/issues/276#issuecomment-30074325 (Thanks to Joe Masilotti for the tip!)&lt;/p&gt;
+</description>
+        <pubDate>Fri, 17 Jul 2015 19:08:28 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>Setting up travis-ci for automated unit testing of iOS projects on GitHub</title>
+        <link>http://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html</guid>
+        <description>&lt;p&gt;This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects.&lt;/p&gt;
+
+&lt;p&gt;The first step is to create a new project in Xcode. I am going to select a single view application and enable storyboards, Automatic Reference Counting and Unit Tests.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-05-06 at 11.42.27 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;All I’m going to change is the &lt;code class=&quot;highlighter-rouge&quot;&gt;testExample&lt;/code&gt; method in the unit testing bundle to something that will pass. For now I have just gone with this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;- (void)testExample
+{
+    STAssertNil(nil, @&quot;This object should be nil&quot;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Check that the tests pass by hitting &lt;code class=&quot;highlighter-rouge&quot;&gt;cmd&lt;/code&gt;+&lt;code class=&quot;highlighter-rouge&quot;&gt;u&lt;/code&gt;. Now that I have my unit tests passing, I’m going to add this project to GitHub. I’ll leave the details out here, as this isn’t the focus of this tutorial but you can find my example project here: &lt;a href=&quot;https://github.com/daniel-beard/SettingUpTravisCIForiOS&quot;&gt;https://github.com/daniel-beard/SettingUpTravisCIForiOS&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now we can setup the TravisCI build. I use the &lt;code class=&quot;highlighter-rouge&quot;&gt;xctool&lt;/code&gt; to build my projects as it has a nicer output and is easier to use than the built in &lt;code class=&quot;highlighter-rouge&quot;&gt;xcodebuild&lt;/code&gt; tool. Add &lt;code class=&quot;highlighter-rouge&quot;&gt;xctool&lt;/code&gt; as a submodule to the git repository using the following commands:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git submodule add https://github.com/facebook/xctool.git ./xctool
+git submodule update --init
+git commit ./xctool -m &quot;Added xctool as a submodule&quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Then we need to add a config file so that travis-ci knows how to build our project. This file is named &lt;code class=&quot;highlighter-rouge&quot;&gt;.travis.yml&lt;/code&gt; and lives in the root of the git repository. Here is the contents of mine:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;before_install: &quot;git submodule init &amp;amp;&amp;amp; git submodule update &amp;amp;&amp;amp; sudo gem update --system &amp;amp;&amp;amp; sudo gem install bundler &amp;amp;&amp;amp; bundle install&quot;
+script: &quot;bundle exec rake test --trace&quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Then we have to add a &lt;code class=&quot;highlighter-rouge&quot;&gt;Rakefile&lt;/code&gt; that tells the &lt;code class=&quot;highlighter-rouge&quot;&gt;xctool&lt;/code&gt; which project and target to build:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;desc &#39;Run the tests&#39;
+task :test do
+   exec(&#39;xctool/xctool.sh -project SettingUpTravisCIForiOS.xcodeproj -scheme SettingUpTravisCIForiOS test&#39;)
+end
+
+task :default =&amp;gt; :test
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;And finally the &lt;code class=&quot;highlighter-rouge&quot;&gt;Gemfile&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;source &#39;https://rubygems.org&#39;
+
+gem &#39;rake&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;You can then test locally that your project builds using the command &lt;code class=&quot;highlighter-rouge&quot;&gt;rake&lt;/code&gt; in your root git repository.
+I get build messages, then &lt;code class=&quot;highlighter-rouge&quot;&gt;** TEST SUCCEEDED: 1 of 1 tests passed ** (25285 ms)&lt;/code&gt;. Now that we have the unit tests running locally, all that is left is to set up the travis-ci build. Login to &lt;a href=&quot;https://travis-ci.org/&quot;&gt;https://travis-ci.org/&lt;/a&gt; with your GitHub account and under account settings select the repository that should be unit tested automatically. This automatically sets up a service hook in GitHub so that every time you push to your repository, it will get unit tested.&lt;/p&gt;
+
+&lt;p&gt;You can also use the status images from travis-ci to show the test status directly in your README file on GitHub. Check out my example project here: &lt;a href=&quot;https://github.com/daniel-beard/SettingUpTravisCIForiOS&quot;&gt;SettingUpTravisCIForiOS&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Mon, 06 May 2013 17:16:04 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>Developing Xcode 4 Plugins</title>
+        <link>http://danielbeard.io/general%20dev/objective-c/osx%20development/2013/04/29/developing-xcode-4-plugins.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/general%20dev/objective-c/osx%20development/2013/04/29/developing-xcode-4-plugins.html</guid>
+        <description>&lt;p&gt;This is a quick guide that documents how to start developing plugins for Xcode4. You need to have Xcode installed to create plugins.&lt;/p&gt;
+
+&lt;h3 id=&quot;step-1---xcode-plugin-project-template&quot;&gt;Step 1 - Xcode Plugin Project Template&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Grab the Xcode project template for creating plugins from &lt;a href=&quot;https://github.com/kattrali/Xcode4-Plugin-Template&quot;&gt;here&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Create the plugin template folder &lt;code class=&quot;highlighter-rouge&quot;&gt;~/Library/Developer/Xcode/Templates/Project Templates/Application Plug-in/Xcode4 Plugin.xctemplate&lt;/code&gt; if it doesn’t already exist.&lt;/li&gt;
+  &lt;li&gt;A quick way to do this is with the following command &lt;code class=&quot;highlighter-rouge&quot;&gt;mkdir -p &quot;~/Library/Developer/Xcode/Templates/Project Templates/Application Plug-in/Xcode4 Plugin.xctemplate&quot;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Copy the contents of the GitHub repository to the folder you just created.&lt;/li&gt;
+  &lt;li&gt;Restart Xcode.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;step-2---create-a-test-project&quot;&gt;Step 2 - Create a test project&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Open Xcode, and select &lt;code class=&quot;highlighter-rouge&quot;&gt;File &amp;gt; New &amp;gt; Project&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Then under &lt;code class=&quot;highlighter-rouge&quot;&gt;OS X &amp;gt; Templates&lt;/code&gt; tap &lt;code class=&quot;highlighter-rouge&quot;&gt;Xcode4 Plugin&lt;/code&gt; (shown below)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-44-05-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-44-05-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-29 at 3.44.05 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;From the GitHub repo:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;The default plugin file links against AppKit and Foundation, and, when built 
+(and Xcode is restarted), creates a menu item labeled &quot;Do Action&quot; in the File menu. 
+Pressing the menu item should open an alert. Customize at will!
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;If we run the project we just created, it will automatically build and copy the plugin to the right location. In this case it is &lt;code class=&quot;highlighter-rouge&quot;&gt;~/Library/Application Support/Developer/Shared/Xcode/Plug-ins/[Project Name].xcplugin&lt;/code&gt;. Restarting Xcode, we get a new menu item under the &lt;code class=&quot;highlighter-rouge&quot;&gt;File&lt;/code&gt; menu!&lt;/p&gt;
+
+&lt;h3 id=&quot;screen-shot-2013-04-29-at-35302-pmhttpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-02-pmpnghttpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-02-pmpng&quot;&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png&quot; alt=&quot;Screen Shot 2013-04-29 at 3.53.02 PM&quot; /&gt;&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;When we click on the menu item, we get an alert:&lt;/p&gt;
+
+&lt;h3 id=&quot;screen-shot-2013-04-29-at-35349-pmhttpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-49-pmpngw300httpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-49-pmpng&quot;&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-29 at 3.53.49 PM&quot; /&gt;&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Xcode plugins have to be written using Objective-C GC, this means you have to use &lt;code class=&quot;highlighter-rouge&quot;&gt;retain&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;release&lt;/code&gt; calls in your code. (No ARC support).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;where-to-go-from-here&quot;&gt;Where to go from here?&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://stackoverflow.com/a/12478484/1144632&quot;&gt;This StackOverflow answer&lt;/a&gt; has some great ideas on where to go next&lt;/li&gt;
+  &lt;li&gt;You can get a dump of the private headers that Xcode uses by using the &lt;a href=&quot;https://github.com/nygard/class-dump&quot;&gt;class-dump&lt;/a&gt; tool&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;brew install class-dump&lt;/code&gt; is the quickest way to get it if you have homebrew installed.&lt;/li&gt;
+  &lt;li&gt;IDEKit and IDEFoundation are present at &lt;code class=&quot;highlighter-rouge&quot;&gt;Xcode.app/Contents/Frameworks&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;DVTKit and DVTFoundation are present at &lt;code class=&quot;highlighter-rouge&quot;&gt;Xcode.app/Contents/SharedFrameworks&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;By registering an observer for &lt;code class=&quot;highlighter-rouge&quot;&gt;nil&lt;/code&gt; you can see all the notifications that are being called. This is useful to find out which actions are called and when, and what notifications you might need to listen for.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Mon, 29 Apr 2013 09:15:20 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>Automated Unit testing an iOS app with Jenkins</title>
+        <link>http://danielbeard.io/general%20dev/ios/objective-c/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins.html</guid>
+        <description>&lt;ul&gt;
+  &lt;li&gt;Setting up and executing automated unit tests is slightly more involved than generating built apps for distribution.&lt;/li&gt;
+  &lt;li&gt;The following is the set up that I use for some of my projects, I have just renamed the project to &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProject&lt;/code&gt; for convenience.&lt;/li&gt;
+  &lt;li&gt;For this article I am assuming that you have Jenkins, Xcode, Xcode Command Line Tools, and the Xcode Jenkins plugin already installed.&lt;/li&gt;
+  &lt;li&gt;Because I use cocoaPods for dependency management, I build a workspace using custom build schemes. To build a single project with a unit-test target would make these steps easier.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;dependencies&quot;&gt;Dependencies&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;HomeBrew&lt;/strong&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Used as a package manager on OSX for easy installation of dependencies.&lt;/li&gt;
+      &lt;li&gt;Install from this website: &lt;a href=&quot;http://mxcl.github.io/homebrew/&quot;&gt;http://mxcl.github.io/homebrew/&lt;/a&gt; or by copy-pasting the following into the terminal: &lt;code class=&quot;highlighter-rouge&quot;&gt;ruby -e &quot;$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)&quot;&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Ruby 1.9.3&lt;/strong&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Needed for other dependencies.&lt;/li&gt;
+      &lt;li&gt;Can be installed via brew, or with RVM.&lt;/li&gt;
+      &lt;li&gt;I used RVM to set up my ruby install.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Sinatra&lt;/strong&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Sinatra is a ruby based server that we use for serving JSON fixtures to the unit tests.&lt;/li&gt;
+      &lt;li&gt;Can be installed using the ruby package manager &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo gem install sinatra&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;ios-sim&lt;/strong&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Required because Xcode doesn’t allow unit tests to be run natively in the iOS simulator from the command line.&lt;/li&gt;
+      &lt;li&gt;Can be installed using brew: &lt;code class=&quot;highlighter-rouge&quot;&gt;brew install ios-sim&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;step-1---poll-scm&quot;&gt;Step 1 - Poll SCM&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProject&lt;/code&gt; Jenkins job polls the SCM looking for changes to the &lt;code class=&quot;highlighter-rouge&quot;&gt;master&lt;/code&gt; branch at midnight every night.&lt;/li&gt;
+  &lt;li&gt;If no changes have occurred, then the project is not built.&lt;/li&gt;
+  &lt;li&gt;If modifications have been made, the next step is executed.&lt;/li&gt;
+  &lt;li&gt;If you want, Jenkins can be set up to build on a push to a branch. E.g. Pushing to the remote master branch.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;step-2---simulator-and-sinatra-setup&quot;&gt;Step 2 - Simulator and Sinatra setup&lt;/h3&gt;
+
+&lt;p&gt;We run the following script:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#reset the content and settings of the iphone sim&lt;/span&gt;
+rm -r ~/Library/Application&lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;Support/iPhone&lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;Simulator/
+
+&lt;span class=&quot;c&quot;&gt;#open the iphonesimulator and kill it&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#this is required after a system restart&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#so the simulator knows to run iPad rather than iPhone apps&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Opening iphone simulator&quot;&lt;/span&gt;
+open &lt;span class=&quot;s2&quot;&gt;&quot;/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app&quot;&lt;/span&gt;
+sleep 10
+killall &lt;span class=&quot;s1&quot;&gt;&#39;iPhone Simulator&#39;&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;iphone simulator killed&quot;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#delete previous build folders&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Removing previous build folder&quot;&lt;/span&gt;
+rm -r &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;WORKSPACE&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/build
+mkdir &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;WORKSPACE&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/build
+
+&lt;span class=&quot;c&quot;&gt;#Start sinatra server in the background&lt;/span&gt;
+ruby TestProject/server.rb &amp;amp;
+
+&lt;span class=&quot;c&quot;&gt;#get the PID of the process&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;PID&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$!&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#save PID to file&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$PID&lt;/span&gt; &amp;gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;WORKSPACE&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/sinatra.pid
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We first remove the iPhone Simulator folder
+    &lt;ul&gt;
+      &lt;li&gt;This makes sure that no previous &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProject&lt;/code&gt; apps are installed on the simulator. Otherwise we may get core data upgrade problems.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;We then have to open the iphone simulator and then kill it
+    &lt;ul&gt;
+      &lt;li&gt;This is a stupid workaround that has to be done so that the iphonesimulator recognizes that we have to run an iPad application rather than an iPhone app.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;We then remove any previous build folders.
+    &lt;ul&gt;
+      &lt;li&gt;Because we have our project set up as a workspace, there are multiple &lt;code class=&quot;highlighter-rouge&quot;&gt;.xcodeproj&lt;/code&gt; files and libraries that we have to build, including our &lt;code class=&quot;highlighter-rouge&quot;&gt;pods&lt;/code&gt; dependencies. Because of this, our default build location is relative to the project, not located in the &lt;code class=&quot;highlighter-rouge&quot;&gt;iPhone Simulator&lt;/code&gt; folder or in Xcode’s &lt;code class=&quot;highlighter-rouge&quot;&gt;DerivedData&lt;/code&gt; folder.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;We then start the sinatra server in the background
+    &lt;ul&gt;
+      &lt;li&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;amp;&lt;/code&gt; operator detaches the ruby process from the current shell so that once this script has finished, the sinatra server is still running.&lt;/li&gt;
+      &lt;li&gt;We store the PID of the process to the &lt;code class=&quot;highlighter-rouge&quot;&gt;PID&lt;/code&gt; variable.&lt;/li&gt;
+      &lt;li&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;$!&lt;/code&gt; expands to the process ID of the most recently executed background (asynchronous) command. More details &lt;a href=&quot;http://www.tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_02.html&quot;&gt;here&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;The PID is then written to file so it persists.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;step-3---xcode-build&quot;&gt;Step 3 - Xcode Build&lt;/h3&gt;
+
+&lt;p&gt;Below is a screenshot from jenkins showing the fields used for the xcode plugin&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-33-32-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-33-32-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-23 at 3.33.32 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Clean before build&lt;/code&gt; - we don’t want any cached compiled objects hanging around.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Xcode Schema File&lt;/code&gt; - &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProjectTests&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Because of a limitation where workspaces can’t build targets directly, we have to use a Build Scheme to run unit tests. This scheme is set up the run the attached unit test target included in the production scheme &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProject&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;SDK&lt;/code&gt; - &lt;code class=&quot;highlighter-rouge&quot;&gt;iphonesimulator&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;We are targeting the simulator to run unit tests so we specify it here.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Configuration&lt;/code&gt; - &lt;code class=&quot;highlighter-rouge&quot;&gt;Debug&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Unit tests only execute in &lt;code class=&quot;highlighter-rouge&quot;&gt;Debug&lt;/code&gt; mode, so this option has to be this.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Custom xcodebuild arguments&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;TEST_AFTER_BUILD&lt;/code&gt; - We manually specify that we want to run unit tests after building the project.&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;ARCHS=i386&lt;/code&gt; - We have to force the architecture to &lt;code class=&quot;highlighter-rouge&quot;&gt;i386&lt;/code&gt; because xcode wants to default to &lt;code class=&quot;highlighter-rouge&quot;&gt;armv6&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;armv7&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;armv7s&lt;/code&gt;.&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;ONLY_ACTIVE_ARCH=NO&lt;/code&gt; - Tell Xcode to not build just the architectures that it wants to by default.&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;VALID_ARCHS=i386&lt;/code&gt; - We have to specify the architecture here again. Xcode does not make this easy for us.&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;SL_RUN_UNIT_TESTS=YES&lt;/code&gt; - This is where the magic happens, this will be explained in more detail in the next section.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Clean test reports?&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;This outputs clean test reports so we can export them to &lt;code class=&quot;highlighter-rouge&quot;&gt;JUnit&lt;/code&gt; reports later.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Unlock keychain?&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Required so we don’t have to enter the password to use debugging.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;step-4---unit-testing&quot;&gt;Step 4 - Unit testing&lt;/h3&gt;
+
+&lt;p&gt;As explained in the previous step, the &lt;code class=&quot;highlighter-rouge&quot;&gt;SL_RUN_UNIT_TESTS=YES&lt;/code&gt; xcodebuild argument is extremely important.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProjectTests&lt;/code&gt; target in Xcode has a custom script that it executes &lt;strong&gt;after&lt;/strong&gt; building. The script can be found in &lt;code class=&quot;highlighter-rouge&quot;&gt;Project Settings -&amp;gt; TestProjectTest -&amp;gt; Build Phases -&amp;gt; Run Script&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-38-26-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-38-26-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-23 at 3.38.26 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The script is shown below:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ruby -v
+ruby &quot;${SRCROOT}/commandlineunittests.rb&quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The first line is unnecessary, and just used for outputting the ruby version.&lt;/li&gt;
+  &lt;li&gt;The second line calls a ruby script that is present in the repository that kicks off the unit tests.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The second ruby script is shown below:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if ENV[&#39;SL_RUN_UNIT_TESTS&#39;] then
+    launcher_path = &quot;/usr/local/bin/ios-sim&quot;    
+    #File.join(ENV[&#39;SRCROOT&#39;], &quot;Scripts&quot;, &quot;ios-sim&quot;)
+    test_bundle_path= File.join(ENV[&#39;BUILT_PRODUCTS_DIR&#39;], &quot;#{ENV[&#39;PRODUCT_NAME&#39;]}.#{ENV[&#39;WRAPPER_EXTENSION&#39;]}&quot;)
+
+    environment = {
+        &#39;DYLD_INSERT_LIBRARIES&#39; =&amp;gt; &quot;/../../Library/PrivateFrameworks/IDEBundleInjection.framework/IDEBundleInjection&quot;,
+        &#39;XCInjectBundle&#39; =&amp;gt; test_bundle_path,
+        &#39;XCInjectBundleInto&#39; =&amp;gt; ENV[&quot;TEST_HOST&quot;]
+    }
+
+    environment_args = environment.collect { |key, value| &quot;--setenv #{key}=\&quot;#{value}\&quot;&quot;}.join(&quot; &quot;)
+
+    app_test_host = File.dirname(ENV[&quot;TEST_HOST&quot;])
+    system(&quot;#{launcher_path} launch \&quot;#{app_test_host}\&quot; #{environment_args} --args -SenTest All #{test_bundle_path}&quot;)
+else
+    puts &quot;SL_RUN_UNIT_TESTS not set - Did not run unit tests!&quot;
+end
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The script checks for that magic variable &lt;code class=&quot;highlighter-rouge&quot;&gt;SL_RUN_UNIT_TESTS&lt;/code&gt; and if it’s present runs the unit tests.&lt;/li&gt;
+  &lt;li&gt;Using the &lt;code class=&quot;highlighter-rouge&quot;&gt;ios-sim&lt;/code&gt; dependency, the script dynamically patches the &lt;code class=&quot;highlighter-rouge&quot;&gt;TEST_HOST&lt;/code&gt; of the ios simulator and runs the unit tests. This is really complicated to try and do by hand, which is what we were doing before using &lt;code class=&quot;highlighter-rouge&quot;&gt;ios-sim&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;step-5---cleanup&quot;&gt;Step 5 - Cleanup&lt;/h3&gt;
+
+&lt;p&gt;The following script is executing after the unit tests have finished, regardless of the output status (&lt;code class=&quot;highlighter-rouge&quot;&gt;PASS&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;FAIL&lt;/code&gt;).&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;PID&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&amp;lt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;WORKSPACE&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/sinatra.pid&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Sinatra server pid &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$PID&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+
+&lt;span class=&quot;nb&quot;&gt;kill&lt;/span&gt; -9 &lt;span class=&quot;nv&quot;&gt;$PID&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;This script reads the process id (&lt;code class=&quot;highlighter-rouge&quot;&gt;PID&lt;/code&gt;) from the file we stored earlier containing the &lt;code class=&quot;highlighter-rouge&quot;&gt;sinatra&lt;/code&gt; server’s PID.&lt;/li&gt;
+  &lt;li&gt;We then kill the &lt;code class=&quot;highlighter-rouge&quot;&gt;sinatra&lt;/code&gt; process.
+    &lt;ul&gt;
+      &lt;li&gt;We don’t want the &lt;code class=&quot;highlighter-rouge&quot;&gt;sinatra&lt;/code&gt; server hanging around after the unit tests have run, because subsequent tests will fail because they will try to start a &lt;code class=&quot;highlighter-rouge&quot;&gt;sinatra&lt;/code&gt; server using the same port as the previous process.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Wed, 24 Apr 2013 05:00:23 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>Auto build and deploy iOS apps using Jenkins</title>
+        <link>http://danielbeard.io/general%20dev/ios/objective-c/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins.html</guid>
+        <description>&lt;p&gt;We will have a look at a &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProject&lt;/code&gt; to get an idea of how jenkins can be used to build, sign and deploy iOS projects. The whole process consists of 4 steps. Note that to deploy an app in this manner, an enterprise distribution certificate is required for each app.
+This guide is how I have set up my enterprise builds for my apps that use &lt;code class=&quot;highlighter-rouge&quot;&gt;cocoaPods&lt;/code&gt; for dependencies, but most of the same principles apply for any iOS apps.
+Because the project uses &lt;code class=&quot;highlighter-rouge&quot;&gt;cocoaPods&lt;/code&gt;, it means we have to build a workspace and have a build scheme set up.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Note: Apple Enterprise licenses can ONLY be used for builds internal to your company. I am not responsible for anything that may happen if you try to distribute apps outside your company using an enterprise license.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;This guide may be a bit brief, don’t hesitate to ask me any questions. This is mostly for my own reference.&lt;/p&gt;
+
+&lt;h3 id=&quot;step-1---poll-scm&quot;&gt;Step 1 - Poll SCM&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Dev builds poll the SCM looking for changes to the &lt;code class=&quot;highlighter-rouge&quot;&gt;master&lt;/code&gt; branch at midnight every night.&lt;/li&gt;
+  &lt;li&gt;If no changes have occurred, then the project is not built.&lt;/li&gt;
+  &lt;li&gt;If modifications have been made, the next step is executed.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;step-2---xcode-build&quot;&gt;Step 2 - Xcode build&lt;/h3&gt;
+
+&lt;p&gt;Below is a screenshot from jenkins showing the fields used for the xcode plugin.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-4-01-12-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-4-01-12-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-23 at 4.01.12 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Clean before build&lt;/code&gt; - we don’t want any cached compiled objects hanging around.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Xcode Schema File&lt;/code&gt; - &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProjectDev&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Because of the way we have our project set up, our top level item is a workspace (&lt;code class=&quot;highlighter-rouge&quot;&gt;TestProject.xcworkspace&lt;/code&gt;), we have to build based on Schemes as Xcode does not support building a target from a workspace.&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;TestProjectDev&lt;/code&gt; specifies the scheme we want to build with.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Configuration&lt;/code&gt; - &lt;code class=&quot;highlighter-rouge&quot;&gt;Release&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;We want the release version. There are several subtle differences between &lt;code class=&quot;highlighter-rouge&quot;&gt;Debug&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;Release&lt;/code&gt; versions. The most notable is that &lt;code class=&quot;highlighter-rouge&quot;&gt;Debug&lt;/code&gt; builds are usually built for just one architecture, where &lt;code class=&quot;highlighter-rouge&quot;&gt;Release&lt;/code&gt; builds are built for all supported architectures, usually with compile time optimisations as well.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Workspace File&lt;/code&gt; - This is our top level workspace file (&lt;code class=&quot;highlighter-rouge&quot;&gt;TestProject.xcworkspace&lt;/code&gt;) that we build from. If this option wasn’t specified, by default the xcode build would look for the first &lt;code class=&quot;highlighter-rouge&quot;&gt;*.xcodeproj&lt;/code&gt; file it can find. This would cause our build to fail.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Unlock Keychain&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;This allows us to unlock the keychain which is required for signing or resigning &lt;code class=&quot;highlighter-rouge&quot;&gt;.ipa&lt;/code&gt; files.&lt;/li&gt;
+      &lt;li&gt;The location of the keychain is the default OSX location&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;step-3---resigning&quot;&gt;Step 3 - Resigning&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;This step only occurs if previous steps were successful&lt;/li&gt;
+  &lt;li&gt;This step only occurs if the text &lt;code class=&quot;highlighter-rouge&quot;&gt;BUILD&lt;/code&gt; is present in the log text (basically every build)&lt;/li&gt;
+  &lt;li&gt;The result of this build will be escalated to the job status. If this step fails and other steps before it were successful, the job will still fail.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Below is the script used for resigning:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/sh&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;PROJECT_BUILDDIR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;WORKSPACE&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/build/TestProject/Build/Products/Release-iphoneos&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;APPLICATION_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;TestProjectDev&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;BUILD_HISTORY_DIR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/Users/administrator/Provisioning/builds&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;DEVELOPER_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;iPhone Distribution: Test Company LTD&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;PROVISIONING_PROFILE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/Users/administrator/Provisioning/TestProjectDevDistributionProfile.mobileprovision&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;HOST_LOCATION&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/Library/WebServer/Documents/apps&quot;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#Sign The .app file and create .ipa file&lt;/span&gt;
+/usr/bin/xcrun -sdk iphoneos PackageApplication -v  &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PROJECT_BUILDDIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;APPLICATION_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.app&quot;&lt;/span&gt; -o  &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BUILD_HISTORY_DIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;APPLICATION_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.ipa&quot;&lt;/span&gt; --sign &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;DEVELOPER_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt; --embed &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PROVISIONING_PROFILE&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#Get the version from the Info.plist file&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;APP_PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PROJECT_BUILDDIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;APPLICATION_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.app&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;VERSION&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;defaults &lt;span class=&quot;nb&quot;&gt;read&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;APP_PATH&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/Info CFBundleShortVersionString&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;BUNDLE_ID&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;defaults &lt;span class=&quot;nb&quot;&gt;read&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;APP_PATH&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/Info CFBundleIdentifier&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Create plist&lt;/span&gt;
+cat &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;HOST_LOCATION&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/template.plist | sed -e &lt;span class=&quot;s2&quot;&gt;&quot;s/&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\$&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;{APP_NAME}/&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$APPLICATION_NAME&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&quot;&lt;/span&gt; -e &lt;span class=&quot;s2&quot;&gt;&quot;s/&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\$&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;{BUNDLE_ID}/&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$BUNDLE_ID&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&quot;&lt;/span&gt; -e &lt;span class=&quot;s2&quot;&gt;&quot;s/&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\$&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;{BUNDLE_VERSION}/&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$VERSION&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&quot;&lt;/span&gt; &amp;gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;HOST_LOCATION&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;APPLICATION_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;.plist
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The first part of this script sets up the locations and script variables
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;PROJECT_BUILDDIR&lt;/code&gt; - The folder that the built &lt;code class=&quot;highlighter-rouge&quot;&gt;.ipa&lt;/code&gt; file resides from the previous build step.&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;APPLICATION_NAME&lt;/code&gt; - In this case it is &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProjectDev&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;BUILD_HISTORY_DIR&lt;/code&gt; - The folder that the re-signed app will be output to&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;DEVELOPER_NAME&lt;/code&gt; - Has to match the &lt;code class=&quot;highlighter-rouge&quot;&gt;.mobileprovision&lt;/code&gt; file used for signing.&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;PROVISIONING_PROFILE&lt;/code&gt; - The location of the &lt;code class=&quot;highlighter-rouge&quot;&gt;.mobileprovision&lt;/code&gt; file used for signing. These must be downloaded from the Apple developer website or shown in Finder from the Xcode organizer.&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;HOST_LOCATION&lt;/code&gt; - Where the final signed app will exist&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;The next stage of the build process is actually re-signing the app using the Xcode command line tool called &lt;code class=&quot;highlighter-rouge&quot;&gt;xcrun&lt;/code&gt;. Note that the version in &lt;code class=&quot;highlighter-rouge&quot;&gt;/usr/bin/&lt;/code&gt; is a symlink to the Xcode version that has been selected by the &lt;code class=&quot;highlighter-rouge&quot;&gt;xcodeselect&lt;/code&gt; command line tool. This is important if more than one version of xcode is installed. Each version of Xcode stores command line tools inside the &lt;code class=&quot;highlighter-rouge&quot;&gt;.app&lt;/code&gt; file in applications.&lt;/li&gt;
+  &lt;li&gt;After re-signing, we grab the version, and bundle-id. These are used in the next part
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;APP_PATH&lt;/code&gt; - The full path including the &lt;code class=&quot;highlighter-rouge&quot;&gt;.app&lt;/code&gt; extension of the re-signed app&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;VERSION&lt;/code&gt; - This is the &lt;code class=&quot;highlighter-rouge&quot;&gt;CFBundleShortVersionString&lt;/code&gt;. This value is set when you change the version in Xcode for each of the build schemes.&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;BUNDLE_ID&lt;/code&gt; - The &lt;code class=&quot;highlighter-rouge&quot;&gt;CFBundleIdentifier&lt;/code&gt; for the built app. For &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProject&lt;/code&gt;, this will be &lt;code class=&quot;highlighter-rouge&quot;&gt;au.com.wordpress.danielbeard.TestProject&lt;/code&gt;. These can be set by modifying the build Schemes, but shouldn’t be changed for existing applications. Production has a different bundleId, which is what allows for both the dev and prod versions to exist on a single iPad at the same time.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;We then auto generate the enterprise install PLIST file. This is needed to install apps from a URL location and acts as a “description” of the app that is about to be installed.
+    &lt;ul&gt;
+      &lt;li&gt;The actual creation of this file is quite simple, we use &lt;code class=&quot;highlighter-rouge&quot;&gt;cat&lt;/code&gt; to copy the &lt;code class=&quot;highlighter-rouge&quot;&gt;template.plist&lt;/code&gt; file to the new location and then using &lt;code class=&quot;highlighter-rouge&quot;&gt;sed&lt;/code&gt; we replace the &lt;code class=&quot;highlighter-rouge&quot;&gt;BUNDLE_ID&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;BUNDLE_VERSION&lt;/code&gt; values. These values are read from the Apps Info.plist from inside the .app folder.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Below is an example template.plist file&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;&amp;lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;plist&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;version=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;1.0&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;dict&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;key&amp;gt;&lt;/span&gt;items&lt;span class=&quot;nt&quot;&gt;&amp;lt;/key&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;array&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;nt&quot;&gt;&amp;lt;dict&amp;gt;&lt;/span&gt;
+                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;key&amp;gt;&lt;/span&gt;assets&lt;span class=&quot;nt&quot;&gt;&amp;lt;/key&amp;gt;&lt;/span&gt;
+                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;array&amp;gt;&lt;/span&gt;
+                                &lt;span class=&quot;nt&quot;&gt;&amp;lt;dict&amp;gt;&lt;/span&gt;
+                                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;key&amp;gt;&lt;/span&gt;kind&lt;span class=&quot;nt&quot;&gt;&amp;lt;/key&amp;gt;&lt;/span&gt;
+                                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;software-package&lt;span class=&quot;nt&quot;&gt;&amp;lt;/string&amp;gt;&lt;/span&gt;
+                                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;key&amp;gt;&lt;/span&gt;url&lt;span class=&quot;nt&quot;&gt;&amp;lt;/key&amp;gt;&lt;/span&gt;
+                                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;http://hostlocation/apps/${APP_NAME}.ipa&lt;span class=&quot;nt&quot;&gt;&amp;lt;/string&amp;gt;&lt;/span&gt;
+                                &lt;span class=&quot;nt&quot;&gt;&amp;lt;/dict&amp;gt;&lt;/span&gt;
+                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;/array&amp;gt;&lt;/span&gt;
+                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;key&amp;gt;&lt;/span&gt;metadata&lt;span class=&quot;nt&quot;&gt;&amp;lt;/key&amp;gt;&lt;/span&gt;
+                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;dict&amp;gt;&lt;/span&gt;
+                                &lt;span class=&quot;nt&quot;&gt;&amp;lt;key&amp;gt;&lt;/span&gt;bundle-identifier&lt;span class=&quot;nt&quot;&gt;&amp;lt;/key&amp;gt;&lt;/span&gt;
+                                &lt;span class=&quot;nt&quot;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;${BUNDLE_ID}&lt;span class=&quot;nt&quot;&gt;&amp;lt;/string&amp;gt;&lt;/span&gt;
+                                &lt;span class=&quot;nt&quot;&gt;&amp;lt;key&amp;gt;&lt;/span&gt;bundle-version&lt;span class=&quot;nt&quot;&gt;&amp;lt;/key&amp;gt;&lt;/span&gt;
+                                &lt;span class=&quot;nt&quot;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;${BUNDLE_VERSION}&lt;span class=&quot;nt&quot;&gt;&amp;lt;/string&amp;gt;&lt;/span&gt;
+                                &lt;span class=&quot;nt&quot;&gt;&amp;lt;key&amp;gt;&lt;/span&gt;kind&lt;span class=&quot;nt&quot;&gt;&amp;lt;/key&amp;gt;&lt;/span&gt;
+                                &lt;span class=&quot;nt&quot;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;software&lt;span class=&quot;nt&quot;&gt;&amp;lt;/string&amp;gt;&lt;/span&gt;
+                                &lt;span class=&quot;nt&quot;&gt;&amp;lt;key&amp;gt;&lt;/span&gt;title&lt;span class=&quot;nt&quot;&gt;&amp;lt;/key&amp;gt;&lt;/span&gt;
+                                &lt;span class=&quot;nt&quot;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;${APP_NAME}&lt;span class=&quot;nt&quot;&gt;&amp;lt;/string&amp;gt;&lt;/span&gt;
+                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;/dict&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;nt&quot;&gt;&amp;lt;/dict&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;/array&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dict&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/plist&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;step-4---copying-to-host-location&quot;&gt;Step 4 - Copying to host location&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;This step simple grabs the signed &lt;code class=&quot;highlighter-rouge&quot;&gt;.ipa&lt;/code&gt; file and puts it in the host location so that the macmini website can serve it over a URL. The host location is &lt;code class=&quot;highlighter-rouge&quot;&gt;/Library/Webserver/Documents/apps&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Script looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/sh&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;APPLICATION_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;TestProjectDev.ipa&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;BUILD_HISTORY_DIR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/Users/administrator/Provisioning/builds&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;HOST_LOCATION&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/Library/WebServer/Documents/apps/&quot;&lt;/span&gt;
+
+cp &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BUILD_HISTORY_DIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;APPLICATION_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;HOST_LOCATION&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;APPLICATION_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;And that’s it! The output is a .ipa file and a .plist file. These are both required to install an enterprise app.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 23 Apr 2013 09:18:15 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>Objective-C Style Guide</title>
+        <link>http://danielbeard.io/general%20dev/ios/objective-c/2013/04/17/objective-c-style-guide.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2013/04/17/objective-c-style-guide.html</guid>
+        <description>&lt;p&gt;This is the style guide that I follow when programming in Objective-C, this is for my own reference, but other people may find this useful.&lt;/p&gt;
+
+&lt;h3 id=&quot;general&quot;&gt;General&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Use modern objective-c 2.0 syntax&lt;/li&gt;
+  &lt;li&gt;Use ARC whenever possible.&lt;/li&gt;
+  &lt;li&gt;Manual memory management should only be used when using older libraries that haven’t been updated yet.&lt;/li&gt;
+  &lt;li&gt;Use tabs when indenting, not spaces.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;code-naming-basics&quot;&gt;Code Naming Basics&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Follow the &lt;a href=&quot;http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/CodingGuidelines/Articles/NamingBasics.html#//apple_ref/doc/uid/20001281-BBCHBFAH&quot;&gt;Apple naming guidelines&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Use descriptive names, even if they are long. Xcode has great code completion features. &lt;em&gt;Use them&lt;/em&gt;.
+    &lt;ul&gt;
+      &lt;li&gt;Clarity is preferred over all else.&lt;/li&gt;
+      &lt;li&gt;E.g. Compare the two methods: &lt;code class=&quot;highlighter-rouge&quot;&gt;[spaceship fly: 10.0f]&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;[spaceship flyAtSpeed: 10.0f]&lt;/code&gt;.&lt;/li&gt;
+      &lt;li&gt;Note how much clearer the second declaration is, the method describes its intentions and parameter names.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Don’t use abbreviations. E.g. &lt;code class=&quot;highlighter-rouge&quot;&gt;bgColor&lt;/code&gt; vs. &lt;code class=&quot;highlighter-rouge&quot;&gt;backgroundColor&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Custom resuseable classes should be prefixed with &lt;code class=&quot;highlighter-rouge&quot;&gt;AFG&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Application level classes do not have to be prefixed. E.g. ViewControllers&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;All view controllers should be descriptively named and end with &lt;code class=&quot;highlighter-rouge&quot;&gt;ViewController&lt;/code&gt;.
+    &lt;ul&gt;
+      &lt;li&gt;E.g. &lt;code class=&quot;highlighter-rouge&quot;&gt;CalculatorSettingsViewController&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;commenting&quot;&gt;Commenting&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Follow the &lt;a href=&quot;http://gentlebytes.com/appledoc/&quot;&gt;appledoc&lt;/a&gt; code formatting style.&lt;/li&gt;
+  &lt;li&gt;Only comment the method declarations. E.g. In the &lt;code class=&quot;highlighter-rouge&quot;&gt;@interface&lt;/code&gt; or private &lt;code class=&quot;highlighter-rouge&quot;&gt;@interface ... ()&lt;/code&gt; code blocks.&lt;/li&gt;
+  &lt;li&gt;Describe what the method does, the parameter names and the return value and what it signifies.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The following is a good example of method commenting:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/** This method asks the delegate if the AFGContainerViewController should pop the current view from the view stack.
+ @param - The current AFGContainerViewController object
+ @return A BOOL value indicating if the current view controller should be removed from the AFGContainerViewController&#39;s view stack.
+ */
+-(BOOL) AFGContainerViewControllerShouldPopContainerViewController: (AFGContainerViewController*) containerViewController;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;spacing&quot;&gt;Spacing&lt;/h3&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-(void) performOperationWithObject: (NSObject*) objectName {
+
+  NSLog(@&quot;This is a well spaced method&quot;);
+  [objectName performSomeOperation];
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;No space between the class or instance specifier &lt;code class=&quot;highlighter-rouge&quot;&gt;(+,-)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Single space between the return type and method name&lt;/li&gt;
+  &lt;li&gt;Single spaces between method signature, object types and object names&lt;/li&gt;
+  &lt;li&gt;Brace on the same line as the method signature.&lt;/li&gt;
+  &lt;li&gt;Optional newline below the method signature for readability&lt;/li&gt;
+  &lt;li&gt;No newline before the closing brace&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;variables-and-initializers&quot;&gt;Variables and Initializers&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Variable names should always start with lower case.
+    &lt;ul&gt;
+      &lt;li&gt;Good: &lt;code class=&quot;highlighter-rouge&quot;&gt;numberOfObjects&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;Bad: &lt;code class=&quot;highlighter-rouge&quot;&gt;NumberOfObjects&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Clearly identify the designated initializer for the class
+    &lt;ul&gt;
+      &lt;li&gt;All other initializers should propagate up to and use the designated initializer.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Override the superclass’ designated initializer.&lt;/li&gt;
+  &lt;li&gt;Initialization method should be at the top of the &lt;code class=&quot;highlighter-rouge&quot;&gt;&lt;span class=&quot;k&quot;&gt;@implementation&lt;/span&gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Don’t explicitly initialize variables to nil. Under ARC this happens automatically.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;properties&quot;&gt;Properties&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Don’t &lt;code class=&quot;highlighter-rouge&quot;&gt;@synthesize&lt;/code&gt; properties. Modern objective-c does this for us automatically.&lt;/li&gt;
+  &lt;li&gt;Always start with a lower case letter.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;NSString&lt;/code&gt; properties should always be &lt;code class=&quot;highlighter-rouge&quot;&gt;copy&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;IBOutlets&lt;/code&gt; should always be &lt;code class=&quot;highlighter-rouge&quot;&gt;weak&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;other-readings&quot;&gt;Other readings&lt;/h3&gt;
+
+&lt;p&gt;These are some good references / starting points for creating your own style guide or just to see other coding styles.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/CodingGuidelines/CodingGuidelines.html#//apple_ref/doc/uid/10000146-SW1&quot;&gt;Apple Coding Guidelines&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://cocoadevcentral.com/articles/000082.php&quot;&gt;CocoaDevCentral coding guidelines&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://google-styleguide.googlecode.com/svn/trunk/objcguide.xml&quot;&gt;Google Code Style&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.techotopia.com/index.php/The_Basics_of_Modern_Objective-C&quot;&gt;Basics of Modern Objective-C&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Wed, 17 Apr 2013 05:58:03 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>Objective-C Runtime</title>
+        <link>http://danielbeard.io/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html</guid>
+        <description>&lt;p&gt;It is pretty rare to actually have to dive into the objc-runtime for any day to day coding. Most developers wont have to touch the runtime, however it is helpful to know what is possible and be able to use it if required. The objective-c runtime is written in C and is how the underlying parts of the objective-c language work including message sending, ivars and properties. This post shows an example of where I have used the Objective-C runtime in one of my projects.&lt;/p&gt;
+
+&lt;p&gt;One example of where I have used the runtime in my projects is the validation code in &lt;code class=&quot;highlighter-rouge&quot;&gt;DBValidator&lt;/code&gt;. The validation code is implemented as a category on &lt;code class=&quot;highlighter-rouge&quot;&gt;NSObject&lt;/code&gt; called &lt;code class=&quot;highlighter-rouge&quot;&gt;NSObject+DBValidator&lt;/code&gt;. This is so we can add validation rules to &lt;strong&gt;any&lt;/strong&gt; objective-c object. The only problem with this approach is that you &lt;em&gt;can’t&lt;/em&gt; add any properties or ivars to an object using a category.&lt;/p&gt;
+
+&lt;p&gt;We can work around this limitation by using the objective-c runtime directly.&lt;/p&gt;
+
+&lt;p&gt;Below is the implementation of the &lt;code class=&quot;highlighter-rouge&quot;&gt;NSObject+DBValidator&lt;/code&gt; category:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-objc&quot; data-lang=&quot;objc&quot;&gt;    &lt;span class=&quot;cp&quot;&gt;#import &quot;NSObject+DBValidator.h&quot;
+&lt;/span&gt;    &lt;span class=&quot;cp&quot;&gt;#import &amp;lt;objc/runtime.h&amp;gt;
+&lt;/span&gt;
+    &lt;span class=&quot;cp&quot;&gt;#define VALIDATION_RULES_KEY @&quot;validationruleskey&quot;
+&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;@implementation&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NSObject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;DBValidator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;err&quot;&gt;-(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;setValidationRules&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;objc_setAssociatedObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VALIDATION_RULES_KEY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OBJC_ASSOCIATION_RETAIN_NONATOMIC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;objc_getAssociatedObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VALIDATION_RULES_KEY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;addValidationRule&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DBValidationRule&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRule&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;addObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;removeAllValidationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;removeAllObjects&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validate&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;failureMessages&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DBValidationRule&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rule&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;BOOL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isValid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rule&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;passesValidation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isValid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                 &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;failureMessages&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;addObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;failureMessage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;failureMessages&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;@end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;We have a &lt;code class=&quot;highlighter-rouge&quot;&gt;&lt;span class=&quot;k&quot;&gt;@property&lt;/span&gt;&lt;/code&gt; defined in the header called &lt;code class=&quot;highlighter-rouge&quot;&gt;validationRules&lt;/code&gt; and we override both the setter and getter in the implementation. In the &lt;code class=&quot;highlighter-rouge&quot;&gt;setValidationRules:&lt;/code&gt; method we use a C function from the objective-c runtime called &lt;a href=&quot;https://developer.apple.com/library/mac/#documentation/Cocoa/Reference/ObjCRuntimeRef/Reference/reference.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;objc_setAssociatedObject&lt;/code&gt;&lt;/a&gt;. This function allows us to set a reference on the &lt;code class=&quot;highlighter-rouge&quot;&gt;self&lt;/code&gt; object. We give it a key, the object (in this case the &lt;code class=&quot;highlighter-rouge&quot;&gt;validationRules&lt;/code&gt; passed to the method) and the association policy.&lt;/p&gt;
+
+&lt;p&gt;The valid options for the association policy are:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;enum {
+   OBJC_ASSOCIATION_ASSIGN = 0,
+   OBJC_ASSOCIATION_RETAIN_NONATOMIC = 1,
+   OBJC_ASSOCIATION_COPY_NONATOMIC = 3,
+   OBJC_ASSOCIATION_RETAIN = 01401,
+   OBJC_ASSOCIATION_COPY = 01403
+};
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Notice how these options map directly to &lt;code class=&quot;highlighter-rouge&quot;&gt;&lt;span class=&quot;k&quot;&gt;@property&lt;/span&gt;&lt;/code&gt; storage options! We are using &lt;code class=&quot;highlighter-rouge&quot;&gt;OBJC_ASSOCIATION_RETAIN_NONATOMIC&lt;/code&gt; because we want our &lt;code class=&quot;highlighter-rouge&quot;&gt;NSObject&lt;/code&gt; to retain the validation rules that are set on it.&lt;/p&gt;
+
+&lt;p&gt;In our &lt;code class=&quot;highlighter-rouge&quot;&gt;validationRules&lt;/code&gt; method, we use a similar call from the objective-c runtime called &lt;a href=&quot;https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ObjCRuntimeRef/Reference/reference.html#//apple_ref/doc/uid/TP40001418-CH1g-SW68&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;objc_getAssociatedObject&lt;/code&gt;&lt;/a&gt;. This allows us to retrieve the object we set a reference to in the preious method. We have to pass the parent object and the key for the associated object we want. We return an empty array if validation rules are not yet set for this object.&lt;/p&gt;
+
+&lt;p&gt;Check out the full source code in the &lt;a href=&quot;https://github.com/daniel-beard/DBValidator&quot;&gt;DBValidator GitHub Project&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Tue, 16 Apr 2013 05:38:24 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>Git notes</title>
+        <link>http://danielbeard.io/general%20dev/git/2013/04/15/git-notes.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/general%20dev/git/2013/04/15/git-notes.html</guid>
+        <description>&lt;p&gt;This is a list of git notes that I use everyday. Hopefully someone else finds it useful. I will update this list over time.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The master branch reflects production ready code only. This branch should be deployable at any time and merges to this branch should not break the build process.&lt;/li&gt;
+  &lt;li&gt;Feature branches should be merged into the master when they are complete.&lt;/li&gt;
+  &lt;li&gt;Feature branches consist of a single feature or discrete unit of work&lt;/li&gt;
+  &lt;li&gt;Commit early and commit often!&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;generating-ssh-public-key&quot;&gt;Generating SSH-Public Key&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Switch to your .ssh directory and check if the id_rsa.pub file exists, this is your public key&lt;/li&gt;
+  &lt;li&gt;If it doesn’t exist, generate one with the following command&lt;code class=&quot;highlighter-rouge&quot;&gt;ssh-keygen -t rsa -C &quot;youremail@email.com&quot;&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Output is something like the following:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Generating public/private rsa key pair.
+Enter file in which to save the key (/Users/danielbeard/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /Users/danielbeard/.ssh/id_rsa.
+Your public key has been saved in /Users/danielbeard/.ssh/id_rsa.pub.
+The key fingerprint is:
+43:c5:5b:5h:b1:f1:51:43:ad:20:a6:92:6a:1f:8a:3a danielbeard@iosdev.local
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Copy the contents of the public key file to your clipboard:
+&lt;code class=&quot;highlighter-rouge&quot;&gt;pbcopy &amp;lt; ~/.ssh/id_rsa.pub&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;normal-workflow&quot;&gt;Normal Workflow&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Checkout the remote repository with: &lt;code class=&quot;highlighter-rouge&quot;&gt;git clone git@github.com:RepoOwner/RepoName.git&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Updating the repository (won’t need to be done the first time): &lt;code class=&quot;highlighter-rouge&quot;&gt;git pull&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Create a new branch from the master or current development branch &lt;code class=&quot;highlighter-rouge&quot;&gt;git checkout -b featurebranchname master&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Make changes to local files&lt;/li&gt;
+  &lt;li&gt;Check local modifications with &lt;code class=&quot;highlighter-rouge&quot;&gt;git status&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Stage certain files with &lt;code class=&quot;highlighter-rouge&quot;&gt;git add &amp;lt;file1&amp;gt; &amp;lt;file2&amp;gt;&lt;/code&gt; etc or add all changes &lt;code class=&quot;highlighter-rouge&quot;&gt;git add .&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Commit to you local repository &lt;code class=&quot;highlighter-rouge&quot;&gt;git commit -m &#39;commit message&#39;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Push the local commit to the remote repository and set up for tracking &lt;code class=&quot;highlighter-rouge&quot;&gt;git push -u origin featurebranchname&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Repeat until feature branch is complete.&lt;/li&gt;
+  &lt;li&gt;Merge master or development branch into the working branch
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;git checkout master&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;git pull&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;git checkout featurebranchname&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;git merge master&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Push to remote repository &lt;code class=&quot;highlighter-rouge&quot;&gt;git push -u origin featurebranchname&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Submit pull request and wait for code review&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;repository-changes&quot;&gt;Repository Changes&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Checking which files are in what state: &lt;code class=&quot;highlighter-rouge&quot;&gt;git status&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Tracking new files: &lt;code class=&quot;highlighter-rouge&quot;&gt;git add README&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Committing your changes: &lt;code class=&quot;highlighter-rouge&quot;&gt;git commit -m &#39;Commit message goes here&#39;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Push your current master to the remote origin: &lt;code class=&quot;highlighter-rouge&quot;&gt;git push -u origin master&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Unstaging a staged file: &lt;code class=&quot;highlighter-rouge&quot;&gt;git reset HEAD &amp;lt;file&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Stage all untracked files - &lt;code class=&quot;highlighter-rouge&quot;&gt;git add -u&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Unmodifying a modified file: &lt;code class=&quot;highlighter-rouge&quot;&gt;git checkout -- benchmarks.rb&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Notes:
+  * The git add command stages a file for a commit. Calling git status shows which files are staged/unstaged or if they are untracked.
+  * If you modify a file after calling git add, the git status command will show the file as being both staged and unstaged.
+  * If you modify a file after calling git add, you have to run git add again to stage the latest version of the file
+Providing the -a option to git commit makes git automatically stage every file before doing the commit. (Letting you skip the git add part)&lt;/p&gt;
+
+&lt;p&gt;Basic repository changes: &lt;a href=&quot;http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository&quot;&gt;http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;branching&quot;&gt;Branching&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Creating a new branch: &lt;code class=&quot;highlighter-rouge&quot;&gt;git checkout -b branchname&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Branching from a current branch: &lt;code class=&quot;highlighter-rouge&quot;&gt;git checkout -b feature devbranch&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Pushing branch to remote with tracking: &lt;code class=&quot;highlighter-rouge&quot;&gt;git push -u origin branchname&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Rename branch &lt;code class=&quot;highlighter-rouge&quot;&gt;git branch -m &amp;lt;oldname&amp;gt; &amp;lt;newname&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Delete the local branch: &lt;code class=&quot;highlighter-rouge&quot;&gt;git branch -d branchname&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Delete the remote branch: &lt;code class=&quot;highlighter-rouge&quot;&gt;git push origin :branchname&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Listing all branches: &lt;code class=&quot;highlighter-rouge&quot;&gt;git branch -a&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Just list remote branches: &lt;code class=&quot;highlighter-rouge&quot;&gt;git branch -r&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Checking out a tracked remote branch: &lt;code class=&quot;highlighter-rouge&quot;&gt;git checkout --track origin/branch_name&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Merging a branch
+    &lt;ul&gt;
+      &lt;li&gt;Must have committed all changes (at least locally) like so: &lt;code class=&quot;highlighter-rouge&quot;&gt;git commit -a -m &quot;Made a change in this branch&quot;&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;Switch to whichever branch you are merging back into, e.g. master &lt;code class=&quot;highlighter-rouge&quot;&gt;git checkout master&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;Merge the branch (ALWAYS USE NO-FF): &lt;code class=&quot;highlighter-rouge&quot;&gt;git merge --no-ff branchname&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Notes:&lt;/p&gt;
+
+&lt;p&gt;Tracked branches are local branches that have a direct relationship to a remote branch.
+If you’re on a tracking branch and type git push or git pull, git automatically knows which branch and server to push/pull from.&lt;/p&gt;
+
+&lt;p&gt;Git remote branches :&lt;a href=&quot;http://git-scm.com/book/en/Git-Branching-Remote-Branches#Tracking-Branches&quot;&gt;http://git-scm.com/book/en/Git-Branching-Remote-Branches#Tracking-Branches&lt;/a&gt;
+Git local branches: &lt;a href=&quot;http://git-scm.com/book/en/Git-Branching-Basic-Branching-and-Merging&quot;&gt;http://git-scm.com/book/en/Git-Branching-Basic-Branching-and-Merging&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;tagging&quot;&gt;Tagging&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Only used for tagging master branch merges or “releases”&lt;/li&gt;
+  &lt;li&gt;You can tag at any point, it doesn’t have to be immediately.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Show the commit history like this: &lt;code class=&quot;highlighter-rouge&quot;&gt;git log --pretty=oneline&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;15027957951b64cf874c3557a0f3547bd83b3ff6 Merge branch &#39;experiment&#39;
+a6b4c97498bd301d84096da251c98a07c7723e65 beginning write support
+0d52aaab4479697da7686c15f77a3d64d9165190 one more thing
+6d52a271eda8725415634dd79daabbc4d9b6008e Merge branch &#39;experiment&#39;
+0b7434d86859cc7b8c3d5e1dddfed66ff742fcbc added a commit function
+4682c3261057305bdd616e23b64b0857d832627b added a todo file
+166ae0c4d3f420721acbb115cc33848dfcc2121a started write support
+9fceb02d0ae598e95dc970b74767f19372d61af8 updated rakefile
+964f16d36dfccde844893cac5b347e7b3d44abbc commit the todo
+8a5cbc430f1a9c3d00faaeffd07798508422908a updated readme
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;To tag a certain commit, specify the commit checksum (or part of it) at the end of the command &lt;code class=&quot;highlighter-rouge&quot;&gt;git tag -a v1.2.1 9fceb02&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Then to transfer all your tags to the remote repository &lt;code class=&quot;highlighter-rouge&quot;&gt;git push origin --tags&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Git tags: &lt;a href=&quot;http://git-scm.com/book/en/Git-Basics-Tagging&quot;&gt;http://git-scm.com/book/en/Git-Basics-Tagging&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;tracking-changes-between-branches&quot;&gt;Tracking changes between branches&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Show the modified files between two branches: &lt;code class=&quot;highlighter-rouge&quot;&gt;git diff --name-status master..branch&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Show side by side comparison : &lt;code class=&quot;highlighter-rouge&quot;&gt;git difftool -t vimdiff master..branch&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;other-notes-and-links&quot;&gt;Other notes and links&lt;/h3&gt;
+
+&lt;p&gt;Git aliases: &lt;a href=&quot;http://git-scm.com/book/en/Git-Basics-Tips-and-Tricks#Git-Aliases&quot;&gt;http://git-scm.com/book/en/Git-Basics-Tips-and-Tricks#Git-Aliases&lt;/a&gt;
+Branching model: &lt;a href=&quot;http://nvie.com/posts/a-successful-git-branching-model/&quot;&gt;http://nvie.com/posts/a-successful-git-branching-model/&lt;/a&gt;
+GitHub flow: &lt;a href=&quot;http://scottchacon.com/2011/08/31/github-flow.html&quot;&gt;http://scottchacon.com/2011/08/31/github-flow.html&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Mon, 15 Apr 2013 05:18:17 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>General purpose validation library for objective-c and iOS</title>
+        <link>http://danielbeard.io/general%20dev/ios/objective-c/2013/01/09/general-purpose-validation-library-for-objective-c-and-ios.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2013/01/09/general-purpose-validation-library-for-objective-c-and-ios.html</guid>
+        <description>&lt;p&gt;This is a simple validation framework that I created for one of my projects that I am releasing under an open source MIT license.&lt;/p&gt;
+
+&lt;p&gt;The framework supports a number of different types of validations including string length, number range, email validation, regex validation and equality.&lt;/p&gt;
+
+&lt;p&gt;Validation rules can be added to any keypath of any object that inherits from NSObject, as well as having multiple validation rules per object. Here is a screenshot:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-09-at-3-35-54-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-09-at-3-35-54-pm.png?w=569&quot; alt=&quot;Image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;And here is the project on Github - &lt;a href=&quot;https://github.com/daniel-beard/DBValidator&quot;&gt;DBValidator&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Wed, 09 Jan 2013 07:43:53 -0800</pubDate>
+      </item>
+    
+      <item>
+        <title>Adding a border to UILabel</title>
+        <link>http://danielbeard.io/2013/01/04/adding-a-border-to-uilabel.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/2013/01/04/adding-a-border-to-uilabel.html</guid>
+        <description>&lt;p&gt;I have created a simple control that subclasses UILabel to add a border. Here’s a screenshot:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-04-at-9-12-11-am.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-04-at-9-12-11-am.png?w=580&quot; alt=&quot;Image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Check out the project on &lt;a href=&quot;https://github.com/daniel-beard/DBBorderedLabel&quot;&gt;GitHub&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Fri, 04 Jan 2013 01:17:06 -0800</pubDate>
+      </item>
+    
+      <item>
+        <title>Metro themed button for iOS</title>
+        <link>http://danielbeard.io/ios/objective-c/2012/09/20/metro-themed-button-for-ios.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/ios/objective-c/2012/09/20/metro-themed-button-for-ios.html</guid>
+        <description>&lt;p&gt;Just for fun, I have created a metro themed UIButton for iOS complete with perspective 3D transform animations. Check out the screen shot and video below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/4oJ8F.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;iframe width=&quot;560&quot; height=&quot;420&quot; src=&quot;http://www.youtube.com/embed/jk9uoD9curk?color=white&amp;amp;theme=light&quot;&gt;&lt;/iframe&gt;
+
+&lt;p&gt;Get the project on GitHub here: &lt;a href=&quot;https://github.com/paintstripper/DBTileButton&quot;&gt;https://github.com/paintstripper/DBTileButton&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Thu, 20 Sep 2012 07:34:12 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>Adding a multiple images to a UIScrollView (iOS)</title>
+        <link>http://danielbeard.io/ios/objective-c/2012/09/17/adding-a-uiscrollview-to-a-uiview-ios.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/ios/objective-c/2012/09/17/adding-a-uiscrollview-to-a-uiview-ios.html</guid>
+        <description>&lt;p&gt;This is the code that I use when setting up a &lt;code class=&quot;highlighter-rouge&quot;&gt;UIScrollView&lt;/code&gt; to contain multiple images that can be scrolled through. I add this code in the &lt;code class=&quot;highlighter-rouge&quot;&gt;viewDidLoad&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;viewWillAppear&lt;/code&gt; methods and then set the &lt;code class=&quot;highlighter-rouge&quot;&gt;numberOfViews&lt;/code&gt; to the number of images I want to display. This will also scale the images to fit the size of the screen using an aspect fit scaling. The example code loads images named “image1”, “image2” etc.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-objc&quot; data-lang=&quot;objc&quot;&gt;    &lt;span class=&quot;k&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;setupScrollView&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//add the scrollview to the view
+&lt;/span&gt;    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scrollView&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UIScrollView&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;initWithFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CGRectMake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                                               &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                                               &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)];&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scrollView&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pagingEnabled&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;YES&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+       &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scrollView&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setAlwaysBounceVertical&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;NO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//setup internal views
+&lt;/span&gt;    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSInteger&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numberOfViews&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numberOfViews&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CGFloat&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xOrigin&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;n&quot;&gt;UIImageView&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UIImageView&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;initWithFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                                                    &lt;span class=&quot;n&quot;&gt;CGRectMake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xOrigin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                                                    &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                                                    &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)];&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;n&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UIImage&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;imageNamed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSString&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;stringWithFormat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                                            &lt;span class=&quot;s&quot;&gt;@&quot;image%d&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]];&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;n&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;contentMode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;UIViewContentModeScaleAspectFit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scrollView&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;addSubview&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//set the scroll view content size
+&lt;/span&gt;    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scrollView&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;contentSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CGSizeMake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;width&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
+                                                &lt;span class=&quot;n&quot;&gt;numberOfViews&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                                                &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//add the scrollview to this view
+&lt;/span&gt;    &lt;span class=&quot;err&quot;&gt; &lt;/span&gt; &lt;span class=&quot;err&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;addSubview&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scrollView&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+        <pubDate>Mon, 17 Sep 2012 01:26:42 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>DBSignatureView</title>
+        <link>http://danielbeard.io/general%20dev/ios/objective-c/2012/09/06/dbsignatureview.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2012/09/06/dbsignatureview.html</guid>
+        <description>&lt;p&gt;One of the projects I am currently working on needs to capture a signature from a user. So I am releasing the simple library that I created for it.&lt;/p&gt;
+
+&lt;p&gt;Check out the project on GitHub here: &lt;a href=&quot;http://github.com/paintstripper/DBSignatureView&quot;&gt;DBSignatureView&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/KD8Ym.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</description>
+        <pubDate>Thu, 06 Sep 2012 02:16:42 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>iOS Updating UI when using blocks</title>
+        <link>http://danielbeard.io/ios/objective-c/2012/04/16/ios-updating-ui-when-using-blocks-background-threads.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/ios/objective-c/2012/04/16/ios-updating-ui-when-using-blocks-background-threads.html</guid>
+        <description>&lt;p&gt;Here is the method that I use to update the UI when a background async thread. This is mostly for my own reference:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-objc&quot; data-lang=&quot;objc&quot;&gt;    &lt;span class=&quot;n&quot;&gt;dispatch_async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dispatch_get_global_queue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DISPATCH_QUEUE_PRIORITY_DEFAULT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;^&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;//background processing goes here
+&lt;/span&gt;            &lt;span class=&quot;n&quot;&gt;dispatch_async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dispatch_get_main_queue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;^&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;c1&quot;&gt;//update UI here
+&lt;/span&gt;            &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+        <pubDate>Mon, 16 Apr 2012 12:48:07 -0700</pubDate>
+      </item>
+    
+      <item>
+        <title>QR Code encoding / generation on an iOS Device</title>
+        <link>http://danielbeard.io/ios/objective-c/2012/03/05/qr-code-encoding-on-an-ios-device.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/ios/objective-c/2012/03/05/qr-code-encoding-on-an-ios-device.html</guid>
+        <description>&lt;p&gt;In one of my recent projects, the need to encode QR codes on the device came up. I tried a few different methods and wasn’t really satisfied with any of them.
+The method detailed here is the one I chose based on ease of use and the quick set up time.
+The core library is written in c and the base version can be found here: &lt;a href=&quot;http://fukuchi.org/works/qrencode/index.html.en&quot;&gt;http://fukuchi.org/works/qrencode/index.html.en&lt;/a&gt; (download the entire project below).&lt;/p&gt;
+
+&lt;p&gt;I am using a modified version with a few helper methods written in objective-c. Then my usage is as follows:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-objc&quot; data-lang=&quot;objc&quot;&gt;    &lt;span class=&quot;n&quot;&gt;UIImage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;quickResponseImageForString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;@&quot;http://danielbeard.wordpress.com&quot;&lt;/span&gt;
+                                         &lt;span class=&quot;nf&quot;&gt;withDimension&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;182&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//set the image
+&lt;/span&gt;    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;imageView&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setImage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;And the result:
+&lt;a href=&quot;http://danielbeard.files.wordpress.com/2012/03/qrcode.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2012/03/qrcode.png?w=358&quot; alt=&quot;Image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Here is the full project with an example&lt;/strong&gt;: &lt;a href=&quot;http://dl.dropbox.com/u/5387570/Blog/QREncoderProject.zip&quot;&gt;Download Project&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Mon, 05 Mar 2012 02:01:07 -0800</pubDate>
+      </item>
+    
+  </channel>
+</rss>

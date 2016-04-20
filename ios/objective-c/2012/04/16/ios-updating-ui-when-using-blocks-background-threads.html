@@ -2,8 +2,8 @@
 <html class="no-js">
   <head>
 	<meta charset="utf-8">
-	<title>About | Daniel Beard</title>
-	<meta name="description" content="iOS and other stuff">
+	<title>iOS Updating UI when using blocks | Daniel Beard</title>
+	<meta name="description" content="Here is the method that I use to update the UI when a background async thread. This is mostly for my own reference:">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="X-Frame-Options" content="sameorigin">
 
@@ -14,7 +14,7 @@
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
 	<!-- Canonical -->
-	<link rel="canonical" href="http://danielbeard.io/about/">
+	<link rel="canonical" href="http://danielbeard.io/ios/objective-c/2012/04/16/ios-updating-ui-when-using-blocks-background-threads.html">
 
 	<!-- RSS -->
 	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
@@ -142,34 +142,31 @@
 </header>
 
     <div class="content">
-      <article class="feature-image">
-  <header style="background-image: url('/img/sample_feature_img_2.jpg')">
-    <h1 class="title">About</h1>
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">iOS Updating UI when using blocks</h1>
+    <p class="meta">
+    April 16, 2012
+     - danielbeard
+    </p>
   </header>
-  <section class="post-content"><p>Hi, I’m Daniel. I’m an iOS engineer. I graduated from Edith Cowan University in Perth, Australia with a B.CompSci / Games Programming and completed my honours degree. I’ve written apps, simulations, visualizations, and games. I now live in silicon valley and work on cool apps and problems.</p>
+  <section class="post-content"><p>Here is the method that I use to update the UI when a background async thread. This is mostly for my own reference:</p>
 
-<h2 id="work">Work</h2>
-<p>I worked as an intern at iVec from Nov ’09 to Feb ’10 in conjunction with the University of Western Australia and the International Centre for Radio Astronomy Research.</p>
-
-<p>I worked for Australian Finance Group for a year and a half as the iOS Technical Lead.</p>
-
-<p>I am currently employed at Groupon as an iOS Software Engineer</p>
-
-<h2 id="other">Other</h2>
-
-<p>I enjoy solving Project Euler problems in Julia in my spare time:</p>
-
-<p><img src="https://projecteuler.net/profile/danielhasabeard.png" alt="ProjectEuler" /></p>
-
-<p>Sometimes I answer questions on StackOverflow</p>
-
-<p><img src="http://stackoverflow.com/users/flair/1144632.png?theme=clean" alt="Image" /></p>
-
-<p>And contributing to / creating open source projects on
-<a href="https://github.com/daniel-beard">Github</a></p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">    <span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_global_queue</span><span class="p">(</span><span class="n">DISPATCH_QUEUE_PRIORITY_DEFAULT</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">^</span><span class="p">{</span>
+            <span class="c1">//background processing goes here
+</span>            <span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_main_queue</span><span class="p">(),</span> <span class="o">^</span><span class="p">{</span>
+                    <span class="c1">//update UI here
+</span>            <span class="p">});</span>
+    <span class="p">});</span></code></pre></figure>
 
 </section>
 </article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
 
     </div>
     

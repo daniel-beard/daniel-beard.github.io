@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>OpenGL / openFrameworks Terrain Loader Update | Daniel Beard</title>
+	<meta name="description" content="Just a quick update on what I have been working on. One of the first posts on this blog was a terrain viewer. That project was thrown together very quickly f...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/games%20development/opengl/2010/08/11/opengl-openframeworks-terrain-loader-update.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">OpenGL / openFrameworks Terrain Loader Update</h1>
+    <p class="meta">
+    August 11, 2010
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>Just a quick update on what I have been working on. One of the first posts on this blog was a terrain viewer. That project was thrown together very quickly for a weekly assessment, so it wasn’t coded very well and was exceptionally bloated for what it did. I have had some spare time, so I started a fresh and commenced building a minimal terrain loader from the ground up. So far, I have terrain loading from file (generated with the tool in previous posts), and displaying a texture mapped, shadowed terrain using glDrawElements. I have specifically not included loading from heightmap in this project because it is easier to load a point struct from a binary file, but heightmap loading could be added in easily and probably will be in the coming days / weeks.</p>
+
+<p>The code is written using OpenGL and the openFrameworks toolkit. OpenFrameworks is used for loading the textures and setting up a window, etc. The size of the file is surprisingly small, just a few hundred lines. I thought I would upload this before I changed everything to a class and added some level of detail stuff to it. So here is a picture showing the pretty terrain.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/shadowedterrain.png"><img src="http://danielbeard.files.wordpress.com/2010/08/shadowedterrain.png?w=300" alt="" /></a></p>
+
+<p>I have heaps more work to do on this subject, but for now here is the source code.
+Just drop this into your openFrameworks project (or use with openGL and load your own images).
+The zip file also contains the terrain and the texture.</p>
+
+<p><a href="http://www.divshare.com/download/12244016-d93">Download Link </a></p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>
