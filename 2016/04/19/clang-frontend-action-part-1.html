@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Clang frontend actions (Part 1) | Daniel Beard</title>
+	<meta name="description" content="I had an interesting discussion with a co-worker yesterday, we were discussing how to grab all the comments from an Objective-C source file. We tried to thin...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/2016/04/19/clang-frontend-action-part-1.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Clang frontend actions (Part 1)</h1>
+    <p class="meta">
+    April 19, 2016
+    
+    </p>
+  </header>
+  <section class="post-content"><p>I had an interesting discussion with a co-worker yesterday, we were discussing how to grab all the comments from an Objective-C source file. We tried to think about how to do that with a regex, which probably would have worked <em>ok</em>, but definitely wouldn’t have handled all the edge cases easily.</p>
+
+<p>I’ve been using clang’s awesome libTooling library for writing frontend actions recently so I thought I’d try and take a quick pass at writing a frontend action that can grab all the comments from a source file.</p>
+
+<p>Setting up the envionment for building frontend actions is covered in the awesome clang <a href="http://clang.llvm.org/docs/LibASTMatchersTutorial.html">Tutorial for building tools using LibTooling and LibASTMatchers</a> documentation, so go do that if you haven’t already!</p>
+
+<p>Next, I set up a new frontend action. I cloned down llvm into the <code class="highlighter-rouge">~/clang-llvm</code> folder:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> ~/clang-llvm/llvm/tools/clang
+mkdir tools/extra/commentparser
+<span class="nb">echo</span> <span class="s1">'add_subdirectory(commentparser)'</span> &gt;&gt; tools/extra/CMakeLists.txt
+vim tools/extra/commentparser/CMakeLists.txt</code></pre></figure>
+
+<p>Then the <code class="highlighter-rouge">CMakeLists.txt</code> should look like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>set(LLVM_LINK_COMPONENTS support)
+
+add_clang_executable(commentparser
+  CommentParser.cpp
+)
+target_link_libraries(commentparser
+  clangTooling
+  clangBasic
+  clangASTMatchers
+)
+</code></pre>
+</div>
+
+<p>Now we can start writing our fontend action. We need a couple of different elements: setting up command line parsing in the main function, an <code class="highlighter-rouge">ASTFrontendAction</code> and an <code class="highlighter-rouge">ASTConsumer</code>. Starting with the command line parsing and setup:</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">static</span> <span class="n">llvm</span><span class="o">::</span><span class="n">cl</span><span class="o">::</span><span class="n">OptionCategory</span> <span class="n">MyToolCategory</span><span class="p">(</span><span class="s">"My tool options"</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">CommonOptionsParser</span> <span class="n">OptionsParser</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="n">MyToolCategory</span><span class="p">);</span>
+  <span class="n">ClangTool</span> <span class="n">Tool</span><span class="p">(</span><span class="n">OptionsParser</span><span class="p">.</span><span class="n">getCompilations</span><span class="p">(),</span>
+                 <span class="n">OptionsParser</span><span class="p">.</span><span class="n">getSourcePathList</span><span class="p">());</span>
+  <span class="k">return</span> <span class="n">Tool</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">newFrontendActionFactory</span><span class="o">&lt;</span><span class="n">FindCommentsAction</span><span class="o">&gt;</span><span class="p">().</span><span class="n">get</span><span class="p">());</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Nothing too interesting going on here yet, although note that we setup a new <code class="highlighter-rouge">OptionCategory</code>, this lets us hide all the default clang options displayed in the help, we don’t want those for our tool.</p>
+
+<p>Next is the <code class="highlighter-rouge">ASTFrontendAction</code>, all we are going to do here is create our <code class="highlighter-rouge">ASTConsumer</code> and forward the compiler’s <code class="highlighter-rouge">ASTContext</code> to it. Here’s that code:</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">FindCommentsAction</span> <span class="o">:</span> <span class="k">public</span> <span class="n">clang</span><span class="o">::</span><span class="n">ASTFrontendAction</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">virtual</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">clang</span><span class="o">::</span><span class="n">ASTConsumer</span><span class="o">&gt;</span> <span class="n">CreateASTConsumer</span><span class="p">(</span>
+    <span class="n">clang</span><span class="o">::</span><span class="n">CompilerInstance</span> <span class="o">&amp;</span><span class="n">Compiler</span><span class="p">,</span> <span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span> <span class="n">InFile</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">clang</span><span class="o">::</span><span class="n">ASTConsumer</span><span class="o">&gt;</span><span class="p">(</span>
+        <span class="k">new</span> <span class="n">FindCommentsConsumer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Compiler</span><span class="p">.</span><span class="n">getASTContext</span><span class="p">()));</span>
+  <span class="p">}</span>
+<span class="p">};</span></code></pre></figure>
+
+<p>Now for the interesting part, our <code class="highlighter-rouge">ASTConsumer</code>, this is the class that we can visit AST nodes in. If we wanted to, we could perform an action on all <code class="highlighter-rouge">IfStmt</code>, <code class="highlighter-rouge">ForLoop</code>, <code class="highlighter-rouge">EnumDecl</code>, etc. All we need to visit to handle comments is the translation unit. A <code class="highlighter-rouge">TranslationUnitDecl</code> is always the top level node in the Abstract Syntax Tree<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup></p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">FindCommentsConsumer</span> <span class="o">:</span> <span class="k">public</span> <span class="n">clang</span><span class="o">::</span><span class="n">ASTConsumer</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="k">explicit</span> <span class="n">FindCommentsConsumer</span><span class="p">(</span><span class="n">ASTContext</span> <span class="o">*</span><span class="n">Context</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="c1">// This is called after the full translation unit is parsed
+</span>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">HandleTranslationUnit</span><span class="p">(</span><span class="n">clang</span><span class="o">::</span><span class="n">ASTContext</span> <span class="o">&amp;</span><span class="n">Context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">auto</span> <span class="n">comments</span> <span class="o">=</span> <span class="n">Context</span><span class="p">.</span><span class="n">getRawCommentList</span><span class="p">().</span><span class="n">getComments</span><span class="p">();</span>
+    <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">comment</span> <span class="o">:</span> <span class="n">comments</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">comment</span><span class="o">-&gt;</span><span class="n">getRawText</span><span class="p">(</span><span class="n">Context</span><span class="p">.</span><span class="n">getSourceManager</span><span class="p">()).</span><span class="n">str</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Finished parsing for comments"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span></code></pre></figure>
+
+<p>That’s all we need for this frontend action, we are just going to print out the comments that we find in each translation unit.</p>
+
+<p>For testing, I’m going to use a simple source file <code class="highlighter-rouge">test.cpp</code>:</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="cm">/** Other comment */</span>
+<span class="c1">// This is the main method
+/// Documentation comment
+</span><span class="cm">/* block comment */</span>
+
+<span class="kt">int</span> <span class="nf">f</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="mi">42</span><span class="p">);</span> <span class="c1">// end of line comment
+</span>  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cm">/** this is a block comment */</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Compiling and running the frontend action:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>ninja commentparser
+./commentparser test.cpp --
+</code></pre>
+</div>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>/** Other comment */
+/// Documentation comment
+/** this is a block comment */
+Finished parsing for comments
+</code></pre>
+</div>
+
+<p>Wait, what happened to the other comments in the file? Clang treats some comments differently to others. Comments that start with <code class="highlighter-rouge">/**</code> or <code class="highlighter-rouge">///</code> are treated as documentation comments. By default, clang <code class="highlighter-rouge">only</code> parses documentation comments.<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup></p>
+
+<p>Luckily, there’s a command line flag to override this and parse <em>all</em> comments <code class="highlighter-rouge">-fparse-all-comments</code>:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>./commentparser test.cpp -- -fparse-all-comments
+
+/** Other comment */
+// This is the main method
+/// Documentation comment
+/* block comment */
+// end of line comment
+/** this is a block comment */
+Finished parsing for comments
+</code></pre>
+</div>
+
+<p>That gives us all the comments in the translation unit! Note that if we wanted to compile a more complicated class with imports or a project that has multiple files, we’d have to use a compilation database<sup id="fnref:3"><a href="#fn:3" class="footnote">3</a></sup>. Checkout out the full source code for this frontend action <a href="https://gist.github.com/daniel-beard/7dab28f3c2fbf24f6c6c3816d76109af">CommentParser.cpp</a></p>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p><a href="http://clang.llvm.org/docs/IntroductionToTheClangAST.html">http://clang.llvm.org/docs/IntroductionToTheClangAST.html</a> <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p><a href="http://www.cs.ubbcluj.ro/~studia-i/2014-macs/06Cseri.pdf">http://www.cs.ubbcluj.ro/~studia-i/2014-macs/06Cseri.pdf</a> <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:3">
+      <p><a href="http://clang.llvm.org/docs/JSONCompilationDatabase.html">http://clang.llvm.org/docs/JSONCompilationDatabase.html</a> <a href="#fnref:3" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>
