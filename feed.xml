@@ -5,7 +5,7 @@
     <atom:link href="http://danielbeard.io/feed.xml" rel="self" type="application/rss+xml"/>
     <link>http://danielbeard.io/</link>
     <description>iOS and other stuff</description>
-    <pubDate>Wed, 20 Apr 2016 10:57:58 -0700</pubDate>
+    <pubDate>Sat, 07 May 2016 14:43:32 -0700</pubDate>
     
       <item>
         <title>Clang frontend actions (Part 1)</title>
@@ -165,7 +165,7 @@ I’m not going to cover the basics here, but for an great introduction to user 
 
 &lt;p&gt;Let’s open the binary within the framework.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://danielbeard.io/images/corelocationhopper.png&quot; alt=&quot;CoreLocationHopper&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/jqewNDV.png&quot; alt=&quot;CoreLocationHopper&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Looking on the left panel under “labels”, there are lots of &lt;code class=&quot;highlighter-rouge&quot;&gt;CLLocationManager&lt;/code&gt; methods. Scrolling through, we can see a couple of interesting authorization related ones.&lt;/p&gt;
 
