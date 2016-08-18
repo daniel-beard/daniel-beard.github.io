@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Swift per-file compile times | Daniel Beard</title>
+	<meta name="description" content="I’ve been struggling with Swift compilation times recently. Working on a larger app means that we are adding a lot of new Swift code. Swift isn’t the fastest...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/2016/08/17/swift-file-compile-times.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Swift per-file compile times</h1>
+    <p class="meta">
+    August 17, 2016
+    
+    </p>
+  </header>
+  <section class="post-content"><p>I’ve been struggling with Swift compilation times recently. Working on a larger app means that we are adding a lot of new Swift code. Swift isn’t the fastest to compile, it sometimes has issues around type inference<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup> (Swift 3 appears to improve a lot of this, but at time of writing I hadn’t migrated yet).</p>
+
+<p>I had been working previously with <a href="https://thatthinginswift.com/debug-long-compile-times-swift/">function compile times</a> to track down some functions that take far too long to compile (minutes in some cases!). Now that I’ve tackled the low hanging functions in my code base, I wanted to see which <em>files</em> were taking the longest to compile.</p>
+
+<hr />
+
+<p>Not knowing a massive amount about the Swift compiler, my approach was similar to how I’d measure Objective-C compile times. My first (failed) attempt was trying to parse the “CompileSwift” build steps in the output from <code class="highlighter-rouge">xcodebuild</code> and building each file separately (while timing the build process), similar to how <code class="highlighter-rouge">OCLint</code> and the <code class="highlighter-rouge">compile_commands.json</code> process works. This worked extremely well in a smaller test project, but fell over completely when moving to a larger, real-world project.</p>
+
+<p>I was assuming that the “CompileSwift” output in the <code class="highlighter-rouge">xcodebuild.log</code> was similar to the Objective-C “CompileC” output, in that it was a completely self contained description of how to build an individual source file (Hint: It’s not, and building individual Swift sources like this isn’t official supported at all). Xcode and the Swift compiler write out <code class="highlighter-rouge">file-lists</code> to temporary files then pass the file path to the “CompileSwift” build step<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>. This is done to reduce the size of the command that gets passed to the swiftc tool. On my machine, these were being written out to the /var folder: <code class="highlighter-rouge">/var/folders/7h/qq7_qn8x6653xq9jlpnddv6w0000gn/T/sources-adc365</code> and being removed after xcodebuild had finished.</p>
+
+<p><a href="https://twitter.com/_danielbeard/status/766047939504594944">Jordan Rose gave me a great tip about -save-temps</a>, but I couldn’t quite get that to work on the larger real-world project. The <a href="https://bugs.swift.org/browse/SR-1788">https://bugs.swift.org/browse/SR-1788</a> Swift issue pointed me in the right direction though.</p>
+
+<p>The <code class="highlighter-rouge">-debug-time-compilation</code> gave awesome in depth compilation times for each part of the compilation process.
+Example:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>===-------------------------------------------------------------------------===
+                               Swift compilation
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.0080 seconds (0.0062 wall clock)
+
+   ---User Time---   --User+System--   ---Wall Time---  --- Name ---
+   0.0040 ( 50.0%)   0.0040 ( 50.0%)   0.0030 ( 49.0%)  LLVM output
+   0.0040 ( 50.0%)   0.0040 ( 50.0%)   0.0010 ( 17.0%)  SILGen
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0008 ( 13.4%)  Type checking / Semantic analysis
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0006 (  9.1%)  IRGen
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0003 (  5.5%)  LLVM optimization
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0002 (  2.7%)  AST verification
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0001 (  1.2%)  SIL verification (pre-optimization)
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0001 (  1.1%)  Parsing
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0000 (  0.6%)  SIL verification (post-optimization)
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0000 (  0.5%)  SIL optimization
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0000 (  0.0%)  Name binding
+   0.0080 (100.0%)   0.0080 (100.0%)   0.0062 (100.0%)  Total
+
+</code></pre>
+</div>
+
+<p>With that knowledge, I compiled my app like this:</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">set</span> -o pipefail <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    xcodebuild -workspace MyApp.xcworkspace <span class="se">\</span>
+    -scheme MyApp <span class="se">\</span>
+    -sdk iphonesimulator <span class="se">\</span>
+    <span class="nv">SYMROOT</span><span class="o">=</span><span class="s2">"</span><span class="k">${</span><span class="nv">PWD</span><span class="k">}</span><span class="s2">/build"</span> <span class="se">\</span>
+    <span class="nv">ONLY_ACTIVE_ARCH</span><span class="o">=</span>YES <span class="se">\</span>
+    <span class="nv">OTHER_SWIFT_FLAGS</span><span class="o">=</span><span class="s2">"-D DEBUG -Xfrontend -debug-time-compilation"</span> <span class="se">\</span>
+    -destination <span class="s1">'platform=iOS Simulator,name=iPhone 6s'</span> clean build <span class="se">\</span>
+    | tee xcodebuild.log | xcpretty
+</code></pre>
+</div>
+
+<p>Then parsed the <code class="highlighter-rouge">xcodebuild.log</code> file for the results:</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>cat xcodebuild.log | ruby process_xcodebuild_log.rb &gt; swift_build_times.txt
+</code></pre>
+</div>
+<p><a href="https://gist.github.com/daniel-beard/3a614435c202d03c8338a5d53a1e333e">Here’s the gist for process_xcodebuild_log.rb</a></p>
+
+<p>and got results like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>0.1925s /Users/dbeard/Dev/swift_file_compile_times/a.swift
+0.5183s /Users/dbeard/Dev/swift_file_compile_times/b.swift
+0.6008s /Users/dbeard/Dev/swift_file_compile_times/c.swift
+0.1964s /Users/dbeard/Dev/swift_file_compile_times/d.swift
+0.1919s /Users/dbeard/Dev/swift_file_compile_times/e.swift
+0.7563s /Users/dbeard/Dev/swift_file_compile_times/f.swift
+</code></pre>
+</div>
+
+<h3 id="tldr-give-me-a-solution">TL;DR, give me a solution</h3>
+
+<p>Sorted swift file compilation times:</p>
+<ol>
+  <li>Download <a href="https://gist.github.com/daniel-beard/3a614435c202d03c8338a5d53a1e333e">process_xcodebuild_log.rb</a></li>
+  <li>Run this:
+    <div class="highlighter-rouge"><pre class="highlight"><code>set -o pipefail &amp;&amp; \
+ xcodebuild -workspace MyApp.xcworkspace \
+ -scheme MyApp \
+ -sdk iphonesimulator \
+ SYMROOT="${PWD}/build" \
+ ONLY_ACTIVE_ARCH=YES \
+ OTHER_SWIFT_FLAGS="-D DEBUG -Xfrontend -debug-time-compilation" \
+ -destination 'platform=iOS Simulator,name=iPhone 6s' clean build \
+ | tee xcodebuild.log | ruby process_xcodebuild_log.rb | sort -nr &gt; sorted_swift_compile_times.txt
+</code></pre>
+    </div>
+  </li>
+</ol>
+
+<hr />
+
+<p>This is a temporary solution until the <a href="https://bugs.swift.org/browse/SR-1788">https://bugs.swift.org/browse/SR-1788</a> issue is resolved in Swift, and I don’t think that’s going to take too long :)</p>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p><a href="https://bugs.swift.org/browse/SR-305">Type Inference Bug - SR-305</a> <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p><a href="https://bugs.swift.org/browse/SR-280">Swift Compile -filelist</a> <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

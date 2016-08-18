@@ -217,11 +217,13 @@ The key fingerprint is:
   <li>Unmodifying a modified file: <code class="highlighter-rouge">git checkout -- benchmarks.rb</code></li>
 </ul>
 
-<p>Notes:
-  * The git add command stages a file for a commit. Calling git status shows which files are staged/unstaged or if they are untracked.
-  * If you modify a file after calling git add, the git status command will show the file as being both staged and unstaged.
-  * If you modify a file after calling git add, you have to run git add again to stage the latest version of the file
-Providing the -a option to git commit makes git automatically stage every file before doing the commit. (Letting you skip the git add part)</p>
+<p>Notes:</p>
+<ul>
+  <li>The git add command stages a file for a commit. Calling git status shows which files are staged/unstaged or if they are untracked.</li>
+  <li>If you modify a file after calling git add, the git status command will show the file as being both staged and unstaged.</li>
+  <li>If you modify a file after calling git add, you have to run git add again to stage the latest version of the file
+Providing the -a option to git commit makes git automatically stage every file before doing the commit. (Letting you skip the git add part)</li>
+</ul>
 
 <p>Basic repository changes: <a href="http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository">http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository</a></p>
 

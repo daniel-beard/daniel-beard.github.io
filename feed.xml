@@ -5,7 +5,118 @@
     <atom:link href="http://danielbeard.io/feed.xml" rel="self" type="application/rss+xml"/>
     <link>http://danielbeard.io/</link>
     <description>iOS and other stuff</description>
-    <pubDate>Sat, 07 May 2016 14:43:32 -0700</pubDate>
+    <pubDate>Thu, 18 Aug 2016 09:36:05 -0700</pubDate>
+    
+      <item>
+        <title>Swift per-file compile times</title>
+        <link>http://danielbeard.io/2016/08/17/swift-file-compile-times.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/2016/08/17/swift-file-compile-times.html</guid>
+        <description>&lt;p&gt;I’ve been struggling with Swift compilation times recently. Working on a larger app means that we are adding a lot of new Swift code. Swift isn’t the fastest to compile, it sometimes has issues around type inference&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt; (Swift 3 appears to improve a lot of this, but at time of writing I hadn’t migrated yet).&lt;/p&gt;
+
+&lt;p&gt;I had been working previously with &lt;a href=&quot;https://thatthinginswift.com/debug-long-compile-times-swift/&quot;&gt;function compile times&lt;/a&gt; to track down some functions that take far too long to compile (minutes in some cases!). Now that I’ve tackled the low hanging functions in my code base, I wanted to see which &lt;em&gt;files&lt;/em&gt; were taking the longest to compile.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Not knowing a massive amount about the Swift compiler, my approach was similar to how I’d measure Objective-C compile times. My first (failed) attempt was trying to parse the “CompileSwift” build steps in the output from &lt;code class=&quot;highlighter-rouge&quot;&gt;xcodebuild&lt;/code&gt; and building each file separately (while timing the build process), similar to how &lt;code class=&quot;highlighter-rouge&quot;&gt;OCLint&lt;/code&gt; and the &lt;code class=&quot;highlighter-rouge&quot;&gt;compile_commands.json&lt;/code&gt; process works. This worked extremely well in a smaller test project, but fell over completely when moving to a larger, real-world project.&lt;/p&gt;
+
+&lt;p&gt;I was assuming that the “CompileSwift” output in the &lt;code class=&quot;highlighter-rouge&quot;&gt;xcodebuild.log&lt;/code&gt; was similar to the Objective-C “CompileC” output, in that it was a completely self contained description of how to build an individual source file (Hint: It’s not, and building individual Swift sources like this isn’t official supported at all). Xcode and the Swift compiler write out &lt;code class=&quot;highlighter-rouge&quot;&gt;file-lists&lt;/code&gt; to temporary files then pass the file path to the “CompileSwift” build step&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;. This is done to reduce the size of the command that gets passed to the swiftc tool. On my machine, these were being written out to the /var folder: &lt;code class=&quot;highlighter-rouge&quot;&gt;/var/folders/7h/qq7_qn8x6653xq9jlpnddv6w0000gn/T/sources-adc365&lt;/code&gt; and being removed after xcodebuild had finished.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://twitter.com/_danielbeard/status/766047939504594944&quot;&gt;Jordan Rose gave me a great tip about -save-temps&lt;/a&gt;, but I couldn’t quite get that to work on the larger real-world project. The &lt;a href=&quot;https://bugs.swift.org/browse/SR-1788&quot;&gt;https://bugs.swift.org/browse/SR-1788&lt;/a&gt; Swift issue pointed me in the right direction though.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;-debug-time-compilation&lt;/code&gt; gave awesome in depth compilation times for each part of the compilation process.
+Example:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;===-------------------------------------------------------------------------===
+                               Swift compilation
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.0080 seconds (0.0062 wall clock)
+
+   ---User Time---   --User+System--   ---Wall Time---  --- Name ---
+   0.0040 ( 50.0%)   0.0040 ( 50.0%)   0.0030 ( 49.0%)  LLVM output
+   0.0040 ( 50.0%)   0.0040 ( 50.0%)   0.0010 ( 17.0%)  SILGen
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0008 ( 13.4%)  Type checking / Semantic analysis
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0006 (  9.1%)  IRGen
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0003 (  5.5%)  LLVM optimization
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0002 (  2.7%)  AST verification
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0001 (  1.2%)  SIL verification (pre-optimization)
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0001 (  1.1%)  Parsing
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0000 (  0.6%)  SIL verification (post-optimization)
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0000 (  0.5%)  SIL optimization
+   0.0000 (  0.0%)   0.0000 (  0.0%)   0.0000 (  0.0%)  Name binding
+   0.0080 (100.0%)   0.0080 (100.0%)   0.0062 (100.0%)  Total
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;With that knowledge, I compiled my app like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt; -o pipefail &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    xcodebuild -workspace MyApp.xcworkspace &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    -scheme MyApp &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    -sdk iphonesimulator &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;SYMROOT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PWD&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/build&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;ONLY_ACTIVE_ARCH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;YES &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;OTHER_SWIFT_FLAGS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;-D DEBUG -Xfrontend -debug-time-compilation&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    -destination &lt;span class=&quot;s1&quot;&gt;&#39;platform=iOS Simulator,name=iPhone 6s&#39;&lt;/span&gt; clean build &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    | tee xcodebuild.log | xcpretty
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Then parsed the &lt;code class=&quot;highlighter-rouge&quot;&gt;xcodebuild.log&lt;/code&gt; file for the results:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cat xcodebuild.log | ruby process_xcodebuild_log.rb &amp;gt; swift_build_times.txt
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;a href=&quot;https://gist.github.com/daniel-beard/3a614435c202d03c8338a5d53a1e333e&quot;&gt;Here’s the gist for process_xcodebuild_log.rb&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;and got results like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;0.1925s /Users/dbeard/Dev/swift_file_compile_times/a.swift
+0.5183s /Users/dbeard/Dev/swift_file_compile_times/b.swift
+0.6008s /Users/dbeard/Dev/swift_file_compile_times/c.swift
+0.1964s /Users/dbeard/Dev/swift_file_compile_times/d.swift
+0.1919s /Users/dbeard/Dev/swift_file_compile_times/e.swift
+0.7563s /Users/dbeard/Dev/swift_file_compile_times/f.swift
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;tldr-give-me-a-solution&quot;&gt;TL;DR, give me a solution&lt;/h3&gt;
+
+&lt;p&gt;Sorted swift file compilation times:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Download &lt;a href=&quot;https://gist.github.com/daniel-beard/3a614435c202d03c8338a5d53a1e333e&quot;&gt;process_xcodebuild_log.rb&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Run this:
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;set -o pipefail &amp;amp;&amp;amp; \
+ xcodebuild -workspace MyApp.xcworkspace \
+ -scheme MyApp \
+ -sdk iphonesimulator \
+ SYMROOT=&quot;${PWD}/build&quot; \
+ ONLY_ACTIVE_ARCH=YES \
+ OTHER_SWIFT_FLAGS=&quot;-D DEBUG -Xfrontend -debug-time-compilation&quot; \
+ -destination &#39;platform=iOS Simulator,name=iPhone 6s&#39; clean build \
+ | tee xcodebuild.log | ruby process_xcodebuild_log.rb | sort -nr &amp;gt; sorted_swift_compile_times.txt
+&lt;/code&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;This is a temporary solution until the &lt;a href=&quot;https://bugs.swift.org/browse/SR-1788&quot;&gt;https://bugs.swift.org/browse/SR-1788&lt;/a&gt; issue is resolved in Swift, and I don’t think that’s going to take too long :)&lt;/p&gt;
+
+&lt;div class=&quot;footnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:1&quot;&gt;
+      &lt;p&gt;&lt;a href=&quot;https://bugs.swift.org/browse/SR-305&quot;&gt;Type Inference Bug - SR-305&lt;/a&gt; &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:2&quot;&gt;
+      &lt;p&gt;&lt;a href=&quot;https://bugs.swift.org/browse/SR-280&quot;&gt;Swift Compile -filelist&lt;/a&gt; &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;
+</description>
+        <pubDate>Wed, 17 Aug 2016 12:08:28 -0700</pubDate>
+      </item>
     
       <item>
         <title>Clang frontend actions (Part 1)</title>
@@ -861,11 +972,11 @@ cp &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&qu
 &lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;@implementation&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NSObject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;DBValidator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-    &lt;span class=&quot;err&quot;&gt;-(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;setValidationRules&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setValidationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;objc_setAssociatedObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VALIDATION_RULES_KEY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OBJC_ASSOCIATION_RETAIN_NONATOMIC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-    &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;objc_getAssociatedObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VALIDATION_RULES_KEY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
         &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
             &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
@@ -992,11 +1103,13 @@ The key fingerprint is:
   &lt;li&gt;Unmodifying a modified file: &lt;code class=&quot;highlighter-rouge&quot;&gt;git checkout -- benchmarks.rb&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Notes:
-  * The git add command stages a file for a commit. Calling git status shows which files are staged/unstaged or if they are untracked.
-  * If you modify a file after calling git add, the git status command will show the file as being both staged and unstaged.
-  * If you modify a file after calling git add, you have to run git add again to stage the latest version of the file
-Providing the -a option to git commit makes git automatically stage every file before doing the commit. (Letting you skip the git add part)&lt;/p&gt;
+&lt;p&gt;Notes:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;The git add command stages a file for a commit. Calling git status shows which files are staged/unstaged or if they are untracked.&lt;/li&gt;
+  &lt;li&gt;If you modify a file after calling git add, the git status command will show the file as being both staged and unstaged.&lt;/li&gt;
+  &lt;li&gt;If you modify a file after calling git add, you have to run git add again to stage the latest version of the file
+Providing the -a option to git commit makes git automatically stage every file before doing the commit. (Letting you skip the git add part)&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;p&gt;Basic repository changes: &lt;a href=&quot;http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository&quot;&gt;http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository&lt;/a&gt;&lt;/p&gt;
 
@@ -1168,23 +1281,6 @@ GitHub flow: &lt;a href=&quot;http://scottchacon.com/2011/08/31/github-flow.html
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/KD8Ym.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 </description>
         <pubDate>Thu, 06 Sep 2012 02:16:42 -0700</pubDate>
-      </item>
-    
-      <item>
-        <title>iOS Updating UI when using blocks</title>
-        <link>http://danielbeard.io/ios/objective-c/2012/04/16/ios-updating-ui-when-using-blocks-background-threads.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/ios/objective-c/2012/04/16/ios-updating-ui-when-using-blocks-background-threads.html</guid>
-        <description>&lt;p&gt;Here is the method that I use to update the UI when a background async thread. This is mostly for my own reference:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-objc&quot; data-lang=&quot;objc&quot;&gt;    &lt;span class=&quot;n&quot;&gt;dispatch_async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dispatch_get_global_queue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DISPATCH_QUEUE_PRIORITY_DEFAULT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;^&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;c1&quot;&gt;//background processing goes here
-&lt;/span&gt;            &lt;span class=&quot;n&quot;&gt;dispatch_async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dispatch_get_main_queue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;^&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-                    &lt;span class=&quot;c1&quot;&gt;//update UI here
-&lt;/span&gt;            &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-</description>
-        <pubDate>Mon, 16 Apr 2012 12:48:07 -0700</pubDate>
       </item>
     
   </channel>

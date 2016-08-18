@@ -165,11 +165,11 @@
 </span>
     <span class="k">@implementation</span> <span class="nc">NSObject</span> <span class="p">(</span><span class="nl">DBValidator</span><span class="p">)</span>
 
-    <span class="err">-(</span><span class="nc">void</span><span class="p">)</span> <span class="n">setValidationRules</span><span class="o">:</span><span class="p">(</span><span class="n">NSMutableArray</span> <span class="o">*</span><span class="p">)</span><span class="n">validationRules</span> <span class="p">{</span>
+    <span class="k">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="nf">setValidationRules</span><span class="p">:(</span><span class="n">NSMutableArray</span> <span class="o">*</span><span class="p">)</span><span class="nv">validationRules</span> <span class="p">{</span>
         <span class="n">objc_setAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">VALIDATION_RULES_KEY</span><span class="p">,</span> <span class="n">validationRules</span><span class="p">,</span> <span class="n">OBJC_ASSOCIATION_RETAIN_NONATOMIC</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="o">-</span><span class="p">(</span><span class="n">NSMutableArray</span><span class="o">*</span><span class="p">)</span> <span class="n">validationRules</span> <span class="p">{</span>
+    <span class="k">-</span><span class="p">(</span><span class="n">NSMutableArray</span><span class="o">*</span><span class="p">)</span> <span class="n">validationRules</span> <span class="p">{</span>
         <span class="n">NSMutableArray</span> <span class="o">*</span><span class="n">validationRules</span> <span class="o">=</span> <span class="n">objc_getAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">VALIDATION_RULES_KEY</span><span class="p">);</span>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">validationRules</span><span class="p">)</span>
             <span class="n">validationRules</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSMutableArray</span> <span class="nf">array</span><span class="p">];</span>
