@@ -5,7 +5,7 @@
     <atom:link href="http://danielbeard.io/feed.xml" rel="self" type="application/rss+xml"/>
     <link>http://danielbeard.io/</link>
     <description>iOS and other stuff</description>
-    <pubDate>Thu, 18 Aug 2016 09:36:05 -0700</pubDate>
+    <pubDate>Fri, 11 May 2018 15:17:15 -0700</pubDate>
     
       <item>
         <title>Swift per-file compile times</title>
@@ -107,10 +107,10 @@ Example:&lt;/p&gt;
 &lt;div class=&quot;footnotes&quot;&gt;
   &lt;ol&gt;
     &lt;li id=&quot;fn:1&quot;&gt;
-      &lt;p&gt;&lt;a href=&quot;https://bugs.swift.org/browse/SR-305&quot;&gt;Type Inference Bug - SR-305&lt;/a&gt; &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+      &lt;p&gt;&lt;a href=&quot;https://bugs.swift.org/browse/SR-305&quot;&gt;Type Inference Bug - SR-305&lt;/a&gt; &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
     &lt;li id=&quot;fn:2&quot;&gt;
-      &lt;p&gt;&lt;a href=&quot;https://bugs.swift.org/browse/SR-280&quot;&gt;Swift Compile -filelist&lt;/a&gt; &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+      &lt;p&gt;&lt;a href=&quot;https://bugs.swift.org/browse/SR-280&quot;&gt;Swift Compile -filelist&lt;/a&gt; &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
 &lt;/div&gt;
@@ -243,13 +243,13 @@ Finished parsing for comments
 &lt;div class=&quot;footnotes&quot;&gt;
   &lt;ol&gt;
     &lt;li id=&quot;fn:1&quot;&gt;
-      &lt;p&gt;&lt;a href=&quot;http://clang.llvm.org/docs/IntroductionToTheClangAST.html&quot;&gt;http://clang.llvm.org/docs/IntroductionToTheClangAST.html&lt;/a&gt; &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+      &lt;p&gt;&lt;a href=&quot;http://clang.llvm.org/docs/IntroductionToTheClangAST.html&quot;&gt;http://clang.llvm.org/docs/IntroductionToTheClangAST.html&lt;/a&gt; &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
     &lt;li id=&quot;fn:2&quot;&gt;
-      &lt;p&gt;&lt;a href=&quot;http://www.cs.ubbcluj.ro/~studia-i/2014-macs/06Cseri.pdf&quot;&gt;http://www.cs.ubbcluj.ro/~studia-i/2014-macs/06Cseri.pdf&lt;/a&gt; &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+      &lt;p&gt;&lt;a href=&quot;http://www.cs.ubbcluj.ro/~studia-i/2014-macs/06Cseri.pdf&quot;&gt;http://www.cs.ubbcluj.ro/~studia-i/2014-macs/06Cseri.pdf&lt;/a&gt; &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
     &lt;li id=&quot;fn:3&quot;&gt;
-      &lt;p&gt;&lt;a href=&quot;http://clang.llvm.org/docs/JSONCompilationDatabase.html&quot;&gt;http://clang.llvm.org/docs/JSONCompilationDatabase.html&lt;/a&gt; &lt;a href=&quot;#fnref:3&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+      &lt;p&gt;&lt;a href=&quot;http://clang.llvm.org/docs/JSONCompilationDatabase.html&quot;&gt;http://clang.llvm.org/docs/JSONCompilationDatabase.html&lt;/a&gt; &lt;a href=&quot;#fnref:3&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
 &lt;/div&gt;
@@ -321,8 +321,8 @@ This is going to let us set the location permission to whatever we want, while s
     
       <item>
         <title>Setting up travis-ci for automated unit testing of iOS projects on GitHub</title>
-        <link>http://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/06/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html</guid>
+        <link>http://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/07/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html</link>
+        <guid isPermaLink="true">http://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/07/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html</guid>
         <description>&lt;p&gt;This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects.&lt;/p&gt;
 
 &lt;p&gt;The first step is to create a new project in Xcode. I am going to select a single view application and enable storyboards, Automatic Reference Counting and Unit Tests.&lt;/p&gt;
@@ -417,11 +417,11 @@ Pressing the menu item should open an alert. Customize at will!
 
 &lt;p&gt;If we run the project we just created, it will automatically build and copy the plugin to the right location. In this case it is &lt;code class=&quot;highlighter-rouge&quot;&gt;~/Library/Application Support/Developer/Shared/Xcode/Plug-ins/[Project Name].xcplugin&lt;/code&gt;. Restarting Xcode, we get a new menu item under the &lt;code class=&quot;highlighter-rouge&quot;&gt;File&lt;/code&gt; menu!&lt;/p&gt;
 
-&lt;h3 id=&quot;screen-shot-2013-04-29-at-35302-pmhttpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-02-pmpnghttpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-02-pmpng&quot;&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png&quot; alt=&quot;Screen Shot 2013-04-29 at 3.53.02 PM&quot; /&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;h3&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png&quot; alt=&quot;Screen Shot 2013-04-29 at 3.53.02 PM&quot; /&gt;&lt;/a&gt;&lt;/h3&gt;
 
 &lt;p&gt;When we click on the menu item, we get an alert:&lt;/p&gt;
 
-&lt;h3 id=&quot;screen-shot-2013-04-29-at-35349-pmhttpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-49-pmpngw300httpdanielbeardfileswordpresscom201304screen-shot-2013-04-29-at-3-53-49-pmpng&quot;&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-29 at 3.53.49 PM&quot; /&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;h3 id=&quot;-1&quot;&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-29 at 3.53.49 PM&quot; /&gt;&lt;/a&gt;&lt;/h3&gt;
 
 &lt;p&gt;Notes:&lt;/p&gt;
 
@@ -972,11 +972,11 @@ cp &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&qu
 &lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;@implementation&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NSObject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;DBValidator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-    &lt;span class=&quot;k&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setValidationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;err&quot;&gt;-(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;setValidationRules&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;objc_setAssociatedObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VALIDATION_RULES_KEY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OBJC_ASSOCIATION_RETAIN_NONATOMIC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-    &lt;span class=&quot;k&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;objc_getAssociatedObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VALIDATION_RULES_KEY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
         &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
             &lt;span class=&quot;n&quot;&gt;validationRules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSMutableArray&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
