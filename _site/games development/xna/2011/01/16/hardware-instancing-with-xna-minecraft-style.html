@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Hardware Instancing with XNA (minecraft style) | Daniel Beard</title>
+	<meta name="description" content="Lately I have been really enjoying a game called Minecraft. It’s an indie game made by one guy, I highly recommend it!">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/games%20development/xna/2011/01/16/hardware-instancing-with-xna-minecraft-style.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Hardware Instancing with XNA (minecraft style)</h1>
+    <p class="meta">
+    January 16, 2011
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>Lately I have been really enjoying a game called Minecraft. It’s an indie game made by one guy, I highly recommend it!</p>
+
+<p>I have ported the heightmap generation code in one of my earlier posts to C# and using XNA I have been creating a minecraft style rendering for fun. My first approach was a brute force, render everything test. As you might have guessed, that didn’t turn out so well when rendering a decent sized terrain. The method I am using now is hardware instancing without any kind of occlusion culling at the moment. I am getting a decent frame rate (about 80fps for 20000 models) for the moment and I am going to continue on improving this method. The example that is linked at the bottom of this article shows how to perform hardware, and shader instancing.</p>
+
+<p>Here’s a video of it in action:</p>
+
+<iframe width="560" height="420" src="http://www.youtube.com/embed/iTlSHS_8iiQ?color=white&amp;theme=light"></iframe>
+
+<p>Links:</p>
+
+<p><a href="http://minecraft.net">Minecraft</a></p>
+
+<p><a href="http://create.msdn.com/en-US/education/catalog/sample/mesh_instancing">XNA Mesh Instancing</a></p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Smoothing Terrain | Daniel Beard</title>
+	<meta name="description" content="The terrain generated in the last post was quite bumpy, what if I want smooth rolling hills or something that isn’t quite so bumpy. There are two options her...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/games%20development/2010/08/07/smoothing-terrain.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Smoothing Terrain</h1>
+    <p class="meta">
+    August 7, 2010
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>The terrain generated in the last post was quite bumpy, what if I want smooth rolling hills or something that isn’t quite so bumpy. There are two options here - you can either play around with the diamond-square weights and method of generating the terrain or you can smooth the result. The method I have chosen is a mean (average) filter also known as a box filter. The filter works by moving a square (say 3x3) across the terrain values taking the average of the pixels surrounding it to give the center value an averaged result.</p>
+
+<p>The box filter size is usually a power of 2 + 1. Some examples are 3x3, 5x5, 9x9, etc. The image below shows how the filter works. The 3x3 square is slid over the terrain averaging it’s neighbours. The center pixel is also taken into account.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/filter.png"><img src="http://danielbeard.files.wordpress.com/2010/08/filter.png?w=300" alt="" /></a></p>
+
+<p>Ok, time for some source code. The following code loops over the 2d array of pixels, the inner loop loops from the position minus the filter size to the position plus the filter size in each dimension, this allows us to have an arbitrary filter size without hand coding the weights and positions of each pixel in the filter. The count variable keeps track of how many points contribute to the average and we ignore edge cases meaning that if a point in the filter is outside the array, it gives no contribution to the average.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/code.png"><img src="http://danielbeard.files.wordpress.com/2010/08/code.png" alt="" /></a></p>
+
+<p>So the results for running this on the terrain in the previous post are as follows first with no smoothing, then with a box size of 9x9:</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/terrain-simple.png"><img src="http://danielbeard.files.wordpress.com/2010/08/terrain-simple.png?w=300" alt="" /></a></p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/smoothterrain2.png"><img src="http://danielbeard.files.wordpress.com/2010/08/smoothterrain2.png?w=300" alt="" /></a></p>
+
+<p>And of course the smoothing can be iterated over many times. Here is the same filter size as above, but repeated 50 times.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2010/08/really-smooth.png"><img src="http://danielbeard.files.wordpress.com/2010/08/really-smooth.png?w=300" alt="" /></a></p>
+
+<p>Here is a link to the code in the image for use with the previous terrain code : <a href="http://www.divshare.com/download/12208159-2b8">Download Link</a></p>
+
+<p>Other useful links:</p>
+
+<p>Band filtering example : <a href="http://www.lighthouse3d.com/opengl/terrain/index.php3?smoothing">http://www.lighthouse3d.com/opengl/terrain/index.php3?smoothing</a>
+Filter functions: <a href="http://www.wheatchex.com/projects/filters/">http://www.wheatchex.com/projects/filters/</a></p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

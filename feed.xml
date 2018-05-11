@@ -2,15 +2,15 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Daniel Beard</title>
-    <atom:link href="http://danielbeard.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <link>http://danielbeard.io/</link>
+    <atom:link href="https://danielbeard.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <link>https://danielbeard.io/</link>
     <description>iOS and other stuff</description>
-    <pubDate>Fri, 11 May 2018 15:17:15 -0700</pubDate>
+    <pubDate>Fri, 11 May 2018 15:48:01 -0700</pubDate>
     
       <item>
         <title>Swift per-file compile times</title>
-        <link>http://danielbeard.io/2016/08/17/swift-file-compile-times.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/2016/08/17/swift-file-compile-times.html</guid>
+        <link>https://danielbeard.io/2016/08/17/swift-file-compile-times.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/2016/08/17/swift-file-compile-times.html</guid>
         <description>&lt;p&gt;I’ve been struggling with Swift compilation times recently. Working on a larger app means that we are adding a lot of new Swift code. Swift isn’t the fastest to compile, it sometimes has issues around type inference&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt; (Swift 3 appears to improve a lot of this, but at time of writing I hadn’t migrated yet).&lt;/p&gt;
 
 &lt;p&gt;I had been working previously with &lt;a href=&quot;https://thatthinginswift.com/debug-long-compile-times-swift/&quot;&gt;function compile times&lt;/a&gt; to track down some functions that take far too long to compile (minutes in some cases!). Now that I’ve tackled the low hanging functions in my code base, I wanted to see which &lt;em&gt;files&lt;/em&gt; were taking the longest to compile.&lt;/p&gt;
@@ -120,8 +120,8 @@ Example:&lt;/p&gt;
     
       <item>
         <title>Clang frontend actions (Part 1)</title>
-        <link>http://danielbeard.io/2016/04/19/clang-frontend-action-part-1.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/2016/04/19/clang-frontend-action-part-1.html</guid>
+        <link>https://danielbeard.io/2016/04/19/clang-frontend-action-part-1.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/2016/04/19/clang-frontend-action-part-1.html</guid>
         <description>&lt;p&gt;I had an interesting discussion with a co-worker yesterday, we were discussing how to grab all the comments from an Objective-C source file. We tried to think about how to do that with a regex, which probably would have worked &lt;em&gt;ok&lt;/em&gt;, but definitely wouldn’t have handled all the edge cases easily.&lt;/p&gt;
 
 &lt;p&gt;I’ve been using clang’s awesome libTooling library for writing frontend actions recently so I thought I’d try and take a quick pass at writing a frontend action that can grab all the comments from a source file.&lt;/p&gt;
@@ -259,8 +259,8 @@ Finished parsing for comments
     
       <item>
         <title>Xcode UI Testing and Location Permission Alerts</title>
-        <link>http://danielbeard.io/2015/07/17/xcode-ui-testing-and-location-permission-alerts.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/2015/07/17/xcode-ui-testing-and-location-permission-alerts.html</guid>
+        <link>https://danielbeard.io/2015/07/17/xcode-ui-testing-and-location-permission-alerts.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/2015/07/17/xcode-ui-testing-and-location-permission-alerts.html</guid>
         <description>&lt;p&gt;With Xcode 7, Apple has given us a new tool for user interface testing.
 I’m not going to cover the basics here, but for an great introduction to user interface testing in Xcode, check out this awesome article: &lt;a href=&quot;http://masilotti.com/ui-testing-xcode-7/&quot;&gt;UI Testing in Xcode 7&lt;/a&gt;&lt;/p&gt;
 
@@ -276,7 +276,7 @@ I’m not going to cover the basics here, but for an great introduction to user 
 
 &lt;p&gt;Let’s open the binary within the framework.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/jqewNDV.png&quot; alt=&quot;CoreLocationHopper&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/jqewNDV.png&quot; alt=&quot;CoreLocationHopper&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Looking on the left panel under “labels”, there are lots of &lt;code class=&quot;highlighter-rouge&quot;&gt;CLLocationManager&lt;/code&gt; methods. Scrolling through, we can see a couple of interesting authorization related ones.&lt;/p&gt;
 
@@ -321,13 +321,13 @@ This is going to let us set the location permission to whatever we want, while s
     
       <item>
         <title>Setting up travis-ci for automated unit testing of iOS projects on GitHub</title>
-        <link>http://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/07/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/07/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html</guid>
+        <link>https://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/07/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/general%20dev/git/ios/objective-c/2013/05/07/setting-up-travis-ci-for-automated-unit-testing-of-ios-projects-on-github.html</guid>
         <description>&lt;p&gt;This guide is how I set up new projects to run unit tests automatically when I push a commit or merge a branch on GitHub for iOS projects.&lt;/p&gt;
 
 &lt;p&gt;The first step is to create a new project in Xcode. I am going to select a single view application and enable storyboards, Automatic Reference Counting and Unit Tests.&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-05-06 at 11.42.27 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png&quot;&gt;&lt;img src=&quot;https://danielbeard.files.wordpress.com/2013/05/screen-shot-2013-05-06-at-11-42-27-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-05-06 at 11.42.27 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;All I’m going to change is the &lt;code class=&quot;highlighter-rouge&quot;&gt;testExample&lt;/code&gt; method in the unit testing bundle to something that will pass. For now I have just gone with this:&lt;/p&gt;
 
@@ -384,8 +384,8 @@ I get build messages, then &lt;code class=&quot;highlighter-rouge&quot;&gt;** TE
     
       <item>
         <title>Developing Xcode 4 Plugins</title>
-        <link>http://danielbeard.io/general%20dev/objective-c/osx%20development/2013/04/29/developing-xcode-4-plugins.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/general%20dev/objective-c/osx%20development/2013/04/29/developing-xcode-4-plugins.html</guid>
+        <link>https://danielbeard.io/general%20dev/objective-c/osx%20development/2013/04/29/developing-xcode-4-plugins.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/general%20dev/objective-c/osx%20development/2013/04/29/developing-xcode-4-plugins.html</guid>
         <description>&lt;p&gt;This is a quick guide that documents how to start developing plugins for Xcode4. You need to have Xcode installed to create plugins.&lt;/p&gt;
 
 &lt;h3 id=&quot;step-1---xcode-plugin-project-template&quot;&gt;Step 1 - Xcode Plugin Project Template&lt;/h3&gt;
@@ -405,7 +405,7 @@ I get build messages, then &lt;code class=&quot;highlighter-rouge&quot;&gt;** TE
   &lt;li&gt;Then under &lt;code class=&quot;highlighter-rouge&quot;&gt;OS X &amp;gt; Templates&lt;/code&gt; tap &lt;code class=&quot;highlighter-rouge&quot;&gt;Xcode4 Plugin&lt;/code&gt; (shown below)&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-44-05-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-44-05-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-29 at 3.44.05 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-44-05-pm.png&quot;&gt;&lt;img src=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-44-05-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-29 at 3.44.05 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;From the GitHub repo:&lt;/p&gt;
 
@@ -417,11 +417,11 @@ Pressing the menu item should open an alert. Customize at will!
 
 &lt;p&gt;If we run the project we just created, it will automatically build and copy the plugin to the right location. In this case it is &lt;code class=&quot;highlighter-rouge&quot;&gt;~/Library/Application Support/Developer/Shared/Xcode/Plug-ins/[Project Name].xcplugin&lt;/code&gt;. Restarting Xcode, we get a new menu item under the &lt;code class=&quot;highlighter-rouge&quot;&gt;File&lt;/code&gt; menu!&lt;/p&gt;
 
-&lt;h3&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png&quot; alt=&quot;Screen Shot 2013-04-29 at 3.53.02 PM&quot; /&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;h3&gt;&lt;a href=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png&quot;&gt;&lt;img src=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-02-pm.png&quot; alt=&quot;Screen Shot 2013-04-29 at 3.53.02 PM&quot; /&gt;&lt;/a&gt;&lt;/h3&gt;
 
 &lt;p&gt;When we click on the menu item, we get an alert:&lt;/p&gt;
 
-&lt;h3 id=&quot;-1&quot;&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-29 at 3.53.49 PM&quot; /&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;h3 id=&quot;-1&quot;&gt;&lt;a href=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png&quot;&gt;&lt;img src=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-29-at-3-53-49-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-29 at 3.53.49 PM&quot; /&gt;&lt;/a&gt;&lt;/h3&gt;
 
 &lt;p&gt;Notes:&lt;/p&gt;
 
@@ -445,8 +445,8 @@ Pressing the menu item should open an alert. Customize at will!
     
       <item>
         <title>Automated Unit testing an iOS app with Jenkins</title>
-        <link>http://danielbeard.io/general%20dev/ios/objective-c/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins.html</guid>
+        <link>https://danielbeard.io/general%20dev/ios/objective-c/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/general%20dev/ios/objective-c/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins.html</guid>
         <description>&lt;ul&gt;
   &lt;li&gt;Setting up and executing automated unit tests is slightly more involved than generating built apps for distribution.&lt;/li&gt;
   &lt;li&gt;The following is the set up that I use for some of my projects, I have just renamed the project to &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProject&lt;/code&gt; for convenience.&lt;/li&gt;
@@ -557,7 +557,7 @@ ruby TestProject/server.rb &amp;amp;
 
 &lt;p&gt;Below is a screenshot from jenkins showing the fields used for the xcode plugin&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-33-32-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-33-32-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-23 at 3.33.32 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-33-32-pm.png&quot;&gt;&lt;img src=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-33-32-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-23 at 3.33.32 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Clean before build&lt;/code&gt; - we don’t want any cached compiled objects hanging around.&lt;/li&gt;
@@ -603,7 +603,7 @@ ruby TestProject/server.rb &amp;amp;
 
 &lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProjectTests&lt;/code&gt; target in Xcode has a custom script that it executes &lt;strong&gt;after&lt;/strong&gt; building. The script can be found in &lt;code class=&quot;highlighter-rouge&quot;&gt;Project Settings -&amp;gt; TestProjectTest -&amp;gt; Build Phases -&amp;gt; Run Script&lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-38-26-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-38-26-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-23 at 3.38.26 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-38-26-pm.png&quot;&gt;&lt;img src=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-3-38-26-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-23 at 3.38.26 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;The script is shown below:&lt;/p&gt;
 
@@ -672,8 +672,8 @@ end
     
       <item>
         <title>Auto build and deploy iOS apps using Jenkins</title>
-        <link>http://danielbeard.io/general%20dev/ios/objective-c/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins.html</guid>
+        <link>https://danielbeard.io/general%20dev/ios/objective-c/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/general%20dev/ios/objective-c/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins.html</guid>
         <description>&lt;p&gt;We will have a look at a &lt;code class=&quot;highlighter-rouge&quot;&gt;TestProject&lt;/code&gt; to get an idea of how jenkins can be used to build, sign and deploy iOS projects. The whole process consists of 4 steps. Note that to deploy an app in this manner, an enterprise distribution certificate is required for each app.
 This guide is how I have set up my enterprise builds for my apps that use &lt;code class=&quot;highlighter-rouge&quot;&gt;cocoaPods&lt;/code&gt; for dependencies, but most of the same principles apply for any iOS apps.
 Because the project uses &lt;code class=&quot;highlighter-rouge&quot;&gt;cocoaPods&lt;/code&gt;, it means we have to build a workspace and have a build scheme set up.&lt;/p&gt;
@@ -694,7 +694,7 @@ Because the project uses &lt;code class=&quot;highlighter-rouge&quot;&gt;cocoaPo
 
 &lt;p&gt;Below is a screenshot from jenkins showing the fields used for the xcode plugin.&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-4-01-12-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-4-01-12-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-23 at 4.01.12 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-4-01-12-pm.png&quot;&gt;&lt;img src=&quot;https://danielbeard.files.wordpress.com/2013/04/screen-shot-2013-04-23-at-4-01-12-pm.png?w=300&quot; alt=&quot;Screen Shot 2013-04-23 at 4.01.12 PM&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Clean before build&lt;/code&gt; - we don’t want any cached compiled objects hanging around.&lt;/li&gt;
@@ -837,8 +837,8 @@ cp &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&qu
     
       <item>
         <title>Objective-C Style Guide</title>
-        <link>http://danielbeard.io/general%20dev/ios/objective-c/2013/04/17/objective-c-style-guide.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2013/04/17/objective-c-style-guide.html</guid>
+        <link>https://danielbeard.io/general%20dev/ios/objective-c/2013/04/17/objective-c-style-guide.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/general%20dev/ios/objective-c/2013/04/17/objective-c-style-guide.html</guid>
         <description>&lt;p&gt;This is the style guide that I follow when programming in Objective-C, this is for my own reference, but other people may find this useful.&lt;/p&gt;
 
 &lt;h3 id=&quot;general&quot;&gt;General&lt;/h3&gt;
@@ -955,8 +955,8 @@ cp &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&qu
     
       <item>
         <title>Objective-C Runtime</title>
-        <link>http://danielbeard.io/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html</guid>
+        <link>https://danielbeard.io/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html</guid>
         <description>&lt;p&gt;It is pretty rare to actually have to dive into the objc-runtime for any day to day coding. Most developers wont have to touch the runtime, however it is helpful to know what is possible and be able to use it if required. The objective-c runtime is written in C and is how the underlying parts of the objective-c language work including message sending, ivars and properties. This post shows an example of where I have used the Objective-C runtime in one of my projects.&lt;/p&gt;
 
 &lt;p&gt;One example of where I have used the runtime in my projects is the validation code in &lt;code class=&quot;highlighter-rouge&quot;&gt;DBValidator&lt;/code&gt;. The validation code is implemented as a category on &lt;code class=&quot;highlighter-rouge&quot;&gt;NSObject&lt;/code&gt; called &lt;code class=&quot;highlighter-rouge&quot;&gt;NSObject+DBValidator&lt;/code&gt;. This is so we can add validation rules to &lt;strong&gt;any&lt;/strong&gt; objective-c object. The only problem with this approach is that you &lt;em&gt;can’t&lt;/em&gt; add any properties or ivars to an object using a category.&lt;/p&gt;
@@ -1034,8 +1034,8 @@ cp &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&qu
     
       <item>
         <title>Git notes</title>
-        <link>http://danielbeard.io/general%20dev/git/2013/04/15/git-notes.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/general%20dev/git/2013/04/15/git-notes.html</guid>
+        <link>https://danielbeard.io/general%20dev/git/2013/04/15/git-notes.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/general%20dev/git/2013/04/15/git-notes.html</guid>
         <description>&lt;p&gt;This is a list of git notes that I use everyday. Hopefully someone else finds it useful. I will update this list over time.&lt;/p&gt;
 
 &lt;ul&gt;
@@ -1189,15 +1189,15 @@ GitHub flow: &lt;a href=&quot;http://scottchacon.com/2011/08/31/github-flow.html
     
       <item>
         <title>General purpose validation library for objective-c and iOS</title>
-        <link>http://danielbeard.io/general%20dev/ios/objective-c/2013/01/09/general-purpose-validation-library-for-objective-c-and-ios.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2013/01/09/general-purpose-validation-library-for-objective-c-and-ios.html</guid>
+        <link>https://danielbeard.io/general%20dev/ios/objective-c/2013/01/09/general-purpose-validation-library-for-objective-c-and-ios.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/general%20dev/ios/objective-c/2013/01/09/general-purpose-validation-library-for-objective-c-and-ios.html</guid>
         <description>&lt;p&gt;This is a simple validation framework that I created for one of my projects that I am releasing under an open source MIT license.&lt;/p&gt;
 
 &lt;p&gt;The framework supports a number of different types of validations including string length, number range, email validation, regex validation and equality.&lt;/p&gt;
 
 &lt;p&gt;Validation rules can be added to any keypath of any object that inherits from NSObject, as well as having multiple validation rules per object. Here is a screenshot:&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-09-at-3-35-54-pm.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-09-at-3-35-54-pm.png?w=569&quot; alt=&quot;Image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-09-at-3-35-54-pm.png&quot;&gt;&lt;img src=&quot;https://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-09-at-3-35-54-pm.png?w=569&quot; alt=&quot;Image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;And here is the project on Github - &lt;a href=&quot;https://github.com/daniel-beard/DBValidator&quot;&gt;DBValidator&lt;/a&gt;&lt;/p&gt;
 </description>
@@ -1206,11 +1206,11 @@ GitHub flow: &lt;a href=&quot;http://scottchacon.com/2011/08/31/github-flow.html
     
       <item>
         <title>Adding a border to UILabel</title>
-        <link>http://danielbeard.io/2013/01/04/adding-a-border-to-uilabel.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/2013/01/04/adding-a-border-to-uilabel.html</guid>
+        <link>https://danielbeard.io/2013/01/04/adding-a-border-to-uilabel.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/2013/01/04/adding-a-border-to-uilabel.html</guid>
         <description>&lt;p&gt;I have created a simple control that subclasses UILabel to add a border. Here’s a screenshot:&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-04-at-9-12-11-am.png&quot;&gt;&lt;img src=&quot;http://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-04-at-9-12-11-am.png?w=580&quot; alt=&quot;Image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-04-at-9-12-11-am.png&quot;&gt;&lt;img src=&quot;https://danielbeard.files.wordpress.com/2013/01/screen-shot-2013-01-04-at-9-12-11-am.png?w=580&quot; alt=&quot;Image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;Check out the project on &lt;a href=&quot;https://github.com/daniel-beard/DBBorderedLabel&quot;&gt;GitHub&lt;/a&gt;&lt;/p&gt;
 </description>
@@ -1219,13 +1219,13 @@ GitHub flow: &lt;a href=&quot;http://scottchacon.com/2011/08/31/github-flow.html
     
       <item>
         <title>Metro themed button for iOS</title>
-        <link>http://danielbeard.io/ios/objective-c/2012/09/20/metro-themed-button-for-ios.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/ios/objective-c/2012/09/20/metro-themed-button-for-ios.html</guid>
+        <link>https://danielbeard.io/ios/objective-c/2012/09/20/metro-themed-button-for-ios.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/ios/objective-c/2012/09/20/metro-themed-button-for-ios.html</guid>
         <description>&lt;p&gt;Just for fun, I have created a metro themed UIButton for iOS complete with perspective 3D transform animations. Check out the screen shot and video below.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/4oJ8F.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/4oJ8F.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;iframe width=&quot;560&quot; height=&quot;420&quot; src=&quot;http://www.youtube.com/embed/jk9uoD9curk?color=white&amp;amp;theme=light&quot;&gt;&lt;/iframe&gt;
+&lt;iframe width=&quot;560&quot; height=&quot;420&quot; src=&quot;https://www.youtube.com/embed/jk9uoD9curk?color=white&amp;amp;theme=light&quot;&gt;&lt;/iframe&gt;
 
 &lt;p&gt;Get the project on GitHub here: &lt;a href=&quot;https://github.com/paintstripper/DBTileButton&quot;&gt;https://github.com/paintstripper/DBTileButton&lt;/a&gt;&lt;/p&gt;
 </description>
@@ -1234,8 +1234,8 @@ GitHub flow: &lt;a href=&quot;http://scottchacon.com/2011/08/31/github-flow.html
     
       <item>
         <title>Adding a multiple images to a UIScrollView (iOS)</title>
-        <link>http://danielbeard.io/ios/objective-c/2012/09/17/adding-a-uiscrollview-to-a-uiview-ios.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/ios/objective-c/2012/09/17/adding-a-uiscrollview-to-a-uiview-ios.html</guid>
+        <link>https://danielbeard.io/ios/objective-c/2012/09/17/adding-a-uiscrollview-to-a-uiview-ios.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/ios/objective-c/2012/09/17/adding-a-uiscrollview-to-a-uiview-ios.html</guid>
         <description>&lt;p&gt;This is the code that I use when setting up a &lt;code class=&quot;highlighter-rouge&quot;&gt;UIScrollView&lt;/code&gt; to contain multiple images that can be scrolled through. I add this code in the &lt;code class=&quot;highlighter-rouge&quot;&gt;viewDidLoad&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;viewWillAppear&lt;/code&gt; methods and then set the &lt;code class=&quot;highlighter-rouge&quot;&gt;numberOfViews&lt;/code&gt; to the number of images I want to display. This will also scale the images to fit the size of the screen using an aspect fit scaling. The example code loads images named “image1”, “image2” etc.&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-objc&quot; data-lang=&quot;objc&quot;&gt;    &lt;span class=&quot;k&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;setupScrollView&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
@@ -1272,13 +1272,13 @@ GitHub flow: &lt;a href=&quot;http://scottchacon.com/2011/08/31/github-flow.html
     
       <item>
         <title>DBSignatureView</title>
-        <link>http://danielbeard.io/general%20dev/ios/objective-c/2012/09/06/dbsignatureview.html</link>
-        <guid isPermaLink="true">http://danielbeard.io/general%20dev/ios/objective-c/2012/09/06/dbsignatureview.html</guid>
+        <link>https://danielbeard.io/general%20dev/ios/objective-c/2012/09/06/dbsignatureview.html</link>
+        <guid isPermaLink="true">https://danielbeard.io/general%20dev/ios/objective-c/2012/09/06/dbsignatureview.html</guid>
         <description>&lt;p&gt;One of the projects I am currently working on needs to capture a signature from a user. So I am releasing the simple library that I created for it.&lt;/p&gt;
 
 &lt;p&gt;Check out the project on GitHub here: &lt;a href=&quot;http://github.com/paintstripper/DBSignatureView&quot;&gt;DBSignatureView&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/KD8Ym.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/KD8Ym.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 </description>
         <pubDate>Thu, 06 Sep 2012 02:16:42 -0700</pubDate>
       </item>

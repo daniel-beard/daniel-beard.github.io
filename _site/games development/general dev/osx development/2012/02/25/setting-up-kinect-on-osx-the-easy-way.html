@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Setting up Kinect on OSX the easy way | Daniel Beard</title>
+	<meta name="description" content="Open Terminal">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/games%20development/general%20dev/osx%20development/2012/02/25/setting-up-kinect-on-osx-the-easy-way.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Setting up Kinect on OSX the easy way</h1>
+    <p class="meta">
+    February 25, 2012
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>Open Terminal</p>
+
+<p>Install homebrew with the following command</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">    /usr/bin/ruby -e <span class="s2">"</span><span class="k">$(</span>curl -fsSL https://raw.github.com/gist/323731<span class="k">)</span><span class="s2">"</span></code></pre></figure>
+
+<p>Make sure homebrew is up to date with</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">    sudo brew update</code></pre></figure>
+
+<p>Change directory to your brew home folder with</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">    <span class="nb">cd</span> /usr/local/Library/Formula
+    curl --insecure -O <span class="s2">"https://raw.github.com/OpenKinect/libfreenect/master/platform/osx/homebrew/libfreenect.rb"</span>
+    curl --insecure -O <span class="s2">"https://raw.github.com/OpenKinect/libfreenect/master/platform/osx/homebrew/libusb-freenect.rb"</span>
+
+    brew install libfreenect
+
+    glview</code></pre></figure>
+
+<p><a href="http://danielbeard.files.wordpress.com/2012/02/kinect.png"><img src="http://danielbeard.files.wordpress.com/2012/02/kinect.png?w=300" alt="" /></a></p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

@@ -14,10 +14,10 @@
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
 	<!-- Canonical -->
-	<link rel="canonical" href="http://danielbeard.io/games%20development/2010/08/07/terrain-generation-and-smoothing.html">
+	<link rel="canonical" href="https://danielbeard.io/games%20development/2010/08/07/terrain-generation-and-smoothing.html">
 
 	<!-- RSS -->
-	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="https://danielbeard.io/feed.xml" />
 
 	<!-- Font Awesome -->
 	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
@@ -122,10 +122,6 @@
 
 
 
-
-
-
-
 <li>
 	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
 		<i class="fa fa-fw fa-twitter"></i>
@@ -158,7 +154,7 @@
 
 <p>We then perform the diamond step which consists of taking the four points arranged in a square shape, averaging the four values and adding a random value to the average, creating diamond shapes. The square step then averages the four corners of the diamonds created in the previous step. The center value of this step becomes the corners of the next step. The diamond and square step are repeated until all the points in the grid have values assigned to them.</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/08/diamond-square-algorithm.png"><img src="http://danielbeard.files.wordpress.com/2010/08/diamond-square-algorithm.png" alt="" /></a>The image above shows the alternating steps being carried out. The red dots are the pixels with new values, the black dots are pixels with existing values. The pseudocode from gameprogrammer.com is as follows:</p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/08/diamond-square-algorithm.png"><img src="https://danielbeard.files.wordpress.com/2010/08/diamond-square-algorithm.png" alt="" /></a>The image above shows the alternating steps being carried out. The red dots are the pixels with new values, the black dots are pixels with existing values. The pseudocode from gameprogrammer.com is as follows:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code> While the length of the side of the squares
  is greater than zero {
@@ -173,11 +169,11 @@
 
 <p>Then we end up with a program that can generate terrain / cloud maps / general fractal noise. Below is an example image that I have generated at 512x512.</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/08/terrain.png"><img src="http://danielbeard.files.wordpress.com/2010/08/terrain.png?w=300" alt="Heightmap 512x512" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/08/terrain.png"><img src="https://danielbeard.files.wordpress.com/2010/08/terrain.png?w=300" alt="Heightmap 512x512" /></a></p>
 
 <p>Below is a sample of what the terrain looks like with simple shading in OpenGL without textures. The shading effect is calculated by giving a colour based on the minimum and maximum values of the heightmap. E.g. VertexColour = (value - minY) / (maxY - minY);</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/08/terrain-simple.png"><img src="http://danielbeard.files.wordpress.com/2010/08/terrain-simple.png?w=300" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/08/terrain-simple.png"><img src="https://danielbeard.files.wordpress.com/2010/08/terrain-simple.png?w=300" alt="" /></a></p>
 
 <p>I find that the easiest way to import data from my terrain generation program into the display program is to use the built-in IO functions to create an easy to read file format. The advantage of using this method is that you can store heights as floating point values instead of bytes (0-255) this gives many more possible heights, a greater dynamic range. The code to write these files is quite simple:</p>
 
@@ -229,7 +225,7 @@
 
 
 <footer class="site-footer">
-	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+	<p class="text">Powered by <a href="https://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
 </p>
 </footer>
 

@@ -14,10 +14,10 @@
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
 	<!-- Canonical -->
-	<link rel="canonical" href="http://danielbeard.io/astronomy/2010/09/10/dark-matter.html">
+	<link rel="canonical" href="https://danielbeard.io/astronomy/2010/09/10/dark-matter.html">
 
 	<!-- RSS -->
-	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="https://danielbeard.io/feed.xml" />
 
 	<!-- Font Awesome -->
 	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
@@ -122,10 +122,6 @@
 
 
 
-
-
-
-
 <li>
 	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
 		<i class="fa fa-fw fa-twitter"></i>
@@ -154,15 +150,15 @@
 
 <p>The first result was encouraging, but wasn’t what I expected. In the following image, the green points is the dark matter volume displayed in Drishti.</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/09/darkmatter_001.png"><img src="http://danielbeard.files.wordpress.com/2010/09/darkmatter_001.png?w=300" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/09/darkmatter_001.png"><img src="https://danielbeard.files.wordpress.com/2010/09/darkmatter_001.png?w=300" alt="" /></a></p>
 
 <p>The problem was that Drishti sucks at displaying dynamic range. The internal possible range of values is limited to the size of an unsigned char (0-255). While this would limit the memory usage, I wish there was an option to use short int, or even float because in the image above, all the dark matter points are physically there but the dynamic range is too high to accurately display them. This may have implications on how my other volumes are being displayed as well. I realised that dark matter for this simulation doesn’t have a mass associated with it and doesn’t share mass between voxels either. To check that the points were actually there, I fired up stereo2 and took an image of the raw points.</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/09/darkmatterpoints.png"><img src="http://danielbeard.files.wordpress.com/2010/09/darkmatterpoints.png?w=300" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/09/darkmatterpoints.png"><img src="https://danielbeard.files.wordpress.com/2010/09/darkmatterpoints.png?w=300" alt="" /></a></p>
 
 <p>So the points are there, my code and Drishti just weren’t displaying them properly. I fixed the dynamic range issue by setting voxels that contained dark matter points to 1. The end result is shown below, and what is expected. Hopefully I can get some awesome movies going with the dark matter as well.</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/09/output_001.png"><img src="http://danielbeard.files.wordpress.com/2010/09/output_001.png?w=300" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/09/output_001.png"><img src="https://danielbeard.files.wordpress.com/2010/09/output_001.png?w=300" alt="" /></a></p>
 </section>
 </article>
 
@@ -179,7 +175,7 @@
 
 
 <footer class="site-footer">
-	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+	<p class="text">Powered by <a href="https://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
 </p>
 </footer>
 

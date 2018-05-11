@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Terrain Loader - Heightmap | Daniel Beard</title>
+	<meta name="description" content="This program is an older OpenGL based terrain loader. The program loads in a greyscale heightmap and generates the terrain based on height values stored in t...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/glut/opengl/2010/07/24/terrain-loader-heightmap.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Terrain Loader - Heightmap</h1>
+    <p class="meta">
+    July 24, 2010
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>This program is an older OpenGL based terrain loader. The program loads in a greyscale heightmap and generates the terrain based on height values stored in the image. This version uses the DevIL image library which allows it to load a wide variety of file formats. Several textures are loaded, these include the ground texture, the detail texture and the water texture. A simple method of creating a water plane is to create a plane at a certain level for example a y axis height of -10, then animate the UV coordinates of the plane so that the water appears to move.</p>
+
+<p>The detail texture allows the ground to have far more “detail” than normal. Usually a detail texture is a perlin noise or similar that is blended with the ground texture. Below is the image of a loaded heightmap.</p>
+
+<p><img src="http://danielbeard.files.wordpress.com/2009/06/post3terrainpic.png?w=300" alt="Post3terrainpic" /></p>
+
+<p>I was going to post the source code to this example, but the code uses a triangle list method without any level of detail, so once I get the time to update this program and change the display method to a vertex buffer and add some other features I will post the code for other people to learn from.</p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Objective-C Style Guide | Daniel Beard</title>
+	<meta name="description" content="This is the style guide that I follow when programming in Objective-C, this is for my own reference, but other people may find this useful.">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/general%20dev/ios/objective-c/2013/04/17/objective-c-style-guide.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Objective-C Style Guide</h1>
+    <p class="meta">
+    April 17, 2013
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>This is the style guide that I follow when programming in Objective-C, this is for my own reference, but other people may find this useful.</p>
+
+<h3 id="general">General</h3>
+
+<ul>
+  <li>Use modern objective-c 2.0 syntax</li>
+  <li>Use ARC whenever possible.</li>
+  <li>Manual memory management should only be used when using older libraries that haven’t been updated yet.</li>
+  <li>Use tabs when indenting, not spaces.</li>
+</ul>
+
+<h3 id="code-naming-basics">Code Naming Basics</h3>
+
+<ul>
+  <li>Follow the <a href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/CodingGuidelines/Articles/NamingBasics.html#//apple_ref/doc/uid/20001281-BBCHBFAH">Apple naming guidelines</a></li>
+  <li>Use descriptive names, even if they are long. Xcode has great code completion features. <em>Use them</em>.
+    <ul>
+      <li>Clarity is preferred over all else.</li>
+      <li>E.g. Compare the two methods: <code class="highlighter-rouge">[spaceship fly: 10.0f]</code> and <code class="highlighter-rouge">[spaceship flyAtSpeed: 10.0f]</code>.</li>
+      <li>Note how much clearer the second declaration is, the method describes its intentions and parameter names.</li>
+    </ul>
+  </li>
+  <li>Don’t use abbreviations. E.g. <code class="highlighter-rouge">bgColor</code> vs. <code class="highlighter-rouge">backgroundColor</code></li>
+  <li>Custom resuseable classes should be prefixed with <code class="highlighter-rouge">AFG</code>
+    <ul>
+      <li>Application level classes do not have to be prefixed. E.g. ViewControllers</li>
+    </ul>
+  </li>
+  <li>All view controllers should be descriptively named and end with <code class="highlighter-rouge">ViewController</code>.
+    <ul>
+      <li>E.g. <code class="highlighter-rouge">CalculatorSettingsViewController</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="commenting">Commenting</h3>
+
+<ul>
+  <li>Follow the <a href="http://gentlebytes.com/appledoc/">appledoc</a> code formatting style.</li>
+  <li>Only comment the method declarations. E.g. In the <code class="highlighter-rouge">@interface</code> or private <code class="highlighter-rouge">@interface ... ()</code> code blocks.</li>
+  <li>Describe what the method does, the parameter names and the return value and what it signifies.</li>
+</ul>
+
+<p>The following is a good example of method commenting:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>/** This method asks the delegate if the AFGContainerViewController should pop the current view from the view stack.
+ @param - The current AFGContainerViewController object
+ @return A BOOL value indicating if the current view controller should be removed from the AFGContainerViewController's view stack.
+ */
+-(BOOL) AFGContainerViewControllerShouldPopContainerViewController: (AFGContainerViewController*) containerViewController;
+</code></pre>
+</div>
+
+<h3 id="spacing">Spacing</h3>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>-(void) performOperationWithObject: (NSObject*) objectName {
+
+  NSLog(@"This is a well spaced method");
+  [objectName performSomeOperation];
+}
+</code></pre>
+</div>
+
+<ul>
+  <li>No space between the class or instance specifier <code class="highlighter-rouge">(+,-)</code></li>
+  <li>Single space between the return type and method name</li>
+  <li>Single spaces between method signature, object types and object names</li>
+  <li>Brace on the same line as the method signature.</li>
+  <li>Optional newline below the method signature for readability</li>
+  <li>No newline before the closing brace</li>
+</ul>
+
+<h3 id="variables-and-initializers">Variables and Initializers</h3>
+
+<ul>
+  <li>Variable names should always start with lower case.
+    <ul>
+      <li>Good: <code class="highlighter-rouge">numberOfObjects</code></li>
+      <li>Bad: <code class="highlighter-rouge">NumberOfObjects</code></li>
+    </ul>
+  </li>
+  <li>Clearly identify the designated initializer for the class
+    <ul>
+      <li>All other initializers should propagate up to and use the designated initializer.</li>
+    </ul>
+  </li>
+  <li>Override the superclass’ designated initializer.</li>
+  <li>Initialization method should be at the top of the <code class="highlighter-rouge"><span class="k">@implementation</span></code></li>
+  <li>Don’t explicitly initialize variables to nil. Under ARC this happens automatically.</li>
+</ul>
+
+<h3 id="properties">Properties</h3>
+
+<ul>
+  <li>Don’t <code class="highlighter-rouge">@synthesize</code> properties. Modern objective-c does this for us automatically.</li>
+  <li>Always start with a lower case letter.</li>
+  <li><code class="highlighter-rouge">NSString</code> properties should always be <code class="highlighter-rouge">copy</code></li>
+  <li><code class="highlighter-rouge">IBOutlets</code> should always be <code class="highlighter-rouge">weak</code></li>
+</ul>
+
+<h3 id="other-readings">Other readings</h3>
+
+<p>These are some good references / starting points for creating your own style guide or just to see other coding styles.</p>
+
+<ul>
+  <li><a href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/CodingGuidelines/CodingGuidelines.html#//apple_ref/doc/uid/10000146-SW1">Apple Coding Guidelines</a></li>
+  <li><a href="http://cocoadevcentral.com/articles/000082.php">CocoaDevCentral coding guidelines</a></li>
+  <li><a href="http://google-styleguide.googlecode.com/svn/trunk/objcguide.xml">Google Code Style</a></li>
+  <li><a href="http://www.techotopia.com/index.php/The_Basics_of_Modern_Objective-C">Basics of Modern Objective-C</a></li>
+</ul>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

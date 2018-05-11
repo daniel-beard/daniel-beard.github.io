@@ -14,10 +14,10 @@
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
 	<!-- Canonical -->
-	<link rel="canonical" href="http://danielbeard.io/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html">
+	<link rel="canonical" href="https://danielbeard.io/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html">
 
 	<!-- RSS -->
-	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="https://danielbeard.io/feed.xml" />
 
 	<!-- Font Awesome -->
 	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
@@ -122,10 +122,6 @@
 
 
 
-
-
-
-
 <li>
 	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
 		<i class="fa fa-fw fa-twitter"></i>
@@ -165,11 +161,11 @@
 </span>
     <span class="k">@implementation</span> <span class="nc">NSObject</span> <span class="p">(</span><span class="nl">DBValidator</span><span class="p">)</span>
 
-    <span class="k">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="nf">setValidationRules</span><span class="p">:(</span><span class="n">NSMutableArray</span> <span class="o">*</span><span class="p">)</span><span class="nv">validationRules</span> <span class="p">{</span>
+    <span class="err">-(</span><span class="nc">void</span><span class="p">)</span> <span class="n">setValidationRules</span><span class="o">:</span><span class="p">(</span><span class="n">NSMutableArray</span> <span class="o">*</span><span class="p">)</span><span class="n">validationRules</span> <span class="p">{</span>
         <span class="n">objc_setAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">VALIDATION_RULES_KEY</span><span class="p">,</span> <span class="n">validationRules</span><span class="p">,</span> <span class="n">OBJC_ASSOCIATION_RETAIN_NONATOMIC</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="k">-</span><span class="p">(</span><span class="n">NSMutableArray</span><span class="o">*</span><span class="p">)</span> <span class="n">validationRules</span> <span class="p">{</span>
+    <span class="o">-</span><span class="p">(</span><span class="n">NSMutableArray</span><span class="o">*</span><span class="p">)</span> <span class="n">validationRules</span> <span class="p">{</span>
         <span class="n">NSMutableArray</span> <span class="o">*</span><span class="n">validationRules</span> <span class="o">=</span> <span class="n">objc_getAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">VALIDATION_RULES_KEY</span><span class="p">);</span>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">validationRules</span><span class="p">)</span>
             <span class="n">validationRules</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSMutableArray</span> <span class="nf">array</span><span class="p">];</span>
@@ -237,7 +233,7 @@
 
 
 <footer class="site-footer">
-	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+	<p class="text">Powered by <a href="https://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
 </p>
 </footer>
 

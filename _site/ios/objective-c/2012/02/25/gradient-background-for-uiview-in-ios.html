@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Gradient background for UIView in iOS | Daniel Beard</title>
+	<meta name="description" content="One of the pieces of code I find myself re-using constantly is creating a gradient background for a UIView in iOS. This example will show two examples of how...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/ios/objective-c/2012/02/25/gradient-background-for-uiview-in-ios.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Gradient background for UIView in iOS</h1>
+    <p class="meta">
+    February 25, 2012
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>One of the pieces of code I find myself re-using constantly is creating a gradient background for a UIView in iOS. This example will show two examples of how to create a simple gradient background.</p>
+
+<p>First, in Xcode, create a new Single View iOS application</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2012/02/singleview.jpg"><img src="http://danielbeard.files.wordpress.com/2012/02/singleview.jpg?w=300" alt="" /></a></p>
+
+<p>Then create a new file File &gt; New &gt; New File and call this file “BackgroundLayer”, this will create BackgroundLayer.h and BackgroundLayer.m automatically for you.</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2012/02/newfile.png"><img src="http://danielbeard.files.wordpress.com/2012/02/newfile.png?w=300" alt="" /></a></p>
+
+<p>Then copy the following code into the BackgroundLayer.h header file</p>
+
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">    <span class="cp">#import &lt;Foundation/Foundation.h&gt;
+</span>    <span class="cp">#import &lt;QuartzCore/QuartzCore.h&gt;
+</span>
+    <span class="k">@interface</span> <span class="nc">BackgroundLayer</span> <span class="p">:</span> <span class="nc">NSObject</span>
+
+    <span class="k">+</span><span class="p">(</span><span class="n">CAGradientLayer</span><span class="o">*</span><span class="p">)</span> <span class="n">greyGradient</span><span class="p">;</span>
+    <span class="k">+</span><span class="p">(</span><span class="n">CAGradientLayer</span><span class="o">*</span><span class="p">)</span> <span class="n">blueGradient</span><span class="p">;</span>
+
+    <span class="k">@end</span></code></pre></figure>
+
+<p>Then copy the following code into the BackgroundLayer.m file</p>
+
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">    <span class="cp">#import "BackgroundLayer.h"
+</span>
+    <span class="k">@implementation</span> <span class="nc">BackgroundLayer</span>
+
+    <span class="c1">//Metallic grey gradient background
+</span>    <span class="k">+</span> <span class="p">(</span><span class="n">CAGradientLayer</span><span class="o">*</span><span class="p">)</span> <span class="n">greyGradient</span> <span class="p">{</span>
+
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorOne</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithWhite</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">9</span> <span class="nf">alpha</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorTwo</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithHue</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">625</span> <span class="nf">saturation</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="n">brightness</span><span class="o">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">85</span> <span class="n">alpha</span><span class="o">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorThree</span> <span class="err"> </span> <span class="err"> </span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithHue</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">625</span> <span class="nf">saturation</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="n">brightness</span><span class="o">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">7</span> <span class="n">alpha</span><span class="o">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorFour</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithHue</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">625</span> <span class="nf">saturation</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="n">brightness</span><span class="o">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">4</span> <span class="n">alpha</span><span class="o">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+
+        <span class="n">NSArray</span> <span class="o">*</span><span class="n">colors</span> <span class="o">=</span><span class="err"> </span> <span class="p">[</span><span class="n">NSArray</span> <span class="nf">arrayWithObjects</span><span class="p">:(</span><span class="n">id</span><span class="p">)</span><span class="n">colorOne</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="n">colorTwo</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="n">colorThree</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="n">colorFour</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="nb">nil</span><span class="p">];</span>
+
+        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">stopOne</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nf">numberWithFloat</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">stopTwo</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nf">numberWithFloat</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mo">02</span><span class="p">];</span>
+        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">stopThree</span> <span class="err"> </span> <span class="err"> </span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nf">numberWithFloat</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">99</span><span class="p">];</span>
+        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">stopFour</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nf">numberWithFloat</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+
+        <span class="n">NSArray</span> <span class="o">*</span><span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSArray</span> <span class="nf">arrayWithObjects</span><span class="p">:</span><span class="n">stopOne</span><span class="p">,</span> <span class="n">stopTwo</span><span class="p">,</span> <span class="n">stopThree</span><span class="p">,</span> <span class="n">stopFour</span><span class="p">,</span> <span class="nb">nil</span><span class="p">];</span>
+        <span class="n">CAGradientLayer</span> <span class="o">*</span><span class="n">headerLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">CAGradientLayer</span> <span class="nf">layer</span><span class="p">];</span>
+        <span class="n">headerLayer</span><span class="p">.</span><span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">;</span>
+        <span class="n">headerLayer</span><span class="p">.</span><span class="n">locations</span> <span class="o">=</span> <span class="n">locations</span><span class="p">;</span>
+
+        <span class="k">return</span> <span class="n">headerLayer</span><span class="p">;</span>
+
+    <span class="p">}</span>
+
+    <span class="c1">//Blue gradient background
+</span>    <span class="o">+</span> <span class="p">(</span><span class="n">CAGradientLayer</span><span class="o">*</span><span class="p">)</span> <span class="n">blueGradient</span> <span class="p">{</span>
+
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorOne</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithRed</span><span class="p">:(</span><span class="mi">120</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span> <span class="nf">green</span><span class="p">:(</span><span class="mi">135</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span> <span class="n">blue</span><span class="o">:</span><span class="p">(</span><span class="mi">150</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span> <span class="n">alpha</span><span class="o">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorTwo</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithRed</span><span class="p">:(</span><span class="mi">57</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="err"> </span> <span class="nf">green</span><span class="p">:(</span><span class="mi">79</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="err"> </span> <span class="n">blue</span><span class="o">:</span><span class="p">(</span><span class="mi">96</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="err"> </span> <span class="n">alpha</span><span class="o">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+
+        <span class="n">NSArray</span> <span class="o">*</span><span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSArray</span> <span class="nf">arrayWithObjects</span><span class="p">:(</span><span class="n">id</span><span class="p">)</span><span class="n">colorOne</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="n">colorTwo</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="nb">nil</span><span class="p">];</span>
+        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">stopOne</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nf">numberWithFloat</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">stopTwo</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nf">numberWithFloat</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+
+        <span class="n">NSArray</span> <span class="o">*</span><span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSArray</span> <span class="nf">arrayWithObjects</span><span class="p">:</span><span class="n">stopOne</span><span class="p">,</span> <span class="n">stopTwo</span><span class="p">,</span> <span class="nb">nil</span><span class="p">];</span>
+
+        <span class="n">CAGradientLayer</span> <span class="o">*</span><span class="n">headerLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">CAGradientLayer</span> <span class="nf">layer</span><span class="p">];</span>
+        <span class="n">headerLayer</span><span class="p">.</span><span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">;</span>
+        <span class="n">headerLayer</span><span class="p">.</span><span class="n">locations</span> <span class="o">=</span> <span class="n">locations</span><span class="p">;</span>
+
+        <span class="k">return</span> <span class="n">headerLayer</span><span class="p">;</span>
+
+    <span class="p">}</span>
+
+    <span class="k">@end</span></code></pre></figure>
+
+<p>Then finally, in your ViewController #import “BackgroundLayer.h” and add the following code to the viewWillAppear method:</p>
+
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">    <span class="n">CAGradientLayer</span> <span class="o">*</span><span class="n">bgLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">BackgroundLayer</span> <span class="nf">blueGradient</span><span class="p">];</span>
+    <span class="n">bgLayer</span><span class="p">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">bounds</span><span class="p">;</span>
+    <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">layer</span> <span class="nf">insertSublayer</span><span class="p">:</span><span class="n">bgLayer</span> <span class="nf">atIndex</span><span class="p">:</span><span class="mi">0</span><span class="p">];</span></code></pre></figure>
+
+<p>And don’t forget to add the QuartzCore framework to your project.</p>
+
+<p>Run the project and you get a result like this:</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2012/02/gradient.png"><img src="http://danielbeard.files.wordpress.com/2012/02/gradient.png?w=154" alt="" /></a>
+<a href="http://dl.dropbox.com/u/5387570/Blog/GradientBackground.zip">Click here to download the project</a></p>
+
+<p>Edit: Thanks to moi in the comments below, add the following code to your view controller so that the CALayer rotates with the view</p>
+
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">    <span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">willAnimateRotationToInterfaceOrientation</span><span class="p">:(</span><span class="n">UIInterfaceOrientation</span><span class="p">)</span><span class="nv">toInterfaceOrientation</span> <span class="nf">duration</span><span class="p">:(</span><span class="n">NSTimeInterval</span><span class="p">)</span><span class="nv">duration</span>
+    <span class="p">{</span>
+        <span class="c1">// resize your layers based on the view’s new bounds
+</span>        <span class="p">[[[</span><span class="n">self</span><span class="p">.</span><span class="n">subview</span><span class="p">.</span><span class="n">layer</span> <span class="nf">sublayers</span><span class="p">]</span> <span class="nf">objectAtIndex</span><span class="p">:</span><span class="mi">0</span><span class="p">]</span> <span class="nf">setFrame</span><span class="p">:</span><span class="n">self</span><span class="p">.</span><span class="n">subview</span><span class="p">.</span><span class="n">bounds</span><span class="p">];</span>
+    <span class="p">}</span></code></pre></figure>
+
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>

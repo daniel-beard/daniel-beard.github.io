@@ -14,10 +14,10 @@
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
 	<!-- Canonical -->
-	<link rel="canonical" href="http://danielbeard.io/ios/objective-c/2012/02/25/gradient-background-for-uiview-in-ios.html">
+	<link rel="canonical" href="https://danielbeard.io/ios/objective-c/2012/02/25/gradient-background-for-uiview-in-ios.html">
 
 	<!-- RSS -->
-	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="https://danielbeard.io/feed.xml" />
 
 	<!-- Font Awesome -->
 	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
@@ -122,10 +122,6 @@
 
 
 
-
-
-
-
 <li>
 	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
 		<i class="fa fa-fw fa-twitter"></i>
@@ -154,11 +150,11 @@
 
 <p>First, in Xcode, create a new Single View iOS application</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2012/02/singleview.jpg"><img src="http://danielbeard.files.wordpress.com/2012/02/singleview.jpg?w=300" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2012/02/singleview.jpg"><img src="https://danielbeard.files.wordpress.com/2012/02/singleview.jpg?w=300" alt="" /></a></p>
 
 <p>Then create a new file File &gt; New &gt; New File and call this file “BackgroundLayer”, this will create BackgroundLayer.h and BackgroundLayer.m automatically for you.</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2012/02/newfile.png"><img src="http://danielbeard.files.wordpress.com/2012/02/newfile.png?w=300" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2012/02/newfile.png"><img src="https://danielbeard.files.wordpress.com/2012/02/newfile.png?w=300" alt="" /></a></p>
 
 <p>Then copy the following code into the BackgroundLayer.h header file</p>
 
@@ -182,9 +178,9 @@
 </span>    <span class="k">+</span> <span class="p">(</span><span class="n">CAGradientLayer</span><span class="o">*</span><span class="p">)</span> <span class="n">greyGradient</span> <span class="p">{</span>
 
         <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorOne</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithWhite</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">9</span> <span class="nf">alpha</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
-        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorTwo</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithHue</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">625</span> <span class="nf">saturation</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="n">brightness</span><span class="o">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">85</span> <span class="n">alpha</span><span class="o">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
-        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorThree</span> <span class="err"> </span> <span class="err"> </span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithHue</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">625</span> <span class="nf">saturation</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="n">brightness</span><span class="o">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">7</span> <span class="n">alpha</span><span class="o">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
-        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorFour</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithHue</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">625</span> <span class="nf">saturation</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="n">brightness</span><span class="o">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">4</span> <span class="n">alpha</span><span class="o">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorTwo</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithHue</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">625</span> <span class="nf">saturation</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="nf">brightness</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">85</span> <span class="nf">alpha</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorThree</span> <span class="err"> </span> <span class="err"> </span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithHue</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">625</span> <span class="nf">saturation</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="nf">brightness</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">7</span> <span class="nf">alpha</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorFour</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithHue</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">625</span> <span class="nf">saturation</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="nf">brightness</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">4</span> <span class="nf">alpha</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
 
         <span class="n">NSArray</span> <span class="o">*</span><span class="n">colors</span> <span class="o">=</span><span class="err"> </span> <span class="p">[</span><span class="n">NSArray</span> <span class="nf">arrayWithObjects</span><span class="p">:(</span><span class="n">id</span><span class="p">)</span><span class="n">colorOne</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="n">colorTwo</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="n">colorThree</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="n">colorFour</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="nb">nil</span><span class="p">];</span>
 
@@ -205,8 +201,8 @@
     <span class="c1">//Blue gradient background
 </span>    <span class="o">+</span> <span class="p">(</span><span class="n">CAGradientLayer</span><span class="o">*</span><span class="p">)</span> <span class="n">blueGradient</span> <span class="p">{</span>
 
-        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorOne</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithRed</span><span class="p">:(</span><span class="mi">120</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span> <span class="nf">green</span><span class="p">:(</span><span class="mi">135</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span> <span class="n">blue</span><span class="o">:</span><span class="p">(</span><span class="mi">150</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span> <span class="n">alpha</span><span class="o">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
-        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorTwo</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithRed</span><span class="p">:(</span><span class="mi">57</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="err"> </span> <span class="nf">green</span><span class="p">:(</span><span class="mi">79</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="err"> </span> <span class="n">blue</span><span class="o">:</span><span class="p">(</span><span class="mi">96</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="err"> </span> <span class="n">alpha</span><span class="o">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorOne</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithRed</span><span class="p">:(</span><span class="mi">120</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span> <span class="nf">green</span><span class="p">:(</span><span class="mi">135</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span> <span class="nf">blue</span><span class="p">:(</span><span class="mi">150</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span> <span class="nf">alpha</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">UIColor</span> <span class="o">*</span><span class="n">colorTwo</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nf">colorWithRed</span><span class="p">:(</span><span class="mi">57</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="err"> </span> <span class="nf">green</span><span class="p">:(</span><span class="mi">79</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="err"> </span> <span class="nf">blue</span><span class="p">:(</span><span class="mi">96</span><span class="o">/</span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="err"> </span> <span class="nf">alpha</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
 
         <span class="n">NSArray</span> <span class="o">*</span><span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSArray</span> <span class="nf">arrayWithObjects</span><span class="p">:(</span><span class="n">id</span><span class="p">)</span><span class="n">colorOne</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="n">colorTwo</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="nb">nil</span><span class="p">];</span>
         <span class="n">NSNumber</span> <span class="o">*</span><span class="n">stopOne</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nf">numberWithFloat</span><span class="p">:</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">];</span>
@@ -234,7 +230,7 @@
 
 <p>Run the project and you get a result like this:</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2012/02/gradient.png"><img src="http://danielbeard.files.wordpress.com/2012/02/gradient.png?w=154" alt="" /></a>
+<p><a href="https://danielbeard.files.wordpress.com/2012/02/gradient.png"><img src="https://danielbeard.files.wordpress.com/2012/02/gradient.png?w=154" alt="" /></a>
 <a href="http://dl.dropbox.com/u/5387570/Blog/GradientBackground.zip">Click here to download the project</a></p>
 
 <p>Edit: Thanks to moi in the comments below, add the following code to your view controller so that the CALayer rotates with the view</p>
@@ -261,7 +257,7 @@
 
 
 <footer class="site-footer">
-	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+	<p class="text">Powered by <a href="https://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
 </p>
 </footer>
 

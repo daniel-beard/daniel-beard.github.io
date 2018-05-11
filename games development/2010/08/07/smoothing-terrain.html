@@ -14,10 +14,10 @@
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
 	<!-- Canonical -->
-	<link rel="canonical" href="http://danielbeard.io/games%20development/2010/08/07/smoothing-terrain.html">
+	<link rel="canonical" href="https://danielbeard.io/games%20development/2010/08/07/smoothing-terrain.html">
 
 	<!-- RSS -->
-	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="https://danielbeard.io/feed.xml" />
 
 	<!-- Font Awesome -->
 	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
@@ -122,10 +122,6 @@
 
 
 
-
-
-
-
 <li>
 	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
 		<i class="fa fa-fw fa-twitter"></i>
@@ -154,23 +150,23 @@
 
 <p>The box filter size is usually a power of 2 + 1. Some examples are 3x3, 5x5, 9x9, etc. The image below shows how the filter works. The 3x3 square is slid over the terrain averaging it’s neighbours. The center pixel is also taken into account.</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/08/filter.png"><img src="http://danielbeard.files.wordpress.com/2010/08/filter.png?w=300" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/08/filter.png"><img src="https://danielbeard.files.wordpress.com/2010/08/filter.png?w=300" alt="" /></a></p>
 
 <p>Ok, time for some source code. The following code loops over the 2d array of pixels, the inner loop loops from the position minus the filter size to the position plus the filter size in each dimension, this allows us to have an arbitrary filter size without hand coding the weights and positions of each pixel in the filter. The count variable keeps track of how many points contribute to the average and we ignore edge cases meaning that if a point in the filter is outside the array, it gives no contribution to the average.</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/08/code.png"><img src="http://danielbeard.files.wordpress.com/2010/08/code.png" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/08/code.png"><img src="https://danielbeard.files.wordpress.com/2010/08/code.png" alt="" /></a></p>
 
 <p>So the results for running this on the terrain in the previous post are as follows first with no smoothing, then with a box size of 9x9:</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/08/terrain-simple.png"><img src="http://danielbeard.files.wordpress.com/2010/08/terrain-simple.png?w=300" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/08/terrain-simple.png"><img src="https://danielbeard.files.wordpress.com/2010/08/terrain-simple.png?w=300" alt="" /></a></p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/08/smoothterrain2.png"><img src="http://danielbeard.files.wordpress.com/2010/08/smoothterrain2.png?w=300" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/08/smoothterrain2.png"><img src="https://danielbeard.files.wordpress.com/2010/08/smoothterrain2.png?w=300" alt="" /></a></p>
 
 <p>And of course the smoothing can be iterated over many times. Here is the same filter size as above, but repeated 50 times.</p>
 
-<p><a href="http://danielbeard.files.wordpress.com/2010/08/really-smooth.png"><img src="http://danielbeard.files.wordpress.com/2010/08/really-smooth.png?w=300" alt="" /></a></p>
+<p><a href="https://danielbeard.files.wordpress.com/2010/08/really-smooth.png"><img src="https://danielbeard.files.wordpress.com/2010/08/really-smooth.png?w=300" alt="" /></a></p>
 
-<p>Here is a link to the code in the image for use with the previous terrain code : <a href="http://www.divshare.com/download/12208159-2b8">Download Link</a></p>
+<p>Here is a link to the code in the image for use with the previous terrain code : <a href="https://www.divshare.com/download/12208159-2b8">Download Link</a></p>
 
 <p>Other useful links:</p>
 
@@ -192,7 +188,7 @@ Filter functions: <a href="http://www.wheatchex.com/projects/filters/">http://ww
 
 
 <footer class="site-footer">
-	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+	<p class="text">Powered by <a href="https://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
 </p>
 </footer>
 

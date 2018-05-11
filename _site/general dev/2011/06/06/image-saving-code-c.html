@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+	<meta charset="utf-8">
+	<title>Simple Image Saving code c++ | Daniel Beard</title>
+	<meta name="description" content="A major annoyance for me is saving images from c++. I can’t really find any libraries that I like, they are either too complex for the task or they don’t do ...">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-Frame-Options" content="sameorigin">
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/css/main.css">
+
+	<!--Favicon-->
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+	<!-- Canonical -->
+	<link rel="canonical" href="http://danielbeard.io/general%20dev/2011/06/06/image-saving-code-c.html">
+
+	<!-- RSS -->
+	<link rel="alternate" type="application/atom+xml" title="Daniel Beard" href="http://danielbeard.io/feed.xml" />
+
+	<!-- Font Awesome -->
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	
+	<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,700italic,400italic" rel="stylesheet" type="text/css">
+	
+
+	<!-- KaTeX -->
+	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.js"></script>
+	
+
+	<!-- Google Analytics -->
+	
+</head>
+
+  <body>
+    <header class="site-header">
+	<div class="branding">
+		
+		<a href="/">
+			<img class="avatar" src="/img/avatar.jpeg" alt=""/>
+		</a>
+		
+		<h1 class="site-title">
+			<a href="/">Daniel Beard</a>
+		</h1>
+	</div>
+	<nav class="site-nav">
+		<ul>
+			
+			
+			
+			
+			<li>
+				<a class="page-link" href="/about/">
+					About
+				</a>
+			</li>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Social icons from Font Awesome, if enabled -->
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/daniel-beard" title="Follow on GitHub">
+		<i class="fa fa-fw fa-github"></i>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
+		<i class="fa fa-fw fa-twitter"></i>
+	</a>
+</li>
+
+
+
+
+
+
+		</ul>
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header style="background-image: url('/')">
+    <h1 class="title">Simple Image Saving code c++</h1>
+    <p class="meta">
+    June 6, 2011
+     - danielbeard
+    </p>
+  </header>
+  <section class="post-content"><p>A major annoyance for me is saving images from c++. I can’t really find any libraries that I like, they are either too complex for the task or they don’t do what I want them to do. So I have created my own, extremely lightweight image library.</p>
+
+<p>All you need to run this is two files, the cpp file and the header. I chose .tga because it is one of the easiest, straightforward formats to save to.</p>
+
+<p>Here is some example code of saving an image with this library:</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c">    <span class="cp">#include "Image.h"
+</span>
+    <span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span><span class="err"> </span><span class="p">{</span>
+       <span class="c1">//declare image
+</span>       <span class="kt">short</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
+       <span class="kt">short</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
+
+       <span class="n">TGAImage</span> <span class="o">*</span><span class="n">img</span> <span class="o">=</span> <span class="n">new</span> <span class="n">TGAImage</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="n">height</span><span class="p">);</span>
+
+       <span class="c1">//declare a temporary color variable
+</span>       <span class="n">Colour</span> <span class="n">c</span><span class="p">;</span>
+
+       <span class="c1">//Loop through image and set all pixels to red
+</span>       <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">x</span><span class="o">&lt;</span><span class="n">width</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span>
+          <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">ysetPixel</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">);</span>
+          <span class="p">}</span>
+
+       <span class="c1">//write the image to disk
+</span>       <span class="n">string</span> <span class="n">filename</span> <span class="o">=</span> <span class="s">"/Users/daniel/test.tga"</span><span class="p">;</span>
+       <span class="n">img</span><span class="o">-&gt;</span><span class="n">WriteImage</span><span class="p">(</span><span class="n">filename</span><span class="p">);</span>
+
+       <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span></code></pre></figure>
+
+<p>This outputs a red image like so:</p>
+
+<p><a href="http://danielbeard.files.wordpress.com/2011/06/test.png"><img src="http://danielbeard.files.wordpress.com/2011/06/test.png" alt="" /></a></p>
+
+<p>Anyway, have fun using this in your projects,
+Here is the download link for the source: <a href="http://dl.dropbox.com/u/5387570/Blog/ImageSaverCode.zip">Download</a>
+For more information on the TGA file format visit the following links:
+<a href="http://paulbourke.net/dataformats/tga/">http://paulbourke.net/dataformats/tga/ </a>
+<a href="http://en.wikipedia.org/wiki/Truevision_TGA">http://en.wikipedia.org/wiki/Truevision_TGA</a></p>
+</section>
+</article>
+
+<!-- Post navigation -->
+
+
+<!-- Disqus -->
+
+
+    </div>
+    
+<script src="/js/katex_init.js"></script>
+
+
+
+<footer class="site-footer">
+	<p class="text">Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type/">Type Theme</a>
+</p>
+</footer>
+
+
+  </body>
+</html>
