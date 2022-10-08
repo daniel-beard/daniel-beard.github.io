@@ -70,20 +70,6 @@
 			
 			
 			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
 			<!-- Social icons from Font Awesome, if enabled -->
 			
 
@@ -110,11 +96,11 @@
 
 
 
-
-
-
-
-
+<li>
+	<a href="https://www.linkedin.com/in/daniel-beard-17577134/" title="Follow on LinkedIn">
+		<i class="fa fa-fw fa-linkedin"></i>
+	</a>
+</li>
 
 
 
@@ -123,10 +109,16 @@
 
 
 <li>
-	<a href="https://twitter.com/_danielbeard" title="Follow on Twitter">
-		<i class="fa fa-fw fa-twitter"></i>
+	<a href="https://stackoverflow.com/users/1144632/danielbeard" title="Follow on Stack Exchange">
+		<i class="fa fa-fw fa-stack-exchange"></i>
 	</a>
 </li>
+
+
+
+
+
+
 
 
 
@@ -152,24 +144,19 @@
     <div class="post-teaser">
       <header>
         <h1>
-          <a class="post-link" href="/general%20dev/ios/objective-c/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins.html">
-            Automated Unit testing an iOS app with Jenkins
+          <a class="post-link" href="/games%20development/2010/08/07/terrain-generation-and-smoothing.html">
+            Terrain Generation - Diamond Square Algorithm
           </a>
         </h1>
         <p class="meta">
-          April 24, 2013
+          August 7, 2010
         </p>
       </header>
       <div class="excerpt">
-        <ul>
-  <li>Setting up and executing automated unit tests is slightly more involved than generating built apps for distribution.</li>
-  <li>The following is the set up that I use for some of my projects, I have just renamed the project to <code class="highlighter-rouge">TestProject</code> for convenience.</li>
-  <li>For this article I am assuming that you have Jenkins, Xcode, Xcode Command Line Tools, and the Xcode Jenkins plugin already installed.</li>
-  <li>Because I use cocoaPods for dependency management, I build a workspace using custom build schemes. To build a single project with a unit-test target would make these steps easier.</li>
-</ul>
+        <p>I have posted previously about a simple terrain heightmap display program I have made, but never talked about some of the methods of generating and manipulating heightmap based terrain systems.</p>
 
 
-        <a class="button" href="/general%20dev/ios/objective-c/2013/04/24/automated-unit-testing-an-ios-app-with-jenkins.html">
+        <a class="button" href="/games%20development/2010/08/07/terrain-generation-and-smoothing.html">
           Continue reading
         </a>
       </div>
@@ -178,21 +165,19 @@
     <div class="post-teaser">
       <header>
         <h1>
-          <a class="post-link" href="/general%20dev/ios/objective-c/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins.html">
-            Auto build and deploy iOS apps using Jenkins
+          <a class="post-link" href="/raytracing/2010/08/03/anti-aliased-raytracing.html">
+            Anti-Aliased Raytracing
           </a>
         </h1>
         <p class="meta">
-          April 23, 2013
+          August 3, 2010
         </p>
       </header>
       <div class="excerpt">
-        <p>We will have a look at a <code class="highlighter-rouge">TestProject</code> to get an idea of how jenkins can be used to build, sign and deploy iOS projects. The whole process consists of 4 steps. Note that to deploy an app in this manner, an enterprise distribution certificate is required for each app.
-This guide is how I have set up my enterprise builds for my apps that use <code class="highlighter-rouge">cocoaPods</code> for dependencies, but most of the same principles apply for any iOS apps.
-Because the project uses <code class="highlighter-rouge">cocoaPods</code>, it means we have to build a workspace and have a build scheme set up.</p>
+        <p>I added anti-aliasing to the rendering of the ray tracer. At first I tried regular sampling which is breaking a pixel down into smaller sub-pixels and shooting rays through the center of those pixels and averaging the result. This was better than nothing but still created some artifacts when rendering. The next trial was random sampling to replace aliasing with noise, but the samples can become clumped together and look unnatural. The method that I have settled on for now is jittered sampling which consists of breaking the target pixel down into sub-pixels and shooting rays at a random position through the sub-pixels so that each sub-pixels has at least one ray shot through it. Changing the amount of samples per pixel reduces the aliasing effect.</p>
 
 
-        <a class="button" href="/general%20dev/ios/objective-c/2013/04/23/auto-build-and-deploy-ios-apps-using-jenkins.html">
+        <a class="button" href="/raytracing/2010/08/03/anti-aliased-raytracing.html">
           Continue reading
         </a>
       </div>
@@ -201,19 +186,19 @@ Because the project uses <code class="highlighter-rouge">cocoaPods</code>, it me
     <div class="post-teaser">
       <header>
         <h1>
-          <a class="post-link" href="/general%20dev/ios/objective-c/2013/04/17/objective-c-style-guide.html">
-            Objective-C Style Guide
+          <a class="post-link" href="/raytracing/2010/07/29/raytracing-svn.html">
+            Raytracing SVN
           </a>
         </h1>
         <p class="meta">
-          April 17, 2013
+          July 29, 2010
         </p>
       </header>
       <div class="excerpt">
-        <p>This is the style guide that I follow when programming in Objective-C, this is for my own reference, but other people may find this useful.</p>
+        <p>Just a quick update, my raytracing project - SimpleRTracer is now available on sourceforge at this address - <a href="https://simplertracer.sourceforge.net">https://simplertracer.sourceforge.net</a></p>
 
 
-        <a class="button" href="/general%20dev/ios/objective-c/2013/04/17/objective-c-style-guide.html">
+        <a class="button" href="/raytracing/2010/07/29/raytracing-svn.html">
           Continue reading
         </a>
       </div>
@@ -222,19 +207,19 @@ Because the project uses <code class="highlighter-rouge">cocoaPods</code>, it me
     <div class="post-teaser">
       <header>
         <h1>
-          <a class="post-link" href="/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html">
-            Objective-C Runtime
+          <a class="post-link" href="/astronomy/2010/07/27/svn-of-owls-h1-project.html">
+            SVN of Owls-H1 Project
           </a>
         </h1>
         <p class="meta">
-          April 16, 2013
+          July 27, 2010
         </p>
       </header>
       <div class="excerpt">
-        <p>It is pretty rare to actually have to dive into the objc-runtime for any day to day coding. Most developers wont have to touch the runtime, however it is helpful to know what is possible and be able to use it if required. The objective-c runtime is written in C and is how the underlying parts of the objective-c language work including message sending, ivars and properties. This post shows an example of where I have used the Objective-C runtime in one of my projects.</p>
+        <p>Just thought I should update that the svn of my Astronomy work is live at <a href="https://owls-h1.sourceforge.net">https://owls-h1.sourceforge.net</a></p>
 
 
-        <a class="button" href="/general%20dev/ios/objective-c/2013/04/16/objective-c-runtime.html">
+        <a class="button" href="/astronomy/2010/07/27/svn-of-owls-h1-project.html">
           Continue reading
         </a>
       </div>
@@ -243,19 +228,187 @@ Because the project uses <code class="highlighter-rouge">cocoaPods</code>, it me
     <div class="post-teaser">
       <header>
         <h1>
-          <a class="post-link" href="/general%20dev/git/2013/04/15/git-notes.html">
-            Git notes
+          <a class="post-link" href="/games%20development/xna/2010/07/25/particle-system.html">
+            Particle System
           </a>
         </h1>
         <p class="meta">
-          April 15, 2013
+          July 25, 2010
         </p>
       </header>
       <div class="excerpt">
-        <p>This is a list of git notes that I use everyday. Hopefully someone else finds it useful. I will update this list over time.</p>
+        <p>Today I was kind of bored so I decided to write a simple particle system in XNA. The helpful tutorials over at https://rbwhitaker.wikidot.com/ helped point me in the right direction. This particle system is very primitive at the moment, a particle emitter follows the mouse around the window. When I get the time (or the motivation) I am going to add a few more features such as different particles (smoke, water, fire, etc.), some different effects like attraction and repulsion and maybe the option to place multiple emitters in the scene.</p>
 
 
-        <a class="button" href="/general%20dev/git/2013/04/15/git-notes.html">
+        <a class="button" href="/games%20development/xna/2010/07/25/particle-system.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/astronomy/2010/07/24/academic-reports.html">
+            Academic Reports
+          </a>
+        </h1>
+        <p class="meta">
+          July 24, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>The following reports are both about the visualisation pipeline that I developed when working for ICRAR (International Centre for Radio Astronomy Research).</p>
+
+
+        <a class="button" href="/astronomy/2010/07/24/academic-reports.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/glut/opengl/2010/07/24/terrain-loader-heightmap.html">
+            Terrain Loader - Heightmap
+          </a>
+        </h1>
+        <p class="meta">
+          July 24, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>This program is an older OpenGL based terrain loader. The program loads in a greyscale heightmap and generates the terrain based on height values stored in the image. This version uses the DevIL image library which allows it to load a wide variety of file formats. Several textures are loaded, these include the ground texture, the detail texture and the water texture. A simple method of creating a water plane is to create a plane at a certain level for example a y axis height of -10, then animate the UV coordinates of the plane so that the water appears to move.</p>
+
+
+        <a class="button" href="/glut/opengl/2010/07/24/terrain-loader-heightmap.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/astronomy/2010/07/24/gimic-output-video.html">
+            GIMIC Output Video
+          </a>
+        </h1>
+        <p class="meta">
+          July 24, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>Just a quick update, the video in this post shows some of the work I have been doing for the International Centre for Radio Astronomy Research. This video consists of 951 frames, each frame is a 3d volume that has been calculated from the GIMIC data set. The volumes are then rendered out from Drishti with a rainbow colour table.</p>
+
+
+        <a class="button" href="/astronomy/2010/07/24/gimic-output-video.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/raytracing/2010/07/24/raytracing.html">
+            Raytracing
+          </a>
+        </h1>
+        <p class="meta">
+          July 24, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>Since I got my new laptop, I have been working on a personal project creating a simple, easily extendable raytracer.</p>
+
+
+        <a class="button" href="/raytracing/2010/07/24/raytracing.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/astronomy/2010/02/01/cubic-images-to-skyboxes.html">
+            Cubic Images to Skyboxes
+          </a>
+        </h1>
+        <p class="meta">
+          February 1, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>I often have the need to transform cubic images into a cube map or skybox, so I have written this program in python to create them quickly and easily.</p>
+
+
+        <a class="button" href="/astronomy/2010/02/01/cubic-images-to-skyboxes.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/astronomy/2010/01/26/ivec-internship.html">
+            iVec Internship
+          </a>
+        </h1>
+        <p class="meta">
+          January 26, 2010
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>I am currently working as an iVec intern on the Visualizing Galaxy Simulations project. The project involves taking cosmological simulation data stored in .hdf5 files and converting point, mass, h1 mass data into a volumetric 3d density representation of h1 hydrogen gas. I am using Smoothed Particle Hydrodynamics to calculate the density contributions of nearby points.</p>
+
+
+        <a class="button" href="/astronomy/2010/01/26/ivec-internship.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/glut/opengl/2009/06/20/doom-md5-model-loader.html">
+            Doom md5 Model Loader
+          </a>
+        </h1>
+        <p class="meta">
+          June 20, 2009
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>This code will load a doom md5 model with textures and animation. The source code for this application was adapted from <a href="https://tfc.duke.free.fr/coding/md5-specs-en.html">here</a>. I do have a better version of this application but some of the features are not yet complete such as bump mapping and displacement mapping. I will upload the updated version at some point in the future when I have enough spare time to finish it.</p>
+
+
+        <a class="button" href="/glut/opengl/2009/06/20/doom-md5-model-loader.html">
+          Continue reading
+        </a>
+      </div>
+    </div>
+    
+    <div class="post-teaser">
+      <header>
+        <h1>
+          <a class="post-link" href="/glut/opengl/2009/05/15/emptyproject.html">
+            First Blog - Empty Project
+          </a>
+        </h1>
+        <p class="meta">
+          May 15, 2009
+        </p>
+      </header>
+      <div class="excerpt">
+        <p>My name is Daniel Beard and I am a third year games programming student. I wanted a place to upload work that I have done and build a profile over time. Hopefully someone else will get some use or education from my programs.</p>
+
+
+        <a class="button" href="/glut/opengl/2009/05/15/emptyproject.html">
           Continue reading
         </a>
       </div>
@@ -271,11 +424,6 @@ Because the project uses <code class="highlighter-rouge">cocoaPods</code>, it me
       Prev
     </a>
     
-    
-    <a href="/blog/page3" class="button" >
-      Next
-      <i class="fa fa-chevron-right"></i>
-    </a>
     
   </div>
   
